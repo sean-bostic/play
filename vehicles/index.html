@@ -3,11 +3,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="robots" content="noindex">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>Turbo Vehicle Simulator</title>
 <style>
   html, body { margin: 0; height: 100%; overflow: hidden; background: #8fd3ff; font-family: system-ui, -apple-system, sans-serif; user-select: none; cursor: default; }
-  canvas { display: block; }
+  canvas { display: block; position: fixed; left: 0; top: 0; } /* pinned, so an iPhone's toolbars can't shift it */
 
   /* the vehicle menu: also the start screen */
   #menu { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3vmin;
@@ -145,6 +148,6 @@
   </div>
 </div>
 
-<script src="vehicles.js?v=d4a73a6"></script>
+<script src="vehicles.js?v=2bd6b6a"></script>
 </body>
 </html>
