@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Turbo Vehicle Simulator</title>
+<style>
+  html, body { margin: 0; height: 100%; overflow: hidden; background: #8fd3ff; font-family: system-ui, -apple-system, sans-serif; user-select: none; cursor: default; }
+  canvas { display: block; }
+
+  /* the vehicle menu: also the start screen */
+  #menu { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3vmin;
+          background: radial-gradient(circle, rgba(255,179,71,0.92) 0%, rgba(230,57,70,0.94) 80%); color: #fff; z-index: 10; transition: opacity 0.25s; }
+  #menu.gone { opacity: 0; pointer-events: none; }
+  #menu.ingame { background: radial-gradient(circle, rgba(255,179,71,0.82) 0%, rgba(230,57,70,0.86) 80%); }
+  #menu .brand { font: 900 2.6vmin system-ui; letter-spacing: 0.35em; text-transform: uppercase; color: #fff3b0; opacity: 0.9; margin-bottom: 0.5vmin; text-shadow: 0 2px 0 #1d3557; }
+  #menu h1 { font-size: 13vmin; margin: 0; color: #fff3b0; text-shadow: 0 0.06em 0 #1d3557, 0 0 0.4em #ffd23f; letter-spacing: 0.04em; animation: bob 1.6s ease-in-out infinite; }
+  #menu.ingame h1 { font-size: 9vmin; }
+  #cards { display: flex; gap: 2.2vmin; }
+  .card { width: 17vmin; padding: 2.4vmin 0 1.8vmin; border-radius: 3vmin; background: rgba(255,255,255,0.22); border: 0.6vmin solid rgba(255,255,255,0.35);
+          display: flex; flex-direction: column; align-items: center; gap: 1vmin; transition: transform 0.15s, background 0.15s; cursor: pointer; }
+  .card .e { font-size: 10vmin; line-height: 1; }
+  .card .n { font: 900 2.8vmin system-ui; letter-spacing: 0.05em; }
+  .card.on { background: #fff3b0; color: #1d3557; border-color: #fff; transform: scale(1.18) translateY(-1vmin); box-shadow: 0 1.5vmin 4vmin rgba(29,53,87,0.45); }
+  .card.on .e { animation: wiggle 0.9s ease-in-out infinite; }
+  .card.current:not(.on) { border-color: #fff3b0; }
+  #menu p { font-size: 3.6vmin; margin: 1vmin 0 0; animation: pulse 1.2s ease-in-out infinite; }
+  @keyframes pulse { 50% { opacity: 0.45; transform: scale(0.97); } }
+  @keyframes bob { 50% { transform: translateY(-1.5vmin) rotate(-2deg); } }
+  @keyframes wiggle { 25% { transform: rotate(-8deg) translateX(-0.5vmin); } 75% { transform: rotate(8deg) translateX(0.5vmin); } }
+
+  /* "🚜 TRACTOR!" */
+  #banner { position: fixed; left: 0; right: 0; top: 34%; text-align: center; font: 900 13vmin system-ui; color: #fff3b0; z-index: 8; pointer-events: none;
+            text-shadow: 0 0.06em 0 #1d3557, 0 0 0.3em rgba(29,53,87,0.5); opacity: 0; }
+  #banner.show { animation: banner 1.8s ease-out forwards; }
+  @keyframes banner { 0% { opacity: 0; transform: scale(0.3) rotate(-8deg); } 15% { opacity: 1; transform: scale(1.15) rotate(3deg); } 25% { transform: scale(1) rotate(0); } 75% { opacity: 1; } 100% { opacity: 0; transform: translateY(-6vmin); } }
+
+  /* hold-button-4 ring */
+  #hold { position: fixed; left: 50%; bottom: 5vmin; width: 15vmin; height: 15vmin; margin-left: -7.5vmin; z-index: 12; pointer-events: none; opacity: 0; transition: opacity 0.1s; }
+  #hold svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+  #hold .bg { fill: rgba(29,53,87,0.45); stroke: rgba(255,255,255,0.35); stroke-width: 8; }
+  #hold .arc { fill: none; stroke: #ffd23f; stroke-width: 8; stroke-linecap: round; stroke-dasharray: 100; stroke-dashoffset: 100; }
+  #hold span { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 6.5vmin; }
+  /* the warship's reload: a small ring just off the middle that fills in a second, then flashes: fire! */
+  #reload { position: fixed; left: calc(50% + 12vmin); top: 76%; width: 7vmin; height: 7vmin; z-index: 3; pointer-events: none; display: none; }
+  body[data-vehicle="boat"] #reload.on { display: block; }
+  #reload svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+  #reload .bg { fill: rgba(29,53,87,0.45); stroke: rgba(255,255,255,0.3); stroke-width: 9; }
+  #reload .arc { fill: none; stroke: #ff9f1c; stroke-width: 9; stroke-linecap: round; stroke-dasharray: 100; stroke-dashoffset: 100; }
+  #reload.ready .arc { stroke: #80ed99; }
+  #reload.flash { animation: ready 0.35s ease-out; }
+  @keyframes ready { 0% { transform: scale(1.5); } 100% { transform: scale(1); } }
+
+  #hud { position: fixed; right: 22px; bottom: 22px; display: flex; flex-direction: column; align-items: center; gap: 6px; z-index: 3; pointer-events: none; font: 900 14px system-ui; color: #1d3557; }
+  #gas { width: 26px; height: 120px; border-radius: 13px; background: rgba(29,53,87,0.25); border: 3px solid #1d3557; overflow: hidden; display: flex; align-items: flex-end; }
+  #gas-fill { width: 100%; height: 0; background: linear-gradient(#8ac926, #ffca3a 50%, #ff595e); transition: height 0.08s linear; }
+  #brake { padding: 3px 8px; border-radius: 8px; background: rgba(29,53,87,0.25); color: #1d3557; }
+  #hud.braking #brake { background: #ff595e; color: #fff; }
+  #hud.nobrake #brake { display: none; }
+  #tip { position: fixed; left: 14px; top: 12px; z-index: 3; pointer-events: none; font: 700 13px system-ui; color: #1d3557; background: rgba(255,255,255,0.55); padding: 5px 10px; border-radius: 8px; transition: opacity 1s; }
+  #score { position: fixed; right: 22px; top: 14px; z-index: 3; pointer-events: none; display: none; font: 900 34px system-ui; color: #fff3b0;
+           text-shadow: 0 3px 0 #1d3557; background: rgba(29,53,87,0.35); padding: 4px 16px; border-radius: 14px; }
+  body[data-vehicle="boat"] #score, body[data-vehicle="car"] #score, body[data-vehicle="plane"] #score { display: block; }
+  #catches { position: fixed; left: 50%; transform: translateX(-50%); top: 62px; z-index: 3; pointer-events: none; display: none; max-width: 72vw;
+    text-align: center; font: 900 34px system-ui; line-height: 1.25; color: #fff3b0; text-shadow: 0 2px 6px rgba(29,53,87,0.6); }
+  body[data-vehicle="boat"] #catches { display: block; }
+  #level { position: fixed; left: 22px; top: 52px; z-index: 3; pointer-events: none; display: none; font: 900 30px system-ui; color: #fff3b0;
+           text-shadow: 0 3px 0 #1d3557; background: rgba(29,53,87,0.35); padding: 4px 16px; border-radius: 14px; }
+  #level b { font-weight: inherit; opacity: 0.28; filter: grayscale(1); margin-left: 4px; transition: opacity 0.3s, filter 0.3s; }
+  #level b.got { opacity: 1; filter: none; }
+  body[data-vehicle="boat"] #level { display: block; }
+  #fps { position: fixed; left: 10px; bottom: 8px; color: #1d3557; font: 12px ui-monospace, monospace; z-index: 3; pointer-events: none; }
+
+  /* the idle show: letterbox bars, no HUD; a quick fade where the camera cuts */
+  #bars::before, #bars::after { content: ''; position: fixed; left: 0; right: 0; height: 0; background: #000; z-index: 6; transition: height 1.2s ease; pointer-events: none; }
+  #bars::before { top: 0; } #bars::after { bottom: 0; }
+  body[data-show="on"] #bars::before, body[data-show="on"] #bars::after { height: 9vh; }
+  body[data-show="on"] #hud, body[data-show="on"] #tip, body[data-show="on"] #score, body[data-show="on"] #catches, body[data-show="on"] #level, body[data-show="on"] .keyhud { opacity: 0 !important; transition: opacity 0.6s; }
+  #fade { position: fixed; inset: 0; background: #000; opacity: 0; z-index: 7; pointer-events: none; }
+  #fade.go { animation: fade 1.1s ease-out; }
+  @keyframes fade { 0% { opacity: 1; } 100% { opacity: 0; } }
+
+  #parent { position: fixed; inset: 0; display: none; align-items: center; justify-content: center; background: rgba(8, 4, 18, 0.82); z-index: 20; color: #eee; }
+  #parent.open { display: flex; }
+  #parent .box { background: #1d1238; border: 2px solid #5b3ea8; border-radius: 16px; padding: 20px 28px; width: min(680px, 94vw); max-height: 94vh; overflow-y: auto; box-sizing: border-box; box-shadow: 0 20px 60px rgba(0,0,0,0.6); }
+  #parent h2 { margin: 0 0 4px; color: #ffd23f; }
+  #parent .sub { margin: 0 0 18px; color: #a99ad0; font-size: 14px; }
+  #parent .row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 6px 0; border-top: 1px solid #33255c; }
+  #parent .row span { font-size: 15px; }
+  #parent .seg { display: flex; gap: 6px; flex-shrink: 0; flex-wrap: wrap; justify-content: flex-end; }
+  #parent button { font: inherit; font-size: 14px; padding: 8px 12px; border-radius: 10px; border: 1px solid #5b3ea8; background: #2a1b52; color: #ddd; cursor: pointer; }
+  #parent button.on { background: #ffd23f; color: #1a0833; border-color: #ffd23f; font-weight: 700; }
+  #parent pre { background: #120a26; border-radius: 10px; padding: 10px; font-size: 12px; color: #9fd8ff; white-space: pre-wrap; margin: 6px 0 0; min-height: 34px; }
+  #parent .foot { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-top: 16px; color: #a99ad0; font-size: 13px; }
+  #parent-close { background: #ffd23f !important; color: #1a0833 !important; font-weight: 700; flex-shrink: 0; }
+</style>
+</head>
+<body>
+<div id="menu">
+  <div class="brand">Turbo Vehicle Simulator</div>
+  <h1>TURBO!</h1>
+  <div id="cards">
+    <div class="card" data-id="car"><div class="e">🚒</div><div class="n">FIRE TRUCK</div></div>
+    <div class="card" data-id="tractor"><div class="e">🚜</div><div class="n">TRACTOR</div></div>
+    <div class="card" data-id="plane"><div class="e">✈️</div><div class="n">AIRPLANE</div></div>
+    <div class="card" data-id="boat"><div class="e">🚤</div><div class="n">BOAT</div></div>
+    <div class="card" data-id="train"><div class="e">🚂</div><div class="n">TRAIN</div></div>
+  </div>
+  <p>Push the stick to choose · press a button to go!</p>
+</div>
+<div id="banner"></div>
+<div id="bars"></div><div id="fade"></div>
+<div id="hold"><svg viewBox="0 0 100 100"><circle class="bg" cx="50" cy="50" r="42"/><circle class="arc" cx="50" cy="50" r="42" pathLength="100"/></svg><span>🚦</span></div>
+<div id="tip">Hold button 4 to pick a vehicle</div>
+<div id="fps"></div>
+<div id="score">⭐ 0</div>
+<div id="catches"></div>
+<div id="level"></div>
+<div id="reload"><svg viewBox="0 0 40 40"><circle class="bg" cx="20" cy="20" r="15"/><circle class="arc" cx="20" cy="20" r="15" pathLength="100"/></svg></div>
+<div id="hud"><div id="gas"><div id="gas-fill"></div></div><span>GAS</span><span id="brake">BRAKE</span></div>
+
+<div id="parent">
+  <div class="box">
+    <h2>Parent settings</h2>
+    <p class="sub">Saved automatically. Press P to go back to the game.</p>
+    <div class="row"><span>Sound</span>
+      <div class="seg"><button data-key="sound" data-value="true">On</button><button data-key="sound" data-value="false">Off</button></div></div>
+    <div class="row"><span>Throttle direction<br><small style="color:#a99ad0;font-size:12px">Which way is full gas (watch the GAS bar)</small></span>
+      <div class="seg"><button data-key="throttleFlip" data-value="false">Forward</button><button data-key="throttleFlip" data-value="true">Back</button></div></div>
+    <div class="row"><span>Starting vehicle<br><small style="color:#a99ad0;font-size:12px">Highlighted first on the menu at launch</small></span>
+      <div class="seg"><button data-key="firstVehicle" data-value="car">🚗</button><button data-key="firstVehicle" data-value="tractor">🚜</button><button data-key="firstVehicle" data-value="plane">✈️</button><button data-key="firstVehicle" data-value="boat">🚤</button><button data-key="firstVehicle" data-value="train">🚂</button></div></div>
+    <div class="row"><span>Arrow to the cabin<br><small style="color:#a99ad0;font-size:12px">Tractor: a blue arrow shows the way out to the cabin</small></span>
+      <div class="seg"><button data-key="cabinArrow" data-value="true">On</button><button data-key="cabinArrow" data-value="false">Off</button></div></div>
+    <div class="row"><span>Tractor speed<br><small style="color:#a99ad0;font-size:12px">The S key cycles it too</small></span>
+      <div class="seg"><button data-key="tractorSpeed" data-value="slow">🐢 Slow</button><button data-key="tractorSpeed" data-value="normal">🚜 Normal</button><button data-key="tractorSpeed" data-value="fast">🐇 Fast</button></div></div>
+    <div class="row"><span>Idle show<br><small style="color:#a99ad0;font-size:12px">Tractor: when nobody touches anything for this long, it drives itself to the cabin, then the woods and a hawk's-eye view of the farm. Any touch takes over.</small></span>
+      <div class="seg"><button data-key="idleShow" data-value="off">Off</button><button data-key="idleShow" data-value="1">1 min</button><button data-key="idleShow" data-value="5">5 min</button><button data-key="idleShow" data-value="10">10 min</button></div></div>
+    <div class="row"><span>Boat level<br><small style="color:#a99ad0;font-size:12px">Boat: jump straight to a level to try it (bigger monsters, the storm from 2). Back to 1 at every launch.</small></span>
+      <div class="seg"><button data-key="boatLevel" data-value="1">1</button><button data-key="boatLevel" data-value="2">2</button><button data-key="boatLevel" data-value="3">3</button><button data-key="boatLevel" data-value="4">4</button><button data-key="boatLevel" data-value="5">5</button><button data-key="boatLevel" data-value="6">6</button></div></div>
+    <div class="row"><span>Boat<br><small style="color:#a99ad0;font-size:12px">Auto: the motorboat, then the warship from Level 2. Button 3 (or S) swaps any time. Back to Auto at every launch.</small></span>
+      <div class="seg"><button data-key="boatHull" data-value="auto">Auto</button><button data-key="boatHull" data-value="motor">🚤 Motorboat</button><button data-key="boatHull" data-value="warship">⛵ Warship</button></div></div>
+    <div class="row" style="display:block"><span>Joysticks</span><pre id="diag"></pre></div>
+    <div class="foot"><span>Joystick: throttle = gas · trigger = hose, horn, loop or the train's crane (never a brake) · stick back = brake, hold to back up (the train has no brake) · other buttons honk · hold button 4 for the vehicle menu. Plane: stick back climbs. Train: stick left/right picks the track. Keys: ↑ gas · ↓ brake (not the train) · space honks · V or Tab menu · 1–5 pick · Esc or ⌘Q quits</span><button id="parent-close">Back to game</button></div>
+  </div>
+</div>
+
+<script src="vehicles.js?v=d4a73a6"></script>
+</body>
+</html>
