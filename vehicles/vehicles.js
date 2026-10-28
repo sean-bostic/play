@@ -3708,7 +3708,7 @@ body.touch #level b { margin-left: 1px; }
 #touchctl-action { right: calc(env(safe-area-inset-right) + 5vmin); bottom: calc(env(safe-area-inset-bottom) + 6vmin); width: 22vmin; height: 22vmin;
   border-radius: 50%; background: rgba(230,57,70,0.85); border: 0.7vmin solid #fff3b0; font-size: 11vmin; display: flex; align-items: center; justify-content: center;
   box-shadow: 0 1vmin 2.5vmin rgba(29,53,87,0.45); }
-#touchctl-swap { right: calc(env(safe-area-inset-right) + 5vmin); bottom: calc(env(safe-area-inset-bottom) + 33vmin); width: 12vmin; height: 12vmin; border-radius: 50%;
+#touchctl-swap { right: calc(env(safe-area-inset-right) + 3vmin); bottom: calc(env(safe-area-inset-bottom) + 38vmin); width: 12vmin; height: 12vmin; border-radius: 50%;
   background: rgba(29,53,87,0.35); border: 0.5vmin solid rgba(255,255,255,0.55); font-size: 6.5vmin; display: none; align-items: center; justify-content: center; }
 #touchctl-swap.has { display: flex; }
 #touchctl-menu { left: calc(env(safe-area-inset-left) + 3vmin); top: calc(env(safe-area-inset-top) + 3vmin); width: 12vmin; height: 12vmin; border-radius: 3vmin;
