@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>The Basement</title>
+<style>
+  html, body { margin: 0; height: 100%; overflow: hidden; background: #2a2520; font-family: system-ui, -apple-system, sans-serif; user-select: none; cursor: default; }
+  canvas { display: block; touch-action: none; }
+  #banner { position: fixed; left: 0; right: 0; top: 30%; text-align: center; font: 900 10vmin system-ui; color: #fff3b0; pointer-events: none;
+            text-shadow: 0 0.06em 0 #1d3557, 0 0 0.3em rgba(29,53,87,0.5); opacity: 0; }
+  #banner.show { animation: banner 2s ease-out forwards; }
+  @keyframes banner { 0% { opacity: 0; transform: scale(0.3) rotate(-8deg); } 15% { opacity: 1; transform: scale(1.12) rotate(3deg); } 25% { transform: scale(1) rotate(0); } 75% { opacity: 1; } 100% { opacity: 0; transform: translateY(-6vmin); } }
+  #hint { position: fixed; right: 2vmin; bottom: 2vmin; padding: 1.4vmin 2.2vmin; border-radius: 2vmin; background: rgba(0,0,0,0.45); color: #fff; font: 600 2.2vmin/1.6 system-ui;
+          opacity: 0; transition: opacity 0.5s; pointer-events: none; }
+  #hint.show { opacity: 1; }
+  #hint b { color: #fff3b0; }
+  #view { position: fixed; left: 2vmin; top: 2vmin; padding: 1vmin 2vmin; border: 0; border-radius: 1.6vmin; background: rgba(29,53,87,0.85);
+          color: #fff3b0; font: 700 2.2vmin system-ui; cursor: pointer; }
+  #view:hover { background: rgba(29,53,87,1); }
+  #overlay { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; display: none; }
+  #legend { position: fixed; right: 0; top: 0; bottom: 0; width: 254px; overflow-y: auto; padding: 10px 8px; display: none;
+            background: rgba(20,24,36,0.9); color: #e8e8e8; font: 12px/1.75 system-ui; }
+  #legend b { color: #fff3b0; } #legend i { color: #9aa4b8; font-style: normal; float: right; }
+  #legend div { cursor: pointer; border-radius: 6px; padding: 0 3px; } #legend div:hover { background: rgba(255,255,255,0.08); }
+  #legend div.sel { background: rgba(255,210,63,0.25); }
+  #legend div.gone { text-decoration: line-through; opacity: 0.5; }
+  #editbar { position: fixed; left: 2vmin; bottom: 2vmin; display: none; padding: 8px 10px; border-radius: 10px; background: rgba(20,24,36,0.9);
+             color: #e8e8e8; font: 12px/1.6 system-ui; max-width: 60vw; }
+  #editbar b { color: #fff3b0; }
+  #editbar .phone { display: none; } body.touch #editbar .phone { display: inline; } body.touch #editbar .desk { display: none; }
+  body.touch #editbar { left: calc(env(safe-area-inset-left) + 2vmin); right: calc(env(safe-area-inset-right) + 2vmin); max-width: none; font-size: 11px; }
+  body.touch #editbar button { padding: 6px 12px; font-size: 14px; margin-bottom: 3px; }
+  body.touch #editbar { padding: 6px 8px; bottom: calc(env(safe-area-inset-bottom) + 1vmin); line-height: 1.35; }
+  body.touch #legend { width: 230px; z-index: 10; padding-top: calc(env(safe-area-inset-top) + 8px); }
+  body.touch #view { left: calc(env(safe-area-inset-left) + 2vmin); top: calc(env(safe-area-inset-top) + 2vmin); }
+  #list { position: fixed; right: calc(env(safe-area-inset-right) + 2vmin); top: calc(env(safe-area-inset-top) + 2vmin); display: none; padding: 1vmin 2vmin; border: 0;
+          border-radius: 1.6vmin; background: rgba(29,53,87,0.85); color: #fff3b0; font: 700 15px system-ui; z-index: 11; }
+  #editbar button { margin-right: 6px; padding: 4px 10px; border: 0; border-radius: 7px; background: #1d3557; color: #fff3b0; font: 700 12px system-ui; cursor: pointer; }
+  #legend .id { display: inline-block; min-width: 20px; padding: 0 4px; border-radius: 9px; background: #d62828; color: #fff; text-align: center; font-weight: 700; }
+</style>
+</head>
+<body>
+<div id="banner"></div>
+<button id="view">🗺️ Top view</button>
+<canvas id="overlay"></canvas>
+<div id="legend"></div>
+<button id="list">☰ List</button>
+<div id="editbar">
+  <button id="turnl" class="phone">⟲</button><button id="turnr" class="phone">⟳</button><button id="del" class="phone">🗑</button><button id="copy">📋 Copy layout</button><button id="save" class="desk">💾 Save layout</button><button id="reset">↩︎ Reset</button><br>
+  <span class="phone"><b>Tap</b> an object (or ☰ List) and <b>drag</b> it · <b>⟲ ⟳</b> turn it (hold to keep turning) · <b>🗑</b> delete (again brings it back) · <b>📋</b> copies the edits to paste to Claude.</span>
+  <span class="desk"><b>Click</b> an object (or its tag, or its line in the list) · <b>Space + arrows</b> slide it · <b>Ctrl (or Option) + arrows</b> turn it ·
+  <b>Shift</b> finer · <b>R</b> quarter turn · <b>D</b> delete (D again, from the list, brings it back) · click the empty floor to let go. Edits are kept in this browser; 💾 saves them to a file (📋 copies them). Drag with the mouse works too.</span>
+</div>
+<div id="hint">
+  <b>Throttle</b> go · <b>Stick</b> steer (back = brake / reverse; in the air, back = climb) · <b>Trigger</b> honk (helicopter: spin) · <b>Button 3</b> next vehicle · <b>Hold button 4</b> free cam<br>
+  <b>Arrows</b> drive / fly · <b>Space</b> honk · <b>S</b> or <b>1–4</b> car / tractor / plane / helicopter · <b>T</b> top view · <b>F</b> free cam (arrows move, Q/E down/up) · <b>Esc</b> quit
+</div>
+<script src="basement.js?v=214f835"></script>
+</body>
+</html>
