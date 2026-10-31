@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Hide the Elf</title>
+<style>
+  html, body { margin: 0; height: 100%; overflow: hidden; background: #2a2520; font-family: system-ui, -apple-system, sans-serif; user-select: none;
+               -webkit-user-select: none; -webkit-touch-callout: none; }
+  canvas { display: block; touch-action: none; }
+  #banner { position: fixed; left: 0; right: 0; top: 26%; text-align: center; font: 900 9vmin system-ui; color: #fff3b0; pointer-events: none;
+            text-shadow: 0 0.06em 0 #1d3557, 0 0 0.3em rgba(29,53,87,0.5); opacity: 0; z-index: 5; }
+  #banner.show { animation: banner 2s ease-out forwards; }
+  @keyframes banner { 0% { opacity: 0; transform: scale(0.3) rotate(-8deg); } 15% { opacity: 1; transform: scale(1.12) rotate(3deg); } 25% { transform: scale(1) rotate(0); } 75% { opacity: 1; } 100% { opacity: 0; transform: translateY(-6vmin); } }
+  #hud { position: fixed; left: 50%; transform: translateX(-50%); top: calc(env(safe-area-inset-top) + 2vmin); padding: 1vmin 2.4vmin; border-radius: 2vmin;
+         background: rgba(20,24,36,0.6); color: #fff; font: 600 max(12px, 2.4vmin) system-ui; pointer-events: none; white-space: nowrap; }
+  #hud:empty { display: none; }
+
+  /* the cover screens: the title, "hand the phone over" (opaque: no peeking), found */
+  #screen { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3vmin; z-index: 20;
+            background: radial-gradient(circle at 50% 35%, #2d6a4f, #1b4332 60%, #081c15); color: #fff; text-align: center; padding: 4vmin; }
+  #screen-title { font: 900 9vmin system-ui; color: #fff3b0; text-shadow: 0 0.06em 0 #9d0208; }
+  #screen-text { font: 500 max(15px, 3.4vmin)/1.45 system-ui; max-width: 80vw; }
+  #screen-text b { color: #ffd23f; }
+  #screen-go { padding: 2.2vmin 5vmin; border: 0; border-radius: 3vmin; background: #d62828; color: #fff; font: 800 max(18px, 4.4vmin) system-ui;
+               box-shadow: 0 1vmin 0 #9d0208; cursor: pointer; }
+
+  /* the controls: each phase shows its own (body[data-phase]) */
+  .ctl { position: fixed; z-index: 9; touch-action: none; display: none; border: 0.5vmin solid #fff3b0; color: #fff; cursor: pointer;
+         font: 800 max(14px, 3.4vmin) system-ui; box-shadow: 0 1vmin 2vmin rgba(0,0,0,0.35); }
+  .ctl:active, .ctl.on { filter: brightness(1.3); transform: scale(0.95); }
+  #stick { left: calc(env(safe-area-inset-left) + 4vmin); bottom: calc(env(safe-area-inset-bottom) + 4vmin); width: 30vmin; height: 30vmin; border-radius: 50%;
+           background: rgba(29,53,87,0.3); border-color: rgba(255,255,255,0.55); cursor: default; }
+  #knob { position: absolute; left: 50%; top: 50%; width: 13vmin; height: 13vmin; margin: -6.5vmin 0 0 -6.5vmin; border-radius: 50%; background: #fff3b0;
+          border: 0.6vmin solid #1d3557; pointer-events: none; }
+  body:not(.touch) #stick { display: none !important; }
+  #jump, #fire { right: calc(env(safe-area-inset-right) + 5vmin); bottom: calc(env(safe-area-inset-bottom) + 6vmin); width: 22vmin; height: 22vmin; border-radius: 50%;
+                 background: rgba(214,40,40,0.9); font-size: 10vmin; display: none; align-items: center; justify-content: center; }
+  #fire { background: rgba(43,138,62,0.92); }
+  #hide, #point { right: calc(env(safe-area-inset-right) + 3vmin); top: calc(env(safe-area-inset-top) + 3vmin); padding: 1.6vmin 3vmin; border-radius: 2.5vmin; background: rgba(29,53,87,0.88); }
+  #crouch, #giveup { right: calc(env(safe-area-inset-right) + 3vmin); padding: 1.2vmin 2.4vmin; border-radius: 2vmin; background: rgba(29,53,87,0.7); font-size: max(13px, 2.8vmin); }
+  #crouch { top: calc(env(safe-area-inset-top) + 15vmin); } #giveup { top: calc(env(safe-area-inset-top) + 25vmin); }
+  body[data-phase=hide] #stick, body[data-phase=hide] #hide,
+  body[data-phase=seek] #stick, body[data-phase=seek] #point, body[data-phase=seek] #crouch, body[data-phase=seek] #giveup,
+  body[data-phase=pointing] #stick, body[data-phase=pointing] #point, body[data-phase=pointing] #crouch, body[data-phase=pointing] #giveup { display: block; }
+  body[data-phase=hide] #jump, body[data-phase=pointing] #fire { display: flex; }
+  /* pointing: the crosshair and a pointing finger */
+  #aim, #finger { position: fixed; pointer-events: none; display: none; z-index: 6; }
+  #aim { left: 50%; top: 50%; width: 9vmin; height: 9vmin; margin: -4.5vmin 0 0 -4.5vmin; border: 0.6vmin solid #ffd23f; border-radius: 50%;
+         box-shadow: 0 0 0 0.3vmin rgba(0,0,0,0.5), inset 0 0 0 0.3vmin rgba(0,0,0,0.5); }
+  #aim::before, #aim::after { content: ''; position: absolute; background: #ffd23f; left: 50%; top: 50%; }
+  #aim::before { width: 0.6vmin; height: 14vmin; margin: -7vmin 0 0 -0.3vmin; } #aim::after { width: 14vmin; height: 0.6vmin; margin: -0.3vmin 0 0 -7vmin; }
+  #finger { left: 56%; top: 56%; font-size: 14vmin; transform: rotate(-35deg); }
+  body[data-phase=pointing] #aim, body[data-phase=pointing] #finger { display: block; }
+</style>
+</head>
+<body data-phase="title">
+<div id="hud"></div>
+<div id="banner"></div>
+<div id="aim"></div><div id="finger">👉</div>
+<div id="stick" class="ctl"><div id="knob"></div></div>
+<div id="jump" class="ctl">⤴︎</div>
+<div id="hide" class="ctl">🙈 Hide here</div>
+<div id="point" class="ctl">🎯 Point</div>
+<div id="fire" class="ctl">👉</div>
+<div id="crouch" class="ctl">🧎 Crouch</div>
+<div id="giveup" class="ctl">🏳️ Give up</div>
+<div id="screen"><div id="screen-title"></div><div id="screen-text"></div><button id="screen-go"></button></div>
+<script src="elf.js?v=e966158"></script>
+</body>
+</html>
