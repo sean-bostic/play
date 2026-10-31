@@ -50,6 +50,7 @@
   body[data-phase=hide] #jump, body[data-phase=pointing] #fire { display: flex; }
   /* pointing: the crosshair and a pointing finger */
   #aim { position: fixed; pointer-events: none; display: none; z-index: 6; }
+  #gun { position: fixed; pointer-events: none; display: none; z-index: 4; filter: drop-shadow(0 1vmin 2vmin rgba(0,0,0,0.35)); }
   #aim { left: 50%; top: 50%; width: 9vmin; height: 9vmin; margin: -4.5vmin 0 0 -4.5vmin; border: 0.6vmin solid #ffd23f; border-radius: 50%;
          box-shadow: 0 0 0 0.3vmin rgba(0,0,0,0.5), inset 0 0 0 0.3vmin rgba(0,0,0,0.5); }
   #aim::before, #aim::after { content: ''; position: absolute; background: #ffd23f; left: 50%; top: 50%; }
@@ -60,6 +61,7 @@
 <body data-phase="title">
 <div id="hud"></div>
 <div id="banner"></div>
+<img id="gun" src="hand.png" alt="">
 <div id="aim"></div>
 <div id="stick" class="ctl"><div id="knob"></div></div>
 <div id="jump" class="ctl">⤴︎</div>
@@ -69,6 +71,6 @@
 <div id="crouch" class="ctl">🧎 Crouch</div>
 <div id="giveup" class="ctl">🏳️ Give up</div>
 <div id="screen"><div id="screen-title"></div><div id="screen-text"></div><button id="screen-go"></button></div>
-<script src="elf.js?v=ba0d27a"></script>
+<script src="elf.js?v=f16f62d"></script>
 </body>
 </html>
