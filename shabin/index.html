@@ -36,6 +36,13 @@
   #hold.full .arc { stroke: #ff6b35; }
   #fps { position: fixed; left: 10px; bottom: 8px; color: #1d3557; font: 12px ui-monospace, monospace; z-index: 3; pointer-events: none; }
   /* a quick fade where the camera cuts (swapping to someone else) */
+  /* the loading screen: up until every material is compiled and every texture uploaded, so the first seconds don't stutter */
+  #loading { position: fixed; inset: 0; z-index: 20; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3vmin;
+             background: #a8e0ff; color: #fff3b0; font: 900 11vmin system-ui; text-shadow: 0 0.06em 0 #1d3557; transition: opacity 0.6s ease-out; }
+  #loading.done { opacity: 0; pointer-events: none; }
+  #loading .bar { width: 46vmin; height: 2.4vmin; border-radius: 2vmin; background: rgba(29,53,87,0.25); overflow: hidden; }
+  #loading .bar i { display: block; height: 100%; width: 100%; background: #fff3b0; transform-origin: left; animation: loadbar 2.2s ease-in-out infinite; }
+  @keyframes loadbar { 0% { transform: scaleX(0.05); } 70% { transform: scaleX(0.95); } 100% { transform: scaleX(1); opacity: 0; } }
   #fade { position: fixed; inset: 0; background: #000; opacity: 0; z-index: 7; pointer-events: none; }
   #fade.go { animation: fade 0.8s ease-out; }
   @keyframes fade { 0% { opacity: 0.85; } 100% { opacity: 0; } }
@@ -56,6 +63,7 @@
 </style>
 </head>
 <body>
+<div id="loading"><div>🏡 THE SHABIN</div><div class="bar"><i></i></div></div>
 <div id="banner"></div>
 <div id="fade"></div>
 <div id="fps"></div>
@@ -82,6 +90,6 @@
   </div>
 </div>
 
-<script src="shabin.js"></script>
+<script src="shabin.js?v=097fc09"></script>
 </body>
 </html>
