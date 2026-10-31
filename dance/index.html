@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Dance Party</title>
+<style>
+  html, body { margin: 0; height: 100%; overflow: hidden; background: #1a0b33; font-family: system-ui, -apple-system, sans-serif; user-select: none; cursor: default; }
+  canvas { display: block; }
+
+  /* the dance meter, across the top */
+  #meter { position: fixed; left: 50%; top: calc(env(safe-area-inset-top) + 3vmin); transform: translateX(-50%); width: min(70vw, 90vmin); height: 6vmin;
+           display: flex; align-items: center; gap: 1.5vmin; z-index: 3; pointer-events: none; }
+  #meter .icon { font-size: 6vmin; filter: drop-shadow(0 0.4vmin 0 #2b1055); }
+  #meter .bar { flex: 1; height: 100%; border-radius: 3vmin; background: rgba(0,0,0,0.45); border: 0.6vmin solid #fff3b0; overflow: hidden; box-shadow: 0 0.8vmin 0 #2b1055; }
+  #fill { height: 100%; width: 0%; border-radius: 3vmin; background: linear-gradient(90deg, #ff4d4d, #ffa22e, #ffe14d, #4fd65a, #4a8dff, #b36bff); background-size: min(70vw, 90vmin) 100%; }
+  #meter.hot .bar { animation: hot 0.25s ease-in-out infinite alternate; }
+  @keyframes hot { to { border-color: #fff; box-shadow: 0 0 3vmin #ffe14d, 0 0.8vmin 0 #2b1055; } }
+
+  /* "BACKFLIP!" */
+  #banner { position: fixed; left: 0; right: 0; top: 30%; text-align: center; font: 900 13vmin system-ui; color: #fff3b0; z-index: 8; pointer-events: none;
+            text-shadow: 0 0.06em 0 #2b1055, 0 0 0.3em rgba(255,77,210,0.6); opacity: 0; }
+  #banner.show { animation: banner 1.6s ease-out forwards; }
+  @keyframes banner { 0% { opacity: 0; transform: scale(0.3) rotate(-8deg); } 15% { opacity: 1; transform: scale(1.15) rotate(3deg); } 25% { transform: scale(1) rotate(0); } 75% { opacity: 1; } 100% { opacity: 0; transform: translateY(-6vmin); } }
+
+  /* what the keys do, until they start dancing (and again if they stop for a while) */
+  #keys { position: fixed; left: 0; right: 0; bottom: 4vmin; text-align: center; font: 800 3.6vmin system-ui; color: #fff3b0; z-index: 3; pointer-events: none;
+          text-shadow: 0 0.3vmin 0 #2b1055; transition: opacity 0.6s; }
+  #keys b { display: inline-block; min-width: 1.4em; padding: 0.1em 0.3em; margin: 0 0.1em; border-radius: 0.3em; background: rgba(255,255,255,0.15); border: 0.3vmin solid rgba(255,243,176,0.6); }
+  #keys.away { opacity: 0; }
+  #fps { position: fixed; left: 10px; bottom: 8px; color: #fff3b0; font: 12px ui-monospace, monospace; z-index: 3; pointer-events: none; }
+</style>
+</head>
+<body>
+<div id="meter"><span class="icon">🕺</span><div class="bar"><div id="fill"></div></div><span class="icon">🤸</span></div>
+<div id="banner"></div>
+<div id="fps"></div>
+<div id="keys" class="keys"><b>←</b><b>↑</b><b>→</b><b>↓</b> dance &nbsp;·&nbsp; <b>Space</b> spin &nbsp;·&nbsp; <b>Tab</b> 🦍🐶🐱</div>
+<script src="dance.js?v=d3a842e"></script>
+</body>
+</html>
