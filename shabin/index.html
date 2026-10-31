@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<title>The Shabin</title>
+<style>
+  html, body { margin: 0; height: 100%; overflow: hidden; background: #a8e0ff; font-family: system-ui, -apple-system, sans-serif; user-select: none; cursor: default; }
+  canvas { display: block; }
+
+  /* "🐶 MIA!" */
+  #banner { position: fixed; left: 0; right: 0; top: 34%; text-align: center; font: 900 13vmin system-ui; color: #fff3b0; z-index: 8; pointer-events: none;
+            text-shadow: 0 0.06em 0 #1d3557, 0 0 0.3em rgba(29,53,87,0.5); opacity: 0; }
+  #banner.show { animation: banner 1.8s ease-out forwards; }
+  @keyframes banner { 0% { opacity: 0; transform: scale(0.3) rotate(-8deg); } 15% { opacity: 1; transform: scale(1.15) rotate(3deg); } 25% { transform: scale(1) rotate(0); } 75% { opacity: 1; } 100% { opacity: 0; transform: translateY(-6vmin); } }
+
+  /* who you are: three faces along the bottom, the current one big and bright */
+  #who { position: fixed; left: 50%; bottom: 2.5vmin; transform: translateX(-50%); display: flex; gap: 2vmin; z-index: 3; }
+  #who .face { width: 9vmin; height: 9vmin; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 5.5vmin;
+               background: rgba(29,53,87,0.3); border: 0.5vmin solid rgba(255,255,255,0.35); opacity: 0.55; transition: transform 0.2s, opacity 0.2s, background 0.2s; cursor: pointer; }
+  #who .face.on { opacity: 1; background: #fff3b0; border-color: #fff; transform: scale(1.35) translateY(-1vmin); box-shadow: 0 1vmin 3vmin rgba(29,53,87,0.4); }
+  /* in the truck: holding the trigger fills this ring, then everybody's out */
+  #hold { position: fixed; left: 50%; bottom: 17vmin; width: 13vmin; height: 13vmin; margin-left: -6.5vmin; z-index: 4; pointer-events: none; opacity: 0; transition: opacity 0.1s; }
+  #hold svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+  #hold .bg { fill: rgba(29,53,87,0.45); stroke: rgba(255,255,255,0.35); stroke-width: 8; }
+  #hold .arc { fill: none; stroke: #ffd23f; stroke-width: 8; stroke-linecap: round; stroke-dasharray: 100; stroke-dashoffset: 100; }
+  #hold span { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 5.5vmin; }
+  #who .face.next { opacity: 1; border-color: #ffd23f; animation: nextpulse 0.6s ease-in-out infinite; }
+  @keyframes nextpulse { 50% { transform: scale(1.2); box-shadow: 0 0 3vmin #ffd23f; } }
+  /* the bow: the points, top left while Daddy holds it; the ring glows when it's drawn right back */
+  #score { position: fixed; left: 3vmin; top: 9vmin; font: 900 7vmin system-ui; color: #fff3b0; text-shadow: 0 0.06em 0 #1d3557; z-index: 3; opacity: 0; transition: opacity 0.3s; pointer-events: none; }
+  #score.on { opacity: 1; }
+  #hold.full .arc { stroke: #ff6b35; }
+  #fps { position: fixed; left: 10px; bottom: 8px; color: #1d3557; font: 12px ui-monospace, monospace; z-index: 3; pointer-events: none; }
+  /* a quick fade where the camera cuts (swapping to someone else) */
+  #fade { position: fixed; inset: 0; background: #000; opacity: 0; z-index: 7; pointer-events: none; }
+  #fade.go { animation: fade 0.8s ease-out; }
+  @keyframes fade { 0% { opacity: 0.85; } 100% { opacity: 0; } }
+
+  #parent { position: fixed; inset: 0; display: none; align-items: center; justify-content: center; background: rgba(8, 4, 18, 0.82); z-index: 20; color: #eee; }
+  #parent.open { display: flex; }
+  #parent .box { background: #1d1238; border: 2px solid #5b3ea8; border-radius: 16px; padding: 20px 28px; width: min(680px, 94vw); max-height: 94vh; overflow-y: auto; box-sizing: border-box; box-shadow: 0 20px 60px rgba(0,0,0,0.6); }
+  #parent h2 { margin: 0 0 4px; color: #ffd23f; }
+  #parent .sub { margin: 0 0 18px; color: #a99ad0; font-size: 14px; }
+  #parent .row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 6px 0; border-top: 1px solid #33255c; }
+  #parent .row span { font-size: 15px; }
+  #parent .seg { display: flex; gap: 6px; flex-shrink: 0; flex-wrap: wrap; justify-content: flex-end; }
+  #parent button { font: inherit; font-size: 14px; padding: 8px 12px; border-radius: 10px; border: 1px solid #5b3ea8; background: #2a1b52; color: #ddd; cursor: pointer; }
+  #parent button.on { background: #ffd23f; color: #1a0833; border-color: #ffd23f; font-weight: 700; }
+  #parent pre { background: #120a26; border-radius: 10px; padding: 10px; font-size: 12px; color: #9fd8ff; white-space: pre-wrap; margin: 6px 0 0; min-height: 34px; }
+  #parent .foot { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-top: 16px; color: #a99ad0; font-size: 13px; }
+  #parent-close { background: #ffd23f !important; color: #1a0833 !important; font-weight: 700; flex-shrink: 0; }
+</style>
+</head>
+<body>
+<div id="banner"></div>
+<div id="fade"></div>
+<div id="fps"></div>
+<div id="hold"><svg viewBox="0 0 100 100"><circle class="bg" cx="50" cy="50" r="42"/><circle class="arc" cx="50" cy="50" r="42" pathLength="100"/></svg><span>🚪</span></div>
+<div id="score">🎯 0</div>
+<div id="who"><div class="face" data-id="daddy">👨</div><div class="face" data-id="mia">🐶</div><div class="face" data-id="copper">🐱</div><div class="face" data-id="hawk">🦅</div></div>
+
+<div id="parent">
+  <div class="box">
+    <h2>Parent settings</h2>
+    <p class="sub">Saved automatically. Press P to go back to the game.</p>
+    <div class="row"><span>Sound</span>
+      <div class="seg"><button data-key="sound" data-value="true">On</button><button data-key="sound" data-value="false">Off</button></div></div>
+    <div class="row"><span>Throttle walks too<br><small style="color:#a99ad0;font-size:12px">Saitek: the throttle lever walks as well as the stick. Off: only the stick does, so a throttle left pushed up can't keep them walking.</small></span>
+      <div class="seg"><button data-key="throttleWalks" data-value="true">On</button><button data-key="throttleWalks" data-value="false">Off</button></div></div>
+    <div class="row"><span>Throttle direction<br><small style="color:#a99ad0;font-size:12px">Which way of the throttle walks</small></span>
+      <div class="seg"><button data-key="throttleFlip" data-value="false">Forward</button><button data-key="throttleFlip" data-value="true">Back</button></div></div>
+    <div class="row"><span>Season<br><small style="color:#a99ad0;font-size:12px">Auto: they come round slowly, one after another (about 5 minutes each), from autumn. Picking one fades it in.</small></span>
+      <div class="seg"><button data-key="season" data-value="auto">Auto</button><button data-key="season" data-value="spring">🌸 Spring</button><button data-key="season" data-value="summer">☀️ Summer</button><button data-key="season" data-value="autumn">🍂 Autumn</button><button data-key="season" data-value="winter">❄️ Winter</button></div></div>
+    <div class="row"><span>Weather<br><small style="color:#a99ad0;font-size:12px">Auto: a shower now and then (snow in winter)</small></span>
+      <div class="seg"><button data-key="weather" data-value="auto">Auto</button><button data-key="weather" data-value="clear">Clear</button><button data-key="weather" data-value="rain">🌧️ Rain</button><button data-key="weather" data-value="snow">🌨️ Snow</button></div></div>
+    <div class="row" style="display:block"><span>Joysticks</span><pre id="diag"></pre></div>
+    <div class="foot"><span>Joystick: stick forward walks (and the throttle) · left/right turns · back stops and backs up · trigger = whistle, woof or meow (next to someone glowing: be them) · hold any other button 1.5 s: a ring shows on the next one (keep holding to move it on: Daddy, Mia, Copper, the hawk), let go to be them. Hawk: stick back climbs, forward dives, trigger lands. Daddy: the trigger whistles (Mia and Copper follow); walk up to the truck and the trigger gets in; in it, the trigger honks; hold the left button (any but the trigger) to get everyone out. The mower: the same (it cuts the grass; sticks hop in the trailer, the woodpile tips them out). The bow: walk up to its stand, trigger picks it up; stick aims, hold the trigger to draw, let go to shoot; hold the left button to put it down. Keys: arrows · Space · Tab or C next · 1–4 pick · Esc or ⌘Q quits</span><button id="parent-close">Back to game</button></div>
+  </div>
+</div>
+
+<script src="shabin.js"></script>
+</body>
+</html>
