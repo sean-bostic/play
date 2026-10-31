@@ -55,7 +55,7 @@
          box-shadow: 0 0 0 0.3vmin rgba(0,0,0,0.5), inset 0 0 0 0.3vmin rgba(0,0,0,0.5); }
   #aim::before, #aim::after { content: ''; position: absolute; background: #ffd23f; left: 50%; top: 50%; }
   #aim::before { width: 0.6vmin; height: 14vmin; margin: -7vmin 0 0 -0.3vmin; } #aim::after { width: 14vmin; height: 0.6vmin; margin: -0.3vmin 0 0 -7vmin; }
-  body[data-phase=pointing] #aim { display: block; }
+  body[data-phase=pointing] #aim, body[data-phase=seek].tapaim #aim { display: block; }
 </style>
 </head>
 <body data-phase="title">
@@ -71,6 +71,6 @@
 <div id="crouch" class="ctl">🧎 Crouch</div>
 <div id="giveup" class="ctl">🏳️ Give up</div>
 <div id="screen"><div id="screen-title"></div><div id="screen-text"></div><button id="screen-go"></button></div>
-<script src="elf.js?v=5e3a1e8"></script>
+<script src="elf.js?v=db6e2cd"></script>
 </body>
 </html>
