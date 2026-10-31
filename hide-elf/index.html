@@ -49,6 +49,8 @@
   body[data-phase=pointing] #stick, body[data-phase=pointing] #point, body[data-phase=pointing] #crouch, body[data-phase=pointing] #giveup { display: block; }
   body[data-phase=hide] #jump, body[data-phase=pointing] #fire { display: flex; }
   /* pointing: the crosshair and a pointing finger */
+  #music { position: fixed; z-index: 21; left: calc(env(safe-area-inset-left) + 2vmin); top: calc(env(safe-area-inset-top) + 2vmin); width: max(34px, 7vmin); height: max(34px, 7vmin);
+           border-radius: 50%; background: rgba(20,24,36,0.6); display: flex; align-items: center; justify-content: center; font-size: max(17px, 3.6vmin); cursor: pointer; touch-action: none; }
   #aim { position: fixed; pointer-events: none; display: none; z-index: 6; }
   #gun { position: fixed; pointer-events: none; display: none; z-index: 4; filter: drop-shadow(0 1vmin 2vmin rgba(0,0,0,0.35)); }
   #aim { left: 50%; top: 50%; width: 9vmin; height: 9vmin; margin: -4.5vmin 0 0 -4.5vmin; border: 0.6vmin solid #ffd23f; border-radius: 50%;
@@ -70,7 +72,8 @@
 <div id="fire" class="ctl">👉</div>
 <div id="crouch" class="ctl">🧎 Crouch</div>
 <div id="giveup" class="ctl">🏳️ Give up</div>
+<div id="music">🎵</div>
 <div id="screen"><div id="screen-title"></div><div id="screen-text"></div><button id="screen-go"></button></div>
-<script src="elf.js?v=db6e2cd"></script>
+<script src="elf.js?v=fb8476b"></script>
 </body>
 </html>
