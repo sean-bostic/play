@@ -40,9 +40,18 @@
           border-radius: 1.6vmin; background: rgba(29,53,87,0.85); color: #fff3b0; font: 700 15px system-ui; z-index: 11; }
   #editbar button { margin-right: 6px; padding: 4px 10px; border: 0; border-radius: 7px; background: #1d3557; color: #fff3b0; font: 700 12px system-ui; cursor: pointer; }
   #legend .id { display: inline-block; min-width: 20px; padding: 0 4px; border-radius: 9px; background: #d62828; color: #fff; text-align: center; font-weight: 700; }
+  #loading { position: fixed; inset: 0; z-index: 20; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3vmin;
+             background: #e9dfcf; color: #fff3b0; font: 900 11vmin system-ui; text-shadow: 0 0.06em 0 #5a3420; transition: opacity 0.6s ease-out; }
+  #loading.done { opacity: 0; pointer-events: none; }
+  #loading .bar { width: 46vmin; height: 2.4vmin; border-radius: 2vmin; background: rgba(90,52,32,0.25); overflow: hidden; }
+  #loading .bar i { display: block; height: 100%; width: 100%; background: #fff3b0; transform-origin: left; animation: loadbar 2.2s ease-in-out infinite; }
+  @keyframes loadbar { 0% { transform: scaleX(0.05); } 70% { transform: scaleX(0.95); } 100% { transform: scaleX(1); opacity: 0; } }
+  #fps { display: none; position: fixed; left: 2vmin; bottom: 2vmin; z-index: 9; padding: 0.6vmin 1.4vmin; border-radius: 1vmin; background: rgba(0,0,0,0.5); color: #fff; font: 600 2vmin system-ui; }
 </style>
 </head>
 <body>
+<div id="loading"><div>🧸 THE BASEMENT</div><div class="bar"><i></i></div></div>
+<div id="fps"></div>
 <div id="banner"></div>
 <button id="view">🗺️ Top view</button>
 <canvas id="overlay"></canvas>
@@ -58,6 +67,6 @@
   <b>Throttle</b> go · <b>Stick</b> steer (back = brake / reverse; in the air, back = climb) · <b>Trigger</b> honk (helicopter: spin) · <b>Button 3</b> next vehicle · <b>Hold button 4</b> free cam<br>
   <b>Arrows</b> drive / fly · <b>Space</b> honk · <b>S</b> or <b>1–9, 0</b> car / tractor / big red tractor / old tractor / plane / racing plane / big jet / F-117 / SR-71 / helicopter · <b>T</b> top view · <b>F</b> free cam (arrows move, Q/E down/up) · <b>Esc</b> quit
 </div>
-<script src="basement.js?v=5ba0aa9"></script>
+<script src="basement.js?v=c5cca2f"></script>
 </body>
 </html>
