@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Shark Reef</title>
+<style>
+  html, body { margin: 0; height: 100%; overflow: hidden; background: #02121c; font-family: system-ui, -apple-system, sans-serif; user-select: none; -webkit-user-select: none; cursor: none; touch-action: none; }
+  canvas { display: block; position: fixed; left: 0; top: 0; }
+  #title { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #eaf8ff; z-index: 10;
+           background: radial-gradient(ellipse at 50% 40%, rgba(2,18,28,0) 0%, rgba(2,18,28,0.55) 100%); transition: opacity 1.2s; pointer-events: auto; }
+  #title.gone { opacity: 0; pointer-events: none; }
+  #title h1 { font: 200 13vmin/1 system-ui, -apple-system, sans-serif; letter-spacing: 0.32em; margin: 0 0 0 0.32em; text-shadow: 0 0 4vmin rgba(120,220,255,0.35); }
+  #title .sub { font: 300 2.6vmin system-ui; letter-spacing: 0.5em; text-transform: uppercase; opacity: 0.75; margin-top: 2.5vmin; }
+  #title .go { font: 400 2.8vmin system-ui; letter-spacing: 0.25em; margin-top: 12vmin; animation: breathe 2.6s ease-in-out infinite; }
+  @keyframes breathe { 0%, 100% { opacity: 0.35; } 50% { opacity: 0.95; } }
+  #credit { position: fixed; right: calc(env(safe-area-inset-right) + 1.5vmin); bottom: calc(env(safe-area-inset-bottom) + 1vmin); z-index: 11;
+            color: rgba(230,248,255,0.35); font: 1.5vmin system-ui; letter-spacing: 0.04em; pointer-events: none; }
+  body.touch #credit { bottom: auto; top: calc(env(safe-area-inset-top) + 1vmin); }
+  #fps { display: none; position: fixed; left: 1vmin; top: 1vmin; color: #fff; font: 12px ui-monospace, monospace; z-index: 12; background: #0008; padding: 2px 6px; border-radius: 4px; }
+</style>
+</head>
+<body>
+<div id="title">
+  <h1>SHARK REEF</h1>
+  <div class="sub">a blacktip on the reef</div>
+  <div class="go">press any button</div>
+</div>
+<div id="credit">Blacktip Shark by DigitalLife3D (CC BY-NC 4.0)</div>
+<div id="fps"></div>
+<script src="shark.js?v=fee9a27"></script>
+</body>
+</html>
