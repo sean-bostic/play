@@ -28,11 +28,6 @@
   #screen-text b { color: #ffd23f; }
   #screen-go { padding: 2.2vmin 5vmin; border: 0; border-radius: 3vmin; background: #d62828; color: #fff; font: 800 max(18px, 4.4vmin) system-ui;
                box-shadow: 0 1vmin 0 #9d0208; cursor: pointer; }
-  /* which elf: three buttons, the picked one lit up */
-  #pick { display: none; gap: 1.6vmin; flex-wrap: wrap; justify-content: center; }
-  #pick button { padding: 1.4vmin 2.6vmin; border: 0.5vmin solid rgba(255,243,176,0.35); border-radius: 2.5vmin; background: rgba(8,28,21,0.55); color: #fff;
-                 font: 700 max(14px, 3vmin) system-ui; cursor: pointer; }
-  #pick button.on { border-color: #ffd23f; background: #2b8a3e; box-shadow: 0 0 2vmin rgba(255,210,63,0.5); }
 
   /* the controls: each phase shows its own (body[data-phase]) */
   .ctl { position: fixed; z-index: 9; touch-action: none; display: none; border: 0.5vmin solid #fff3b0; color: #fff; cursor: pointer;
@@ -78,7 +73,7 @@
 <div id="crouch" class="ctl">🧎 Crouch</div>
 <div id="giveup" class="ctl">🏳️ Give up</div>
 <div id="music">🎵</div>
-<div id="screen"><div id="screen-title"></div><div id="screen-text"></div><div id="pick"></div><button id="screen-go"></button></div>
-<script src="elf.js?v=9b09fb6"></script>
+<div id="screen"><div id="screen-title"></div><div id="screen-text"></div><button id="screen-go"></button></div>
+<script src="elf.js?v=64caa21"></script>
 </body>
 </html>
