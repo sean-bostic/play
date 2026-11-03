@@ -51,6 +51,20 @@
   /* pointing: the crosshair and a pointing finger */
   #music { position: fixed; z-index: 21; left: calc(env(safe-area-inset-left) + 2vmin); top: calc(env(safe-area-inset-top) + 2vmin); width: max(34px, 7vmin); height: max(34px, 7vmin);
            border-radius: 50%; background: rgba(20,24,36,0.6); display: flex; align-items: center; justify-content: center; font-size: max(17px, 3.6vmin); cursor: pointer; touch-action: none; }
+  /* ⚙️ the settings (on the start screen, top right): the timers */
+  #gear { position: fixed; z-index: 21; right: calc(env(safe-area-inset-right) + 2vmin); top: calc(env(safe-area-inset-top) + 2vmin); width: max(40px, 8vmin); height: max(40px, 8vmin);
+          border-radius: 50%; background: rgba(20,24,36,0.6); display: none; align-items: center; justify-content: center; font-size: max(20px, 4.4vmin); cursor: pointer; }
+  #settings { position: fixed; inset: 0; z-index: 30; display: none; align-items: center; justify-content: center; background: rgba(8,28,21,0.75); padding: 4vmin; }
+  #settings .panel { background: #1b4332; border: 0.5vmin solid #ffd23f; border-radius: 3vmin; padding: 3vmin 4vmin; display: flex; flex-direction: column; align-items: center;
+                     gap: 1.6vmin; color: #fff; text-align: center; box-shadow: 0 2vmin 5vmin rgba(0,0,0,0.5); max-width: 92vw; }
+  #settings .panel-title { font: 900 max(22px, 6vmin) system-ui; color: #fff3b0; text-shadow: 0 0.06em 0 #9d0208; }
+  #settings .label { font: 700 max(15px, 3.2vmin) system-ui; margin-top: 1vmin; }
+  #settings .times { display: flex; gap: 1.4vmin; flex-wrap: wrap; justify-content: center; }
+  #settings .times button { min-width: max(56px, 11vmin); padding: 1.4vmin 2vmin; border: 0.5vmin solid rgba(255,243,176,0.35); border-radius: 2.5vmin;
+                            background: rgba(8,28,21,0.55); color: #fff; font: 700 max(15px, 3.2vmin) system-ui; cursor: pointer; }
+  #settings .times button.on { border-color: #ffd23f; background: #2b8a3e; box-shadow: 0 0 2vmin rgba(255,210,63,0.5); }
+  #settings-done { margin-top: 1.6vmin; padding: 1.8vmin 5vmin; border: 0; border-radius: 3vmin; background: #d62828; color: #fff; font: 800 max(17px, 4vmin) system-ui;
+                   box-shadow: 0 1vmin 0 #9d0208; cursor: pointer; }
   #aim { position: fixed; pointer-events: none; display: none; z-index: 6; }
   #gun { position: fixed; pointer-events: none; display: none; z-index: 4; filter: drop-shadow(0 1vmin 2vmin rgba(0,0,0,0.35)); }
   #aim { left: 50%; top: 50%; width: 9vmin; height: 9vmin; margin: -4.5vmin 0 0 -4.5vmin; border: 0.6vmin solid #ffd23f; border-radius: 50%;
@@ -73,7 +87,14 @@
 <div id="crouch" class="ctl">🧎 Crouch</div>
 <div id="giveup" class="ctl">🏳️ Give up</div>
 <div id="music">🎵</div>
+<div id="gear">⚙️</div>
+<div id="settings"><div class="panel">
+  <div class="panel-title">⚙️ Settings</div>
+  <div class="label">🧝 Time to hide</div><div id="hide-times" class="times"></div>
+  <div class="label">🔎 Time to find him</div><div id="seek-times" class="times"></div>
+  <button id="settings-done">✅ Done</button>
+</div></div>
 <div id="screen"><div id="screen-title"></div><div id="screen-text"></div><button id="screen-go"></button></div>
-<script src="elf.js?v=64caa21"></script>
+<script src="elf.js?v=ef815cf"></script>
 </body>
 </html>
