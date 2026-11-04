@@ -24,16 +24,6 @@
   body.touch .gauges { left: auto; right: 2vmin; top: 12vmin; bottom: auto; font-size: 2.6vmin; }
   .gauges .thr { display: inline-block; width: 7vmin; height: 1.2vmin; border-radius: 1vmin; background: rgba(255,255,255,0.2); vertical-align: middle; overflow: hidden; }
   .gauges .thr i { display: block; height: 100%; background: #ffb02e; }
-  /* the nuke's reload ring (like the warship's guns in Vehicles): fills over 10 s, then flashes green: armed! */
-  .reload { position: absolute; left: calc(50% + 12vmin); top: 70%; width: 9vmin; height: 9vmin; pointer-events: none; display: none; }
-  .reload.on { display: block; }
-  .reload svg { width: 100%; height: 100%; transform: rotate(-90deg); }
-  .reload b { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 3.6vmin; opacity: 0.55; }
-  .reload.ready b { opacity: 1; }
-  .reload .bg { fill: rgba(29,53,87,0.45); stroke: rgba(255,255,255,0.3); stroke-width: 6; }
-  .reload .arc { fill: none; stroke: #ff9f1c; stroke-width: 6; stroke-linecap: round; stroke-dasharray: 100; stroke-dashoffset: 100; }
-  .reload.ready .arc { stroke: #80ed99; }
-  .reload.flash { animation: ringpop 0.4s ease-out; } @keyframes ringpop { 0% { transform: scale(1.5); } 100% { transform: scale(1); } }
   .warn { position: absolute; left: 0; right: 0; top: 62%; text-align: center; font: 900 6vmin Impact, system-ui; color: #ff3b1f; -webkit-text-stroke: 0.2vmin #000; }
   .blink { animation: blink 0.5s steps(2) infinite; } @keyframes blink { 50% { opacity: 0; } }
   #replay { position: fixed; left: 0; right: 0; top: 0; z-index: 7; display: none; pointer-events: none; text-align: center; font: 900 5vmin Impact, system-ui; color: #fff; padding-top: 2.5vmin; letter-spacing: 0.08em; }
@@ -67,6 +57,6 @@
   <b>Stick</b> fly (back = nose up) · <b>Throttle</b> speed · <b>Trigger</b> fire / drop · <b>Thumb</b> bomb · <b>Button 3</b> next plane · <b>Button 4</b> replay · <b>Button 5+</b> ⚙️<br>
   <b>Arrows</b> fly (↑ nose up) · <b>Shift</b> faster · <b>Z</b> slower · <b>Space</b> guns · <b>B</b> bomb / nuke · <b>S</b> next plane · <b>Enter</b> replay · <b>Tab</b> ⚙️ · <b>Esc</b> quit
 </div>
-<script src="dogfight.js?v=7e6f94d"></script>
+<script src="dogfight.js?v=2245d9a"></script>
 </body>
 </html>
