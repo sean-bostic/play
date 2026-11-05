@@ -3692,8 +3692,8 @@ void main() {
   body.online #giveup, body.online #gear { display: none !important; }
   #lids { position: fixed; inset: 0; pointer-events: none; z-index: 3; display: none; overflow: hidden; }
   body.counting #lids { display: block; }
-  #lids img { position: absolute; right: -8vw; top: 50%; width: min(108vw, 215vh); transform: translateY(-50%); filter: brightness(0.7) drop-shadow(0 0 5vmin rgba(0,0,0,0.7)); animation: palm 3.2s ease-in-out infinite; }
-  @media (orientation: portrait) { #lids img { width: 165vw; right: -30vw; } }
+  #lids img { position: absolute; right: -6vw; top: 50%; width: min(92vw, 182vh); transform: translateY(-50%); filter: brightness(0.7) drop-shadow(0 0 5vmin rgba(0,0,0,0.7)); animation: palm 3.2s ease-in-out infinite; }
+  @media (orientation: portrait) { #lids img { width: 140vw; right: -24vw; } }
   @keyframes palm { 0%, 100% { transform: translateY(-50%) rotate(-1.5deg); } 50% { transform: translate(-0.6vw, -51.5%) rotate(1.5deg); } }
   body.counting canvas { filter: brightness(0.2) saturate(0.6); }
   #clock { position: fixed; z-index: 6; pointer-events: none; display: none; left: calc(env(safe-area-inset-left) + 2vmin); top: calc(env(safe-area-inset-top) + 11vmin); width: max(64px, 15vmin); height: max(64px, 15vmin); filter: drop-shadow(0 0.6vmin 1.2vmin rgba(0,0,0,0.45)); }
