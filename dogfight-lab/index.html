@@ -17,16 +17,29 @@
   input, textarea { -webkit-user-select: text; user-select: text; }
   canvas { display: block; touch-action: none; }
   #fx { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 3; }
-  #banner { position: fixed; left: 0; right: 0; top: 28%; text-align: center; font: 900 9vmin Impact, "Arial Black", system-ui; color: #ffe14d; pointer-events: none; z-index: 6;
-            -webkit-text-stroke: 0.25vmin #1b1b1b; text-shadow: 0 0.07em 0 #1b1b1b, 0 0 0.3em rgba(0,0,0,0.5); opacity: 0; letter-spacing: 0.02em; }
+  /* ✨ the game's one gold (the user: "I love the color. Maybe a tad more gold to make it pop"): its words, the menu's picks,
+     the kill popups. Its text is small and crisp, a quick pop and a quiet fade (the user: "the text of Chivalry 2 when you
+     kill someone: it's not much but it pops and is elegant"), not half the screen */
+  :root { --gold: #f5c242; --gold-glow: rgba(245, 194, 66, 0.45); --say-font: "Avenir Next", Avenir, "Segoe UI", system-ui, sans-serif; }
+  #banner { position: fixed; left: 0; right: 0; top: 30%; width: fit-content; max-width: 84vw; margin: 0 auto; padding: 1.2vmin 7vmin; text-align: center; pointer-events: none; z-index: 6; opacity: 0;
+            font: 800 max(16px, 3.4vmin)/1.25 var(--say-font); letter-spacing: 0.14em; text-transform: uppercase; color: var(--gold);
+            background: radial-gradient(closest-side, rgba(8,10,18,0.5), rgba(8,10,18,0)); /* (a soft shade behind it: it reads on the white walls too) */
+            text-shadow: 0 0 2px rgba(0,0,0,0.95), 0 1px 3px rgba(0,0,0,0.8), 0 0 1.4em var(--gold-glow); }
+  #banner::after { content: ''; display: block; width: min(30vmin, 70%); height: 1px; margin: 0.8vmin auto 0; background: linear-gradient(90deg, transparent, var(--gold), transparent); opacity: 0.8; transform: scaleX(0); }
   #banner.show { animation: banner 2s ease-out forwards; }
-  @keyframes banner { 0% { opacity: 0; transform: scale(0.3) rotate(-8deg); } 12% { opacity: 1; transform: scale(1.15) rotate(3deg); } 22% { transform: scale(1) rotate(0); } 78% { opacity: 1; } 100% { opacity: 0; transform: translateY(-6vmin); } }
+  #banner.show::after { animation: rule 2s ease-out forwards; animation-duration: inherit; }
+  @keyframes banner { 0% { opacity: 0; transform: scale(1.3); filter: blur(3px); } 6% { opacity: 1; transform: scale(0.98); filter: blur(0); } 11% { transform: scale(1); } 72% { opacity: 1; transform: none; } 100% { opacity: 0; transform: translateY(-1vmin); } }
+  @keyframes rule { 0%, 4% { transform: scaleX(0); } 22% { transform: scaleX(1); } 100% { transform: scaleX(1); } }
   #announce { position: fixed; left: 50%; top: calc(env(safe-area-inset-top) + 9vmin); transform: translateX(-50%); z-index: 7; pointer-events: none; opacity: 0; text-align: center;
-              padding: 1.6vmin 4vmin; border-radius: 2.5vmin; background: rgba(20,24,40,0.85); border: 0.5vmin solid #ffe14d; box-shadow: 0 1vmin 3vmin rgba(0,0,0,0.45); white-space: nowrap; }
-  #announce b { display: block; font: 900 6.5vmin Impact, "Arial Black", system-ui; color: #ffe14d; letter-spacing: 0.03em; }
-  #announce span { display: block; font: 700 3.6vmin system-ui; color: #fff; margin-top: 0.4vmin; }
+              max-width: 88vw; padding: 1vmin 6vmin 1.2vmin; background: radial-gradient(closest-side, rgba(8,10,18,0.6), rgba(8,10,18,0)); }
+  #announce b { display: block; font: 800 max(17px, 3.6vmin)/1.2 var(--say-font); letter-spacing: 0.14em; text-transform: uppercase; color: var(--gold); white-space: nowrap;
+                text-shadow: 0 0 2px rgba(0,0,0,0.95), 0 1px 3px rgba(0,0,0,0.8), 0 0 1.4em var(--gold-glow); }
+  #announce span { display: block; margin-top: 0.6vmin; padding-top: 0.6vmin; font: 600 max(11px, 1.9vmin)/1.35 var(--say-font); letter-spacing: 0.04em; color: rgba(245,240,230,0.88);
+                   text-shadow: 0 1px 2px #000; border-top: 1px solid; border-image: linear-gradient(90deg, transparent, rgba(245,194,66,0.7), transparent) 1; }
   #announce.show { animation: announce 3.5s ease-out forwards; }
-  @keyframes announce { 0% { opacity: 0; transform: translate(-50%, -4vmin) scale(0.8); } 8% { opacity: 1; transform: translate(-50%, 0) scale(1.05); } 14% { transform: translate(-50%, 0) scale(1); } 85% { opacity: 1; } 100% { opacity: 0; transform: translate(-50%, -2vmin); } }
+  #announce.show b { animation: ann-b 0.5s cubic-bezier(.2,.8,.2,1) both; }
+  @keyframes announce { 0% { opacity: 0; transform: translate(-50%, -1vmin); } 6% { opacity: 1; transform: translate(-50%, 0); } 86% { opacity: 1; } 100% { opacity: 0; transform: translate(-50%, -0.6vmin); } }
+  @keyframes ann-b { from { letter-spacing: 0.42em; opacity: 0; } to { letter-spacing: 0.14em; opacity: 1; } }
   #score { position: fixed; left: 50%; top: calc(env(safe-area-inset-top) + 1.6vmin); transform: translateX(-50%); z-index: 5; padding: 0.8vmin 2vmin; border-radius: 2vmin;
            background: rgba(20,24,36,0.75); color: #fff; font: 800 2.6vmin system-ui; white-space: nowrap; pointer-events: none; }
   #score:empty { display: none; }
@@ -47,13 +60,13 @@
   body.replaying #hud, body.replaying #score { display: none; }
   #hint { position: fixed; left: 50%; bottom: 9vmin; transform: translateX(-50%); z-index: 8; padding: 1.4vmin 2.2vmin; border-radius: 2vmin; background: rgba(0,0,0,0.6); color: #fff; font: 600 2vmin/1.6 system-ui;
           opacity: 0; transition: opacity 0.5s; pointer-events: none; white-space: nowrap; }
-  #hint.show { opacity: 1; } #hint b { color: #ffe14d; }
+  #hint.show { opacity: 1; } #hint b { color: var(--gold); }
   body.touch #hint { display: none; }
   #loading { position: fixed; inset: 0; z-index: 20; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3vmin;
-             background: #1d2333; color: #ffe14d; font: 900 11vmin Impact, system-ui; -webkit-text-stroke: 0.3vmin #000; transition: opacity 0.6s ease-out; }
+             background: #1d2333; color: var(--gold); font: 900 11vmin Impact, system-ui; -webkit-text-stroke: 0.3vmin #000; transition: opacity 0.6s ease-out; }
   #loading.done { opacity: 0; pointer-events: none; }
   #loading .bar { width: 46vmin; height: 2.4vmin; border-radius: 2vmin; background: rgba(255,255,255,0.15); overflow: hidden; }
-  #loading .bar i { display: block; height: 100%; width: 100%; background: #ffe14d; transform-origin: left; animation: loadbar 2.2s ease-in-out infinite; }
+  #loading .bar i { display: block; height: 100%; width: 100%; background: var(--gold); transform-origin: left; animation: loadbar 2.2s ease-in-out infinite; }
   @keyframes loadbar { 0% { transform: scaleX(0.05); } 70% { transform: scaleX(0.95); } 100% { transform: scaleX(1); opacity: 0; } }
   #fps { display: none; position: fixed; left: 2vmin; top: 2vmin; z-index: 9; padding: 0.6vmin 1.4vmin; border-radius: 1vmin; background: rgba(0,0,0,0.5); color: #fff; font: 600 2vmin system-ui; }
 </style>
@@ -71,6 +84,6 @@
   <b>Stick</b> fly (back = nose up) · <b>Throttle</b> speed · <b>Trigger</b> guns · <b>Thumb</b> bomb / nuke · <b>Button 3</b> barrel roll · <b>Button 4</b> replay · <b>Button 5</b> 🚀 missile · <b>Button 6+</b> ⚙️<br>
   <b>Arrows</b> fly (↑ nose down) · <b>Shift</b> / <b>Z</b> throttle up / down (it stays) · <b>1</b>–<b>0</b> throttle idle–full · <b>Space</b> guns · <b>B</b> bomb / nuke · <b>S</b> barrel roll · <b>M</b> 🚀 missile · <b>Enter</b> replay · <b>Tab</b> ⚙️ · <b>Esc</b> quit
 </div>
-<script src="dogfight.js?v=38e223f"></script>
+<script src="dogfight.js?v=7141f7f"></script>
 </body>
 </html>
