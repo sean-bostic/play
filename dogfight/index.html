@@ -7,7 +7,11 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <title>Dogfight</title>
 <style>
-  html, body { margin: 0; height: 100%; overflow: hidden; background: #2a2520; font-family: system-ui, -apple-system, sans-serif; user-select: none; cursor: default; }
+  html, body { margin: 0; height: 100%; overflow: hidden; background: #2a2520; font-family: system-ui, -apple-system, sans-serif; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent; cursor: default; }
+  /* (nothing on the page is text to pick: on a phone a long press highlighted words and emojis and offered to look them up.
+     Safari needs its own -webkit- ones, and the callout is the look-up bubble. The name box still takes typing) */
+  *, *::before, *::after { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+  input, textarea { -webkit-user-select: text; user-select: text; }
   canvas { display: block; touch-action: none; }
   #fx { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 3; }
   #banner { position: fixed; left: 0; right: 0; top: 28%; text-align: center; font: 900 9vmin Impact, "Arial Black", system-ui; color: #ffe14d; pointer-events: none; z-index: 6;
@@ -64,6 +68,6 @@
   <b>Stick</b> fly (back = nose up) · <b>Throttle</b> speed · <b>Trigger</b> guns · <b>Thumb</b> bomb / nuke · <b>Button 3</b> barrel roll · <b>Button 4</b> replay · <b>Button 5</b> 🚀 missile · <b>Button 6+</b> ⚙️<br>
   <b>Arrows</b> fly (↑ nose down) · <b>Shift</b> / <b>Z</b> throttle up / down (it stays) · <b>1</b>–<b>0</b> throttle idle–full · <b>Space</b> guns · <b>B</b> bomb / nuke · <b>S</b> barrel roll · <b>M</b> 🚀 missile · <b>Enter</b> replay · <b>Tab</b> ⚙️ · <b>Esc</b> quit
 </div>
-<script src="dogfight.js?v=195422c"></script>
+<script src="dogfight.js?v=89095ef"></script>
 </body>
 </html>
