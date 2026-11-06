@@ -8,6 +8,7 @@
 <!-- (as an app on the home screen: Android opens invite links straight in it; the iPhone can't, so the game has 📋 Paste invite) -->
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" href="icon-192.png">
 <title>Dogfight</title>
 <style>
   html, body { margin: 0; height: 100%; overflow: hidden; background: #2a2520; font-family: system-ui, -apple-system, sans-serif; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent; cursor: default; }
@@ -62,17 +63,70 @@
           opacity: 0; transition: opacity 0.5s; pointer-events: none; white-space: nowrap; }
   #hint.show { opacity: 1; } #hint b { color: var(--gold); }
   body.touch #hint { display: none; }
-  #loading { position: fixed; inset: 0; z-index: 20; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3vmin;
-             background: #1d2333; color: var(--gold); font: 900 11vmin Impact, system-ui; -webkit-text-stroke: 0.3vmin #000; transition: opacity 0.6s ease-out; }
+  /* 🛩️ the loading screen: the logo (the roundel over the word, a light running along it) on the menu's navy, a thin gold bar under it */
+  #loading { position: fixed; inset: 0; z-index: 20; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5vmin;
+             background: radial-gradient(ellipse at 50% 42%, #283049, #151a28 55%, #0c0f17); --df-navy: #141a2a; transition: opacity 0.6s ease-out; }
   #loading.done { opacity: 0; pointer-events: none; }
-  #loading .bar { width: 46vmin; height: 2.4vmin; border-radius: 2vmin; background: rgba(255,255,255,0.15); overflow: hidden; }
-  #loading .bar i { display: block; height: 100%; width: 100%; background: var(--gold); transform-origin: left; animation: loadbar 2.2s ease-in-out infinite; }
+  #loading .logo { display: flex; flex-direction: column; align-items: center; gap: 3.4vmin; filter: drop-shadow(0 0 3vmin rgba(245, 194, 66, 0.22)); animation: logo-in 0.7s ease-out both; }
+  #loading .mark { width: 34vmin; height: 34vmin; }
+  #loading .word { width: 66vmin; height: 11.2vmin; overflow: visible; }
+  @keyframes logo-in { 0% { opacity: 0; transform: scale(0.94); } 100% { opacity: 1; transform: none; } }
+  #loading .bar { width: 46vmin; height: max(3px, 0.6vmin); border-radius: 1vmin; background: rgba(245, 194, 66, 0.16); overflow: hidden; }
+  #loading .bar i { display: block; height: 100%; width: 100%; background: linear-gradient(90deg, #c88a17, var(--gold) 70%, #ffe7a3); box-shadow: 0 0 1.4vmin var(--gold-glow);
+                    transform-origin: left; animation: loadbar 2.2s ease-in-out infinite; }
   @keyframes loadbar { 0% { transform: scaleX(0.05); } 70% { transform: scaleX(0.95); } 100% { transform: scaleX(1); opacity: 0; } }
   #fps { display: none; position: fixed; left: 2vmin; top: 2vmin; z-index: 9; padding: 0.6vmin 1.4vmin; border-radius: 1vmin; background: rgba(0,0,0,0.5); color: #fff; font: 600 2vmin system-ui; }
 </style>
 </head>
 <body>
-<div id="loading"><div>✈️ DOGFIGHT 💥</div><div class="bar"><i></i></div></div>
+<!-- 🛩️ THE LOGO, drawn once here and used by <use href="#df-mark"> / "#df-word"> (the loading screen below, the ⚙️ menu's
+     header in src/settings.js). tools/icon.html draws the same mark for the app icon: change one, change both.
+     (Not display:none: Chrome then won't paint the gradients the <use>s point at) -->
+<svg id="df-logo" class="df-defs" width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <linearGradient id="df-gold" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffe7a3"/><stop offset="0.45" stop-color="#f5c242"/><stop offset="1" stop-color="#c88a17"/>
+    </linearGradient>
+    <!-- the loading screen's sheen: a band of light that runs along the word (moved by the animate, in the word's own units) -->
+    <linearGradient id="df-sheen" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="140" y2="60">
+      <stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset="0.5" stop-color="#fff" stop-opacity="0.75"/><stop offset="1" stop-color="#fff" stop-opacity="0"/>
+      <animateTransform attributeName="gradientTransform" type="translate" values="-260 0; 760 0; 760 0" keyTimes="0; 0.6; 1" dur="2.8s" repeatCount="indefinite"/>
+    </linearGradient>
+    <!-- the mark: a squadron roundel. A gold ring, a swept-wing fighter climbing straight up through it (its nose breaks
+         out the top), and two contrails crossed behind it like crossed swords: two planes' paths scissoring. Its inside is
+         --df-navy (whatever's behind it shows through the ring's gap otherwise). Readable at the app icon's 60 px -->
+    <symbol id="df-mark" viewBox="0 0 200 200">
+      <circle cx="100" cy="100" r="92" style="fill: var(--df-navy, #141a2a)"/>
+      <clipPath id="df-in"><circle cx="100" cy="100" r="80"/></clipPath>
+      <g clip-path="url(#df-in)" fill="none" stroke="url(#df-gold)" stroke-linecap="round" opacity="0.45">
+        <path d="M30 176 C70 150 120 120 178 30" stroke-width="7"/>
+        <path d="M170 176 C130 150 80 120 22 30" stroke-width="7"/>
+      </g>
+      <circle cx="100" cy="100" r="86" fill="none" stroke="url(#df-gold)" stroke-width="12"/>
+      <circle cx="100" cy="100" r="74" fill="none" stroke="url(#df-gold)" stroke-width="2.5" opacity="0.7"/>
+      <path fill="url(#df-gold)" style="stroke: var(--df-navy, #141a2a)" stroke-width="5" stroke-linejoin="round" paint-order="stroke"
+            d="M100 4 L105 24 L108 62 L156 112 L156 126 L110 114 L111 140 L130 158 L130 168 L107 163 L100 174 L93 163 L70 168 L70 158 L89 140 L90 114 L44 126 L44 112 L92 62 L95 24 Z"/>
+      <path style="fill: var(--df-navy, #141a2a)" d="M100 28 C104 34 104 50 100 56 C96 50 96 34 100 28 Z"/>
+    </symbol>
+    <!-- the word: DOGFIGHT in drawn block letters with clipped corners (a stencil on a fuselage), leaned forward for speed.
+         Drawn, not typed: the iPhone has no Impact, and drawn it's the same everywhere. --df-fill swaps its paint (the sheen) -->
+    <symbol id="df-word" viewBox="0 0 588 100">
+      <g style="fill: var(--df-fill, url(#df-gold))" fill-rule="evenodd" transform="translate(18 0) skewX(-10)">
+        <path d="M0 0 H52 L72 20 V80 L52 100 H0 Z M24 24 V76 H44 L48 72 V28 L44 24 Z"/>
+        <path d="M100 0 H132 L152 20 V80 L132 100 H100 L80 80 V20 ZM108 24 L104 28 V72 L108 76 H124 L128 72 V28 L124 24 Z"/>
+        <path d="M180 0 H212 L232 20 V32 H208 V28 L204 24 H188 L184 28 V72 L188 76 H204 L208 72 V64 H198 V44 H232 V80 L212 100 H180 L160 80 V20 Z"/>
+        <path d="M240 0 H302 V24 H264 V40 H292 V62 H264 V100 H240 Z"/>
+        <path d="M310 0 H334 V100 H310 Z"/>
+        <path d="M362 0 H394 L414 20 V32 H390 V28 L386 24 H370 L366 28 V72 L370 76 H386 L390 72 V64 H380 V44 H414 V80 L394 100 H362 L342 80 V20 Z"/>
+        <path d="M422 0 H446 V38 H470 V0 H494 V100 H470 V62 H446 V100 H422 Z"/>
+        <path d="M502 0 H570 V24 H548 V100 H524 V24 H502 Z"/>
+      </g>
+    </symbol>
+  </defs>
+</svg>
+<div id="loading"><div class="logo" role="img" aria-label="Dogfight"><svg class="mark"><use href="#df-mark"/></svg>
+  <svg class="word" viewBox="0 0 588 100"><use href="#df-word"/><use href="#df-word" style="--df-fill: url(#df-sheen)"/></svg></div>
+  <div class="bar"><i></i></div></div>
 <div id="fps"></div>
 <canvas id="fx"></canvas>
 <div id="hud"></div>
@@ -84,6 +138,6 @@
   <b>Stick</b> fly (back = nose up) · <b>Throttle</b> speed · <b>Trigger</b> guns · <b>Thumb</b> bomb / nuke · <b>Button 3</b> barrel roll · <b>Button 4</b> replay · <b>Button 5</b> 🚀 missile · <b>Button 6+</b> ⚙️<br>
   <b>Arrows</b> fly (↑ nose down) · <b>Shift</b> / <b>Z</b> throttle up / down (it stays) · <b>1</b>–<b>0</b> throttle idle–full · <b>Space</b> guns · <b>B</b> bomb / nuke · <b>S</b> barrel roll · <b>M</b> 🚀 missile · <b>Enter</b> replay · <b>Tab</b> ⚙️ · <b>Esc</b> quit
 </div>
-<script src="dogfight.js?v=8cb5d22"></script>
+<script src="dogfight.js?v=e2f7e34"></script>
 </body>
 </html>
