@@ -17,6 +17,10 @@
   #edit { position: fixed; left: calc(env(safe-area-inset-left) + 2vmin); top: calc(env(safe-area-inset-top) + 2vmin); z-index: 7; padding: 8px 12px; border: 0; border-radius: 10px;
     background: rgba(29,53,87,0.85); color: #fff; font: 700 14px system-ui; cursor: pointer; }
   #speed { position: fixed; right: calc(env(safe-area-inset-right) + 2vmin); top: calc(env(safe-area-inset-top) + 2vmin); z-index: 5; color: #fff; font: 800 15px system-ui; text-shadow: 0 1px 3px #000a; pointer-events: none; }
+  #who { position: fixed; top: calc(env(safe-area-inset-top) + 2vmin); left: 50%; transform: translateX(-50%); z-index: 7; display: flex; gap: 6px; }
+  #who button { font: 22px system-ui; width: 46px; height: 42px; border: 0; border-radius: 10px; background: rgba(29,53,87,0.6); cursor: pointer; padding: 0; }
+  #who button.on { background: #f5c242; }
+  body.plan #who, body.onfoot #speed, body.onfoot #tc-thr { display: none !important; }
   #banner { position: fixed; left: 0; right: 0; top: 28%; width: fit-content; max-width: 84vw; margin: 0 auto; padding: 1vmin 6vmin; text-align: center; pointer-events: none; z-index: 10; opacity: 0;
     font: 800 max(15px, 3.2vmin)/1.25 "Avenir Next", Avenir, system-ui, sans-serif; letter-spacing: 0.12em; text-transform: uppercase; color: #f5c242;
     background: radial-gradient(closest-side, rgba(8,10,18,0.55), rgba(8,10,18,0)); text-shadow: 0 0 2px #000, 0 1px 3px #000c; }
@@ -32,8 +36,9 @@
 <canvas id="fx"></canvas>
 <button id="edit">🗺️ Edit</button>
 <div id="speed"></div>
+<div id="who"></div>
 <div id="banner"></div>
-<div id="hint">Arrows fly (↓ nose up) · Shift / Z throttle · T or 🗺️ edits the yard · Esc quits</div>
-<script src="backyard.js?v=fe0d317"></script>
+<div id="hint">Arrows fly (↓ nose up) or run · Shift / Z throttle · Space barks · S: next one (🖤 🐕 🐶 🐈) · T or 🗺️ edits · Esc quits</div>
+<script src="backyard.js?v=f5d52d2"></script>
 </body>
 </html>
