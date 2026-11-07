@@ -9,7 +9,7 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" type="image/png" href="icon-192.png">
-<title>Dogfight</title>
+<title>Callsign Challenge</title>
 <style>
   html, body { margin: 0; height: 100%; overflow: hidden; background: #2a2520; font-family: system-ui, -apple-system, sans-serif; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent; cursor: default; }
   /* (nothing on the page is text to pick: on a phone a long press highlighted words and emojis and offered to look them up.
@@ -65,7 +65,8 @@
   #loading.done { opacity: 0; pointer-events: none; }
   #loading .logo { display: flex; flex-direction: column; align-items: center; gap: 3.4vmin; filter: drop-shadow(0 0 3vmin rgba(245, 194, 66, 0.22)); animation: logo-in 0.7s ease-out both; }
   #loading .mark { width: 34vmin; height: 34vmin; }
-  #loading .word { width: 66vmin; height: 11.2vmin; overflow: visible; }
+  #loading .word { width: 66vmin; height: 17.5vmin; overflow: visible; }
+  #loading .motto { margin-top: -0.6vmin; color: #e9dcb8; font: italic 600 max(13px, 2.6vmin) system-ui, -apple-system, sans-serif; letter-spacing: 0.06em; text-align: center; opacity: 0.85; }
   @keyframes logo-in { 0% { opacity: 0; transform: scale(0.94); } 100% { opacity: 1; transform: none; } }
   #loading .bar { width: 46vmin; height: max(3px, 0.6vmin); border-radius: 1vmin; background: rgba(245, 194, 66, 0.16); overflow: hidden; }
   #loading .bar i { display: block; height: 100%; width: 100%; background: linear-gradient(90deg, #c88a17, var(--gold) 70%, #ffe7a3); box-shadow: 0 0 1.4vmin var(--gold-glow);
@@ -104,24 +105,35 @@
             d="M100 4 L105 24 L108 62 L156 112 L156 126 L110 114 L111 140 L130 158 L130 168 L107 163 L100 174 L93 163 L70 168 L70 158 L89 140 L90 114 L44 126 L44 112 L92 62 L95 24 Z"/>
       <path style="fill: var(--df-navy, #141a2a)" d="M100 28 C104 34 104 50 100 56 C96 50 96 34 100 28 Z"/>
     </symbol>
-    <!-- the word: DOGFIGHT in drawn block letters with clipped corners (a stencil on a fuselage), leaned forward for speed.
+    <!-- the word: CALLSIGN over a smaller, spread-out CHALLENGE, in drawn block letters with clipped corners (a stencil on
+         a fuselage), leaned forward for speed (the user renamed the game, 2026-11-07, "keep the logo": the roundel as it was).
          Drawn, not typed: the iPhone has no Impact, and drawn it's the same everywhere. --df-fill swaps its paint (the sheen) -->
-    <symbol id="df-word" viewBox="0 0 588 100">
+    <symbol id="df-word" viewBox="0 0 588 156">
       <g style="fill: var(--df-fill, url(#df-gold))" fill-rule="evenodd" transform="translate(18 0) skewX(-10)">
-        <path d="M0 0 H52 L72 20 V80 L52 100 H0 Z M24 24 V76 H44 L48 72 V28 L44 24 Z"/>
-        <path d="M100 0 H132 L152 20 V80 L132 100 H100 L80 80 V20 ZM108 24 L104 28 V72 L108 76 H124 L128 72 V28 L124 24 Z"/>
-        <path d="M180 0 H212 L232 20 V32 H208 V28 L204 24 H188 L184 28 V72 L188 76 H204 L208 72 V64 H198 V44 H232 V80 L212 100 H180 L160 80 V20 Z"/>
-        <path d="M240 0 H302 V24 H264 V40 H292 V62 H264 V100 H240 Z"/>
-        <path d="M310 0 H334 V100 H310 Z"/>
-        <path d="M362 0 H394 L414 20 V32 H390 V28 L386 24 H370 L366 28 V72 L370 76 H386 L390 72 V64 H380 V44 H414 V80 L394 100 H362 L342 80 V20 Z"/>
-        <path d="M422 0 H446 V38 H470 V0 H494 V100 H470 V62 H446 V100 H422 Z"/>
-        <path d="M502 0 H570 V24 H548 V100 H524 V24 H502 Z"/>
+        <path d="M25 0 H57 L77 20 V32 H53 V28 L49 24 H33 L29 28 V72 L33 76 H49 L53 72 V68 H77 V80 L57 100 H25 L5 80 V20 Z"/>
+        <path d="M105 0 H137 L157 20 V100 H133 V62 H109 V100 H85 V20 Z M113 24 L109 28 V40 H133 V28 L129 24 Z"/>
+        <path d="M165 0 H189 V76 H225 V100 H165 Z"/>
+        <path d="M233 0 H257 V76 H293 V100 H233 Z"/>
+        <path d="M321 0 H373 V24 H329 L325 28 V34 L329 38 H353 L373 58 V80 L353 100 H301 V76 H345 L349 72 V66 L345 62 H321 L301 42 V20 Z"/>
+        <path d="M381 0 H405 V100 H381 Z"/>
+        <path d="M433 0 H465 L485 20 V32 H461 V28 L457 24 H441 L437 28 V72 L441 76 H457 L461 72 V64 H451 V44 H485 V80 L465 100 H433 L413 80 V20 Z"/>
+        <path d="M493 0 H517 L541 52 V0 H565 V100 H541 L517 48 V100 H493 Z"/>
+        <path d="M28.4 114 H41.84 L50.24 122.4 V127.44 H40.16 V125.76 L38.48 124.08 H31.76 L30.08 125.76 V144.24 L31.76 145.92 H38.48 L40.16 144.24 V142.56 H50.24 V147.6 L41.84 156 H28.4 L20 147.6 V122.4 Z"/>
+        <path d="M88.53 114 H98.61 V129.96 H108.69 V114 H118.77 V156 H108.69 V140.04 H98.61 V156 H88.53 Z"/>
+        <path d="M165.46 114 H178.9 L187.3 122.4 V156 H177.22 V140.04 H167.14 V156 H157.06 V122.4 Z M168.82 124.08 L167.14 125.76 V130.8 H177.22 V125.76 L175.54 124.08 Z"/>
+        <path d="M225.59 114 H235.67 V145.92 H250.79 V156 H225.59 Z"/>
+        <path d="M289.08 114 H299.16 V145.92 H314.28 V156 H289.08 Z"/>
+        <path d="M352.57 114 H378.61 V124.08 H362.65 V129.96 H374.41 V140.04 H362.65 V145.92 H378.61 V156 H352.57 Z"/>
+        <path d="M416.9 114 H426.98 L437.06 135.84 V114 H447.14 V156 H437.06 L426.98 134.16 V156 H416.9 Z"/>
+        <path d="M493.83 114 H507.27 L515.67 122.4 V127.44 H505.59 V125.76 L503.91 124.08 H497.19 L495.51 125.76 V144.24 L497.19 145.92 H503.91 L505.59 144.24 V140.88 H501.39 V132.48 H515.67 V147.6 L507.27 156 H493.83 L485.43 147.6 V122.4 Z"/>
+        <path d="M553.96 114 H580 V124.08 H564.04 V129.96 H575.8 V140.04 H564.04 V145.92 H580 V156 H553.96 Z"/>
       </g>
     </symbol>
   </defs>
 </svg>
-<div id="loading"><div class="logo" role="img" aria-label="Dogfight"><svg class="mark"><use href="#df-mark"/></svg>
-  <svg class="word" viewBox="0 0 588 100"><use href="#df-word"/><use href="#df-word" style="--df-fill: url(#df-sheen)"/></svg></div>
+<div id="loading"><div class="logo" role="img" aria-label="Callsign Challenge"><svg class="mark"><use href="#df-mark"/></svg>
+  <svg class="word" viewBox="0 0 588 156"><use href="#df-word"/><use href="#df-word" style="--df-fill: url(#df-sheen)"/></svg>
+  <div class="motto">Prove why your name means air superiority</div></div>
   <div class="bar"><i></i></div></div>
 <div id="fps"></div>
 <canvas id="fx"></canvas>
@@ -133,6 +145,6 @@
   <b>Stick</b> fly (back = nose up) · <b>Throttle</b> speed · <b>Trigger</b> guns · <b>Thumb</b> bomb / nuke · <b>Button 3</b> barrel roll · <b>Button 4</b> replay · <b>Button 5</b> 🚀 missile · <b>Button 6+</b> ⚙️<br>
   <b>Arrows</b> fly (↑ nose down) · <b>Shift</b> / <b>Z</b> throttle up / down (it stays) · <b>1</b>–<b>0</b> throttle idle–full · <b>Space</b> guns · <b>B</b> bomb / nuke · <b>S</b> barrel roll · <b>M</b> 🚀 missile · <b>Enter</b> replay · <b>Tab</b> ⚙️ · <b>Esc</b> quit
 </div>
-<script src="dogfight.js?v=d9bb367"></script>
+<script src="dogfight.js?v=5c40de4"></script>
 </body>
 </html>

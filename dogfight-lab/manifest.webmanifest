@@ -1,6 +1,6 @@
 {
-  "name": "Dogfight",
-  "short_name": "Dogfight",
+  "name": "Callsign Challenge",
+  "short_name": "Callsign",
   "start_url": "./",
   "scope": "./",
   "display": "fullscreen",
