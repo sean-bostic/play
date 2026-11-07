@@ -53,11 +53,7 @@
   .gauges .thr i { display: block; height: 100%; background: #ffb02e; }
   .warn { position: absolute; left: 0; right: 0; top: 62%; text-align: center; font: 900 6vmin Impact, system-ui; color: #ff3b1f; -webkit-text-stroke: 0.2vmin #000; }
   .blink { animation: blink 0.5s steps(2) infinite; } @keyframes blink { 50% { opacity: 0; } }
-  #replay { position: fixed; left: 0; right: 0; top: 0; z-index: 7; display: none; pointer-events: none; text-align: center; font: 900 5vmin Impact, system-ui; color: #fff; padding-top: 2.5vmin; letter-spacing: 0.08em; }
-  body.replaying #replay { display: block; }
-  body.replaying::before, body.replaying::after { content: ''; position: fixed; left: 0; right: 0; height: 10vh; background: #000; z-index: 6; pointer-events: none; }
-  body.replaying::before { top: 0; } body.replaying::after { bottom: 0; }
-  body.replaying #replay::after { content: 'any button skips'; display: block; font: 600 1.8vmin system-ui; opacity: 0.7; margin-top: 0.6vmin; letter-spacing: 0; }
+  /* (🎬 a replay's bars and title: src/letterbox.js) */
   body.replaying #hud, body.replaying #score { display: none; }
   #hint { position: fixed; left: 50%; bottom: 9vmin; transform: translateX(-50%); z-index: 8; padding: 1.4vmin 2.2vmin; border-radius: 2vmin; background: rgba(0,0,0,0.6); color: #fff; font: 600 2vmin/1.6 system-ui;
           opacity: 0; transition: opacity 0.5s; pointer-events: none; white-space: nowrap; }
@@ -133,11 +129,10 @@
 <div id="score"></div>
 <div id="banner"></div>
 <div id="announce"></div>
-<div id="replay"></div>
 <div id="hint">
   <b>Stick</b> fly (back = nose up) · <b>Throttle</b> speed · <b>Trigger</b> guns · <b>Thumb</b> bomb / nuke · <b>Button 3</b> barrel roll · <b>Button 4</b> replay · <b>Button 5</b> 🚀 missile · <b>Button 6+</b> ⚙️<br>
   <b>Arrows</b> fly (↑ nose down) · <b>Shift</b> / <b>Z</b> throttle up / down (it stays) · <b>1</b>–<b>0</b> throttle idle–full · <b>Space</b> guns · <b>B</b> bomb / nuke · <b>S</b> barrel roll · <b>M</b> 🚀 missile · <b>Enter</b> replay · <b>Tab</b> ⚙️ · <b>Esc</b> quit
 </div>
-<script src="dogfight.js?v=027bef5"></script>
+<script src="dogfight.js?v=f732b87"></script>
 </body>
 </html>
