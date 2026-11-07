@@ -20,7 +20,14 @@
   #who { position: fixed; top: calc(env(safe-area-inset-top) + 2vmin); left: 50%; transform: translateX(-50%); z-index: 7; display: flex; gap: 6px; }
   #who button { font: 22px system-ui; width: 46px; height: 42px; border: 0; border-radius: 10px; background: rgba(29,53,87,0.6); cursor: pointer; padding: 0; }
   #who button.on { background: #f5c242; }
-  body.plan #who, body.onfoot #speed, body.onfoot #tc-thr { display: none !important; }
+  @media (max-width: 560px) { #who { top: calc(env(safe-area-inset-top) + 2vmin + 46px); } #who button { width: 42px; height: 38px; font-size: 20px; } } /* (a phone: under the Edit button) */
+  body.plan #who, body.plan #oob, body.onfoot #speed, body.onfoot #tc-thr { display: none !important; }
+  /* 🚫 out over the fence: OUT OF BOUNDS, in red, pulsing, till the plane's back in */
+  #oob { position: fixed; left: 0; right: 0; top: 16%; text-align: center; pointer-events: none; z-index: 9; opacity: 0; transition: opacity 0.15s;
+    font: italic 900 max(26px, 7vmin)/1 "Avenir Next", Avenir, Impact, system-ui, sans-serif; letter-spacing: 0.08em; text-transform: uppercase;
+    color: #ff2b2b; -webkit-text-stroke: 1.5px #5a0000; text-shadow: 0 0 6px #ff0000, 0 0 18px #ff3b3b, 0 0 36px #b30000, 0 3px 0 #4a0000; }
+  #oob.show { opacity: 1; animation: oob 0.6s ease-in-out infinite alternate; }
+  @keyframes oob { from { transform: scale(1); filter: brightness(1); } to { transform: scale(1.07); filter: brightness(1.35); } }
   #banner { position: fixed; left: 0; right: 0; top: 28%; width: fit-content; max-width: 84vw; margin: 0 auto; padding: 1vmin 6vmin; text-align: center; pointer-events: none; z-index: 10; opacity: 0;
     font: 800 max(15px, 3.2vmin)/1.25 "Avenir Next", Avenir, system-ui, sans-serif; letter-spacing: 0.12em; text-transform: uppercase; color: #f5c242;
     background: radial-gradient(closest-side, rgba(8,10,18,0.55), rgba(8,10,18,0)); text-shadow: 0 0 2px #000, 0 1px 3px #000c; }
@@ -38,7 +45,8 @@
 <div id="speed"></div>
 <div id="who"></div>
 <div id="banner"></div>
-<div id="hint">Arrows fly (↓ nose up) or run · Shift / Z throttle · Space barks · S: next one (🖤 🐕 🐶 🐈) · T or 🗺️ edits · Esc quits</div>
-<script src="backyard.js?v=f5d52d2"></script>
+<div id="oob">Out of Bounds</div>
+<div id="hint">Arrows fly (↓ nose up) or run · Shift / Z throttle · Space barks · S: next one (🖤 🦇 🔺 🐕 🐶 🐈) · T or 🗺️ edits · Esc quits</div>
+<script src="backyard.js?v=6a3b47a"></script>
 </body>
 </html>
