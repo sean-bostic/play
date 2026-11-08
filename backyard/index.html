@@ -18,6 +18,11 @@
     background: rgba(29,53,87,0.85); color: #fff; font: 700 14px system-ui; cursor: pointer; }
   #size-btn { position: fixed; left: calc(env(safe-area-inset-left) + 2vmin + 92px); top: calc(env(safe-area-inset-top) + 2vmin); z-index: 7; padding: 8px 10px; border: 0; border-radius: 10px;
     background: rgba(29,53,87,0.85); color: #fff; font: 700 14px system-ui; cursor: pointer; }
+  #view-btn { display: none; position: fixed; left: calc(env(safe-area-inset-left) + 2vmin + 140px); top: calc(env(safe-area-inset-top) + 2vmin); z-index: 7; padding: 8px 10px; border: 0; border-radius: 10px;
+    background: rgba(29,53,87,0.85); color: #fff; font: 700 14px system-ui; cursor: pointer; }
+  body.snow #view-btn { display: block; }
+  #xhair { display: none; position: fixed; left: 50%; top: 50%; width: 10px; height: 10px; margin: -5px; border-radius: 50%; border: 2px solid #fffd; box-shadow: 0 0 3px #000a; pointer-events: none; z-index: 5; }
+  body.snow.fp #xhair { display: block; }
   #sizes { display: none; position: fixed; left: calc(env(safe-area-inset-left) + 2vmin); top: calc(env(safe-area-inset-top) + 2vmin + 50px); z-index: 12; width: min(300px, calc(100vw - 4vmin - 24px));
     padding: 12px; border-radius: 12px; background: rgba(12,22,38,0.92); color: #fff; font: 700 14px system-ui; box-shadow: 0 4px 18px #0006; }
   #sizes.open { display: block; }
@@ -35,6 +40,23 @@
   #who button.on { background: #f5c242; }
   #who button[data-who=plane] { width: 58px; }
   @media (max-width: 560px) { #who { top: calc(env(safe-area-inset-top) + 2vmin + 46px); } #who button { width: 42px; height: 38px; font-size: 20px; } } /* (a phone: under the Edit button) */
+  #family { display: none; position: fixed; top: calc(env(safe-area-inset-top) + 2vmin + 50px); left: 50%; transform: translateX(-50%); z-index: 12; width: min(420px, calc(100vw - 24px));
+    grid-template-columns: 1fr 1fr; gap: 6px; padding: 10px; border-radius: 12px; background: rgba(12,22,38,0.92); box-shadow: 0 4px 18px #0006; }
+  #family.open { display: grid; }
+  #family .title { grid-column: 1 / -1; color: #fff3b0; font: 700 14px system-ui; padding: 2px 4px 4px; }
+  #family button { display: flex; align-items: center; gap: 8px; padding: 10px; border: 0; border-radius: 8px; background: #2c4a73; color: #fff; font: 700 16px system-ui; cursor: pointer; text-align: left; }
+  #family button span { font-size: 26px; }
+  #family button.on { background: #f5c242; color: #1d3557; }
+  @media (max-width: 560px) { #family { top: calc(env(safe-area-inset-top) + 2vmin + 92px); } }
+  /* ❄️ the snowball fight's scores (top right) and your snowballs */
+  #snowhud { display: none; position: fixed; right: calc(env(safe-area-inset-right) + 2vmin); top: calc(env(safe-area-inset-top) + 2vmin); z-index: 6; padding: 6px 10px; border-radius: 12px;
+    background: rgba(12,22,38,0.6); color: #fff; font: 800 18px system-ui; pointer-events: none; }
+  #snowhud.show { display: block; }
+  #snowhud div { display: flex; justify-content: space-between; gap: 10px; padding: 1px 4px; border-radius: 6px; }
+  #snowhud div.me { background: #f5c242; color: #1d3557; }
+  #snowhud .ammo { display: block; margin-top: 4px; text-align: center; font-size: 15px; background: none !important; color: #fff !important; }
+  #snowhud i { font-weight: 600; font-size: 12px; font-style: normal; }
+  @media (max-width: 560px) { #snowhud { top: calc(env(safe-area-inset-top) + 2vmin + 92px); font-size: 15px; } }
   #planes { display: none; position: fixed; top: calc(env(safe-area-inset-top) + 2vmin + 50px); left: 50%; transform: translateX(-50%); z-index: 12; width: min(420px, calc(100vw - 24px));
     grid-template-columns: 1fr 1fr; gap: 6px; padding: 10px; border-radius: 12px; background: rgba(12,22,38,0.92); box-shadow: 0 4px 18px #0006; }
   #planes.open { display: grid; }
@@ -42,7 +64,7 @@
   #planes button span { font-size: 20px; }
   #planes button.on { background: #f5c242; color: #1d3557; }
   @media (max-width: 560px) { #planes { top: calc(env(safe-area-inset-top) + 2vmin + 92px); } }
-  body.plan #planes,
+  body.plan #planes, body.plan #family, body.plan #snowhud, body.plan #view-btn, body.plan #xhair,
   body.plan #who, body.plan #oob, body.plan #size-btn, body.plan #sizes, body.onfoot #speed, body.onfoot #tc-thr { display: none !important; }
   /* 🚫 out over the fence: OUT OF BOUNDS, in red, pulsing, till the plane's back in */
   #oob { position: fixed; left: 0; right: 0; top: 16%; text-align: center; pointer-events: none; z-index: 9; opacity: 0; transition: opacity 0.15s;
@@ -65,13 +87,17 @@
 <canvas id="fx"></canvas>
 <button id="edit">🗺️ Edit</button>
 <button id="size-btn" title="Settings">⚙️</button>
+<button id="view-btn" title="View (V)">🎥 3rd</button>
+<div id="xhair"></div>
 <div id="sizes"></div>
 <div id="speed"></div>
 <div id="who"></div>
 <div id="planes"></div>
+<div id="family"></div>
+<div id="snowhud"></div>
 <div id="banner"></div>
 <div id="oob">Out of Bounds</div>
-<div id="hint">Arrows fly (↓ nose up) or run · Shift / Z throttle · Space barks · S: next one (✈️ planes, 🐕 🐶 🐈) · T or 🗺️ edits · Esc quits</div>
-<script src="backyard.js?v=d734056"></script>
+<div id="hint">Arrows fly (↓ nose up) or run · Shift / Z throttle · Space barks / throws · V: 1st / 3rd person · S: next one (✈️ planes, 🐕 🐶 🐈, ❄️ the family) · T or 🗺️ edits · Esc quits</div>
+<script src="backyard.js?v=5fa3107"></script>
 </body>
 </html>
