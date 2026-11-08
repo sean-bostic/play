@@ -34,6 +34,14 @@
   #who button { font: 22px system-ui; width: 46px; height: 42px; border: 0; border-radius: 10px; background: rgba(29,53,87,0.6); cursor: pointer; padding: 0; }
   #who button.on { background: #f5c242; }
   @media (max-width: 560px) { #who { top: calc(env(safe-area-inset-top) + 2vmin + 46px); } #who button { width: 42px; height: 38px; font-size: 20px; } } /* (a phone: under the Edit button) */
+  #planes { display: none; position: fixed; top: calc(env(safe-area-inset-top) + 2vmin + 50px); left: 50%; transform: translateX(-50%); z-index: 12; width: min(420px, calc(100vw - 24px));
+    grid-template-columns: 1fr 1fr; gap: 6px; padding: 10px; border-radius: 12px; background: rgba(12,22,38,0.92); box-shadow: 0 4px 18px #0006; }
+  #planes.open { display: grid; }
+  #planes button { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border: 0; border-radius: 8px; background: #2c4a73; color: #fff; font: 700 14px system-ui; cursor: pointer; text-align: left; }
+  #planes button span { font-size: 20px; }
+  #planes button.on { background: #f5c242; color: #1d3557; }
+  @media (max-width: 560px) { #planes { top: calc(env(safe-area-inset-top) + 2vmin + 92px); } }
+  body.plan #planes,
   body.plan #who, body.plan #oob, body.plan #size-btn, body.plan #sizes, body.onfoot #speed, body.onfoot #tc-thr { display: none !important; }
   /* 🚫 out over the fence: OUT OF BOUNDS, in red, pulsing, till the plane's back in */
   #oob { position: fixed; left: 0; right: 0; top: 16%; text-align: center; pointer-events: none; z-index: 9; opacity: 0; transition: opacity 0.15s;
@@ -59,9 +67,10 @@
 <div id="sizes"></div>
 <div id="speed"></div>
 <div id="who"></div>
+<div id="planes"></div>
 <div id="banner"></div>
 <div id="oob">Out of Bounds</div>
-<div id="hint">Arrows fly (↓ nose up) or run · Shift / Z throttle · Space barks · S: next one (🖤 🦇 🔺 🐕 🐶 🐈) · T or 🗺️ edits · Esc quits</div>
-<script src="backyard.js?v=e9272c2"></script>
+<div id="hint">Arrows fly (↓ nose up) or run · Shift / Z throttle · Space barks · S: next one (✈️ planes, 🐕 🐶 🐈) · T or 🗺️ edits · Esc quits</div>
+<script src="backyard.js?v=cf673cf"></script>
 </body>
 </html>
