@@ -68,7 +68,12 @@
   #loading .word { width: 66vmin; height: 17.5vmin; overflow: visible; }
   #loading .motto { margin-top: -0.6vmin; color: #e9dcb8; font: italic 600 max(13px, 2.6vmin) system-ui, -apple-system, sans-serif; letter-spacing: 0.06em; text-align: center; opacity: 0.85; }
   @keyframes logo-in { 0% { opacity: 0; transform: scale(0.94); } 100% { opacity: 1; transform: none; } }
-  #loading .bar { width: 46vmin; height: max(3px, 0.6vmin); border-radius: 1vmin; background: rgba(245, 194, 66, 0.16); overflow: hidden; }
+  /* (the trio's scene fills the screen, kept whole: a phone held upright gets it letterboxed; the bar under it) */
+  #loading .trio { position: absolute; inset: 0; width: 100%; height: 100%; animation: logo-in 0.9s ease-out both; }
+  #loading .trio .rmark { filter: drop-shadow(0 0 20px rgba(245, 194, 66, 0.45)); }
+  #loading .trio .tword { filter: drop-shadow(0 0 22px rgba(245, 194, 66, 0.35)) drop-shadow(0 2px 2px rgba(0, 0, 0, 0.8)); }
+  #loading .trio .tmotto { fill: #e9dcb8; font: italic 600 18px system-ui, -apple-system, sans-serif; letter-spacing: 0.06em; }
+  #loading .bar { position: absolute; left: 50%; bottom: max(3vh, env(safe-area-inset-bottom)); transform: translateX(-50%); width: 46vmin; height: max(3px, 0.6vmin); border-radius: 1vmin; background: rgba(245, 194, 66, 0.16); overflow: hidden; }
   #loading .bar i { display: block; height: 100%; width: 100%; background: linear-gradient(90deg, #c88a17, var(--gold) 70%, #ffe7a3); box-shadow: 0 0 1.4vmin var(--gold-glow);
                     transform-origin: left; animation: loadbar 2.2s ease-in-out infinite; }
   @keyframes loadbar { 0% { transform: scaleX(0.05); } 70% { transform: scaleX(0.95); } 100% { transform: scaleX(1); opacity: 0; } }
@@ -131,9 +136,115 @@
     </symbol>
   </defs>
 </svg>
-<div id="loading"><div class="logo" role="img" aria-label="Callsign Challenge"><svg class="mark"><use href="#df-mark"/></svg>
-  <svg class="word" viewBox="0 0 588 156"><use href="#df-word"/><use href="#df-word" style="--df-fill: url(#df-sheen)"/></svg>
-  <div class="motto">Prove why your name means air superiority</div></div>
+<div id="loading"><svg class="trio" viewBox="0 0 1280 720" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Callsign Challenge: a WWI ace, a test pilot and a WWII bomber pilot around the roundel">
+  <!-- 🛩️ THE TRIO (the user's new intro, 2026-11-08: the design canvas https://claude.ai/artifact/LcsJa2gKqC1riNT7BvdVVq):
+       the regal WWI ace on the left, the cocky test pilot at the top, the rugged WWII bomber pilot on the right, their
+       shoulders fading into a gold haze, the roundel and the word (#df-mark, #df-word, with the sheen) bonding them.
+       The pilots are drawn stand-ins till the hyper-realistic portraits come: then they're three <image>s here -->
+  <defs>
+<linearGradient id="t-skin" x1="0" y1="0" x2="1" y2="0.2"><stop offset="0" stop-color="#a8720f"></stop><stop offset="0.5" stop-color="#f5c242"></stop><stop offset="1" stop-color="#ffe7a3"></stop></linearGradient>
+<linearGradient id="t-leather" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#c88a17"></stop><stop offset="0.6" stop-color="#8f6112"></stop><stop offset="1" stop-color="#5c3f0c"></stop></linearGradient>
+<linearGradient id="t-fadeGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff"></stop><stop offset="0.62" stop-color="#fff"></stop><stop offset="1" stop-color="#000"></stop></linearGradient>
+<mask id="t-fade" maskUnits="objectBoundingBox" maskContentUnits="objectBoundingBox"><rect x="0" y="0" width="1" height="1" fill="url(#t-fadeGrad)"></rect></mask>
+<radialGradient id="t-haze" cx="0.5" cy="0.5" r="0.5"><stop offset="0" stop-color="#f5c242" stop-opacity="0.34"></stop><stop offset="0.55" stop-color="#c88a17" stop-opacity="0.12"></stop><stop offset="1" stop-color="#c88a17" stop-opacity="0"></stop></radialGradient>
+
+<g id="t-neck">
+<path d="M164 280 C166 320 160 350 146 372 L276 372 C262 350 256 320 258 280 Z" fill="url(#t-skin)" stroke="#141a2a" stroke-width="3"></path>
+<path d="M166 292 C190 314 236 316 258 290 L258 324 C232 338 190 336 166 318 Z" fill="#5c3f0c" opacity="0.6"></path>
+</g>
+<g id="t-face">
+<path d="M142 186 C126 176 118 200 124 220 C128 236 140 240 148 232 Z" fill="url(#t-skin)" stroke="#141a2a" stroke-width="2.5"></path>
+<path d="M136 200 C132 210 134 222 142 226" stroke="#7a5210" stroke-width="2.5" fill="none"></path>
+<path d="M146 150 C148 104 180 82 214 82 C252 82 280 108 284 150 C287 176 284 196 280 214 C276 240 268 260 256 276 C242 296 226 306 208 306 C188 306 170 294 158 276 C148 260 142 240 142 216 C140 196 142 172 146 150 Z" fill="url(#t-skin)" stroke="#141a2a" stroke-width="3"></path>
+<path d="M146 170 C144 214 152 252 172 282 C186 298 198 304 208 306 C186 290 168 262 162 226 C158 202 160 182 166 164 Z" fill="#7a5210" opacity="0.45"></path>
+<path d="M276 196 C272 226 266 248 254 268 C262 244 268 222 270 198 Z" fill="#ffe7a3" opacity="0.55"></path>
+<path d="M160 160 C176 150 196 150 206 158 C200 167 178 169 160 168 Z M222 156 C238 148 260 150 272 160 C258 166 236 166 222 162 Z" fill="#7a5210" opacity="0.45"></path>
+<path d="M160 158 C174 148 192 148 204 156" stroke="#141a2a" stroke-width="7" stroke-linecap="round" fill="none"></path>
+<path d="M226 154 C240 146 258 148 270 156" stroke="#141a2a" stroke-width="6" stroke-linecap="round" fill="none"></path>
+<path d="M168 178 C176 170 192 170 198 178 C190 184 176 184 168 178 Z M230 176 C238 168 254 168 262 176 C254 182 238 182 230 176 Z" fill="#141a2a"></path>
+<circle cx="187" cy="176" r="1.8" fill="#ffe7a3"></circle><circle cx="249" cy="174" r="1.8" fill="#ffe7a3"></circle>
+<path d="M170 187 C180 191 192 191 198 187 M232 185 C242 189 254 189 260 185" stroke="#a8720f" stroke-width="2" fill="none"></path>
+<path d="M216 168 C218 192 222 212 230 232" stroke="#ffe7a3" stroke-width="3" opacity="0.7" fill="none"></path>
+<path d="M208 172 C206 200 202 220 196 236 C204 246 224 248 238 238 C232 240 220 240 212 232 C210 214 212 192 214 174 Z" fill="#a8720f" opacity="0.75"></path>
+<path d="M196 236 C204 248 226 250 240 236" stroke="#141a2a" stroke-width="2.5" fill="none"></path>
+<path d="M206 238 C210 244 216 244 220 240 M228 240 C232 244 236 242 238 238" stroke="#141a2a" stroke-width="3" fill="none" stroke-linecap="round"></path>
+<path d="M192 232 C186 248 186 260 190 268 M244 230 C252 244 254 256 250 266" stroke="#7a5210" stroke-width="2.5" fill="none" opacity="0.7"></path>
+<path d="M196 292 C206 300 222 300 232 292" stroke="#a8720f" stroke-width="3" fill="none"></path>
+<g stroke="#141a2a" stroke-width="1.2" opacity="0.3"><path d="M150 200 L164 214 M150 212 L166 228 M152 226 L170 244 M156 240 L174 258 M162 254 L178 270 M170 266 L184 282"></path></g>
+</g>
+<g id="t-ace">
+<path d="M236 336 C300 318 364 344 400 290 C394 356 330 384 254 374 Z" fill="#ffe7a3" stroke="#141a2a" stroke-width="3"></path>
+<path d="M270 352 C310 350 344 340 372 318 M262 366 C306 366 340 358 384 330" stroke="#c88a17" stroke-width="2.5" fill="none"></path>
+<path d="M30 520 C36 420 96 372 210 368 C324 372 382 420 390 520 Z" fill="url(#t-leather)" stroke="#141a2a" stroke-width="3"></path>
+<path d="M210 372 L150 520 M210 372 L272 520 M120 420 L176 392 M300 420 L244 392" stroke="#141a2a" stroke-width="4" fill="none"></path>
+<path d="M120 420 L176 392 L150 470 Z M300 420 L244 392 L272 470 Z" fill="#c88a17" stroke="#141a2a" stroke-width="3"></path>
+<circle cx="196" cy="452" r="6" fill="#ffe7a3" stroke="#141a2a" stroke-width="2"></circle><circle cx="226" cy="452" r="6" fill="#ffe7a3" stroke="#141a2a" stroke-width="2"></circle>
+<use href="#t-neck"></use>
+<path d="M150 336 C180 370 246 372 278 336 L286 374 C246 402 178 402 138 374 Z" fill="#ffe7a3" stroke="#141a2a" stroke-width="3"></path>
+<path d="M160 360 C190 380 236 380 266 360 M176 348 C196 362 228 362 250 348" stroke="#c88a17" stroke-width="2.5" fill="none"></path>
+<use href="#t-face"></use>
+<path d="M198 268 C210 272 224 272 236 268" stroke="#141a2a" stroke-width="3.5" fill="none" stroke-linecap="round"></path>
+<path d="M216 258 C204 250 186 254 172 246 C162 240 156 228 162 222 C162 236 176 244 192 244 C204 244 212 248 216 252 C220 248 230 244 242 244 C258 244 270 236 272 222 C276 228 272 240 262 246 C248 254 230 250 216 258 Z" fill="#141a2a"></path>
+<path d="M140 176 C130 110 160 64 214 62 C270 62 296 108 288 176 L286 236 C284 248 270 248 270 236 L272 160 C252 132 176 132 156 160 L158 238 C158 250 142 250 140 238 Z" fill="url(#t-leather)" stroke="#141a2a" stroke-width="3"></path>
+<path d="M214 64 C212 90 212 110 214 132 M170 86 C162 104 158 124 158 150" stroke="#ffe7a3" stroke-width="2" stroke-dasharray="5 5" fill="none" opacity="0.7"></path>
+<path d="M146 128 C170 118 258 116 284 126" stroke="#141a2a" stroke-width="8" fill="none"></path>
+<circle cx="182" cy="122" r="22" fill="#2b3552" stroke="#ffe7a3" stroke-width="5"></circle><circle cx="246" cy="120" r="22" fill="#2b3552" stroke="#ffe7a3" stroke-width="5"></circle>
+<circle cx="182" cy="122" r="22" fill="none" stroke="#141a2a" stroke-width="2"></circle><circle cx="246" cy="120" r="22" fill="none" stroke="#141a2a" stroke-width="2"></circle>
+<path d="M170 112 C176 106 184 106 188 110 M234 110 C240 104 248 104 252 108" stroke="#ffe7a3" stroke-width="3" fill="none" opacity="0.85"></path>
+<path d="M204 122 H224" stroke="#141a2a" stroke-width="5"></path>
+</g>
+<g id="t-test">
+<path d="M0 520 C10 420 90 372 210 368 C330 372 410 420 420 520 Z" fill="url(#t-leather)" stroke="#141a2a" stroke-width="3"></path>
+<path d="M210 380 V520" stroke="#141a2a" stroke-width="3"></path>
+<path d="M210 380 V520" stroke="#ffe7a3" stroke-width="1.5" stroke-dasharray="3 4" opacity="0.6"></path>
+<path d="M44 470 C80 440 120 430 150 432 M376 470 C340 440 300 430 270 432" stroke="#5c3f0c" stroke-width="3" fill="none" opacity="0.8"></path>
+<use href="#t-neck"></use>
+<path d="M138 378 L206 392 L176 446 Z M282 378 L214 392 L244 446 Z" fill="#c88a17" stroke="#141a2a" stroke-width="3"></path>
+<path d="M276 196 C290 196 300 210 296 232 C292 250 280 256 272 250" fill="url(#t-skin)" stroke="#141a2a" stroke-width="2.5"></path>
+<use href="#t-face"></use>
+<path d="M254 276 C248 290 238 300 224 306" stroke="#7a5210" stroke-width="3" fill="none" opacity="0.6"></path>
+<path d="M196 270 C210 276 230 272 248 258" stroke="#141a2a" stroke-width="4" fill="none" stroke-linecap="round"></path>
+<path d="M248 258 C252 262 252 266 248 270" stroke="#141a2a" stroke-width="2.5" fill="none" stroke-linecap="round"></path>
+<path d="M146 152 C140 108 160 78 214 74 C268 74 290 104 284 152 L280 132 C262 114 166 114 150 134 Z" fill="#141a2a"></path>
+<path d="M150 116 L156 84 C182 74 248 74 274 84 L280 116 C256 104 174 104 150 116 Z" fill="#141a2a"></path>
+<path d="M164 88 L170 108 M182 82 L186 104 M200 80 L202 102 M218 80 L218 102 M236 80 L234 102 M254 82 L250 104 M268 86 L262 108" stroke="#c88a17" stroke-width="1.6" opacity="0.6"></path>
+<path d="M156 166 H204 C206 190 198 206 180 206 C164 206 156 192 156 166 Z M222 164 H274 C276 188 268 204 250 204 C234 204 224 190 222 164 Z" fill="#141a2a" stroke="#ffe7a3" stroke-width="3"></path>
+<path d="M204 168 C210 162 216 162 222 166 M156 168 L140 176 M274 166 L292 172" stroke="#ffe7a3" stroke-width="3" fill="none"></path>
+<path d="M164 176 L176 170 M166 190 L190 172 M232 174 L246 168 M236 188 L262 170" stroke="#ffe7a3" stroke-width="2.5" opacity="0.55"></path>
+</g>
+<g id="t-bomber">
+<path d="M30 520 C36 420 96 372 210 368 C324 372 382 420 390 520 Z" fill="url(#t-leather)" stroke="#141a2a" stroke-width="3"></path>
+<path d="M210 410 V520 M150 470 L170 520 M270 470 L250 520" stroke="#141a2a" stroke-width="3" fill="none"></path>
+<use href="#t-neck"></use>
+<path d="M104 392 C130 334 172 344 210 352 C248 344 290 334 316 392 C300 440 252 426 210 436 C168 426 120 440 104 392 Z" fill="#ffe7a3" stroke="#141a2a" stroke-width="3"></path>
+<g stroke="#c88a17" stroke-width="2.2" fill="none" opacity="0.9"><path d="M124 384 c6 -8 14 -8 18 0 M148 372 c6 -8 14 -8 18 0 M128 404 c6 -8 14 -8 18 0 M156 396 c6 -8 14 -8 18 0 M254 372 c6 -8 14 -8 18 0 M280 384 c6 -8 14 -8 18 0 M246 396 c6 -8 14 -8 18 0 M274 404 c6 -8 14 -8 18 0 M180 412 c6 -8 14 -8 18 0 M222 412 c6 -8 14 -8 18 0"></path></g>
+<use href="#t-face"></use>
+<g fill="#141a2a" opacity="0.35"><circle cx="186" cy="282" r="1.3"></circle><circle cx="194" cy="290" r="1.3"></circle><circle cx="204" cy="296" r="1.3"></circle><circle cx="214" cy="298" r="1.3"></circle><circle cx="226" cy="294" r="1.3"></circle><circle cx="236" cy="288" r="1.3"></circle><circle cx="246" cy="280" r="1.3"></circle><circle cx="180" cy="270" r="1.3"></circle><circle cx="252" cy="268" r="1.3"></circle><circle cx="200" cy="286" r="1.3"></circle><circle cx="230" cy="284" r="1.3"></circle><circle cx="216" cy="290" r="1.3"></circle></g>
+<path d="M196 270 C206 274 218 274 228 270" stroke="#141a2a" stroke-width="3.5" fill="none" stroke-linecap="round"></path>
+<path d="M226 266 L278 258 L280 270 L228 278 Z" fill="#ffe7a3" stroke="#141a2a" stroke-width="2.5"></path>
+<path d="M270 259 L272 271" stroke="#c88a17" stroke-width="3"></path>
+<circle cx="282" cy="264" r="5" fill="#ff7a1a"></circle>
+<path d="M286 256 C296 240 290 226 300 212 C306 202 302 192 308 184" stroke="#ffe7a3" stroke-width="2" fill="none" opacity="0.5"></path>
+<rect x="124" y="180" width="22" height="44" rx="8" fill="#141a2a"></rect>
+<path d="M134 182 C126 112 300 112 294 182" stroke="#141a2a" stroke-width="7" fill="none"></path>
+<path d="M136 150 C126 108 170 86 214 86 C264 86 300 106 292 150 C276 138 250 132 214 132 C180 132 152 138 136 150 Z" fill="url(#t-leather)" stroke="#141a2a" stroke-width="3"></path>
+<path d="M150 106 C160 116 168 124 176 132 M276 106 C266 116 258 124 252 132" stroke="#5c3f0c" stroke-width="3" fill="none"></path>
+<path d="M138 148 C170 138 258 138 290 148 L290 160 C258 150 170 150 138 160 Z" fill="#141a2a"></path>
+<path d="M150 160 C180 176 250 176 280 160 L286 170 C252 192 176 192 144 170 Z" fill="#141a2a"></path>
+<path d="M196 116 L214 106 L232 116 L222 122 L214 116 L206 122 Z" fill="#ffe7a3" stroke="#141a2a" stroke-width="1.5"></path>
+</g>
+
+</defs>
+  <ellipse cx="640" cy="500" rx="520" ry="260" fill="url(#t-haze)"/>
+  <g mask="url(#t-fade)"><use href="#t-test" transform="translate(436 -46) scale(0.98)"/></g>
+  <g mask="url(#t-fade)"><use href="#t-ace" transform="translate(-14 236)"/></g>
+  <g mask="url(#t-fade)"><use href="#t-bomber" transform="translate(1294 236) scale(-1 1)"/></g>
+  <g stroke="url(#df-gold)" stroke-width="3" fill="none" stroke-linecap="round" opacity="0.5"><path d="M640 420 C560 410 440 430 330 470"/><path d="M640 420 C720 410 840 430 950 470"/><path d="M640 420 V360"/></g>
+  <ellipse cx="640" cy="535" rx="330" ry="90" fill="#0c0f17" opacity="0.55"/>
+  <use href="#df-mark" x="590" y="368" width="100" height="100" class="rmark"/>
+  <g class="tword"><use href="#df-word" x="372" y="478" width="541" height="143.5"/><use href="#df-word" x="372" y="478" width="541" height="143.5" style="--df-fill: url(#df-sheen)"/></g>
+  <text x="640" y="668" text-anchor="middle" class="tmotto">Prove why your name means air superiority</text>
+</svg>
   <div class="bar"><i></i></div></div>
 <div id="fps"></div>
 <canvas id="fx"></canvas>
@@ -145,6 +256,6 @@
   <b>Stick</b> fly (back = nose up) · <b>Throttle</b> speed · <b>Trigger</b> guns · <b>Thumb</b> bomb / nuke · <b>Button 3</b> barrel roll · <b>Button 4</b> replay · <b>Button 5</b> 🚀 missile · <b>Button 6+</b> ⚙️<br>
   <b>Arrows</b> fly (↑ nose down) · <b>Shift</b> / <b>Z</b> throttle up / down (it stays) · <b>1</b>–<b>0</b> throttle idle–full · <b>Space</b> guns · <b>B</b> bomb / nuke · <b>S</b> barrel roll · <b>M</b> 🚀 missile · <b>Enter</b> replay · <b>Tab</b> ⚙️ · <b>Esc</b> quit
 </div>
-<script src="dogfight.js?v=6104f6e"></script>
+<script src="dogfight.js?v=fb792f2"></script>
 </body>
 </html>
