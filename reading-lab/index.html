@@ -127,11 +127,12 @@
     body.touch #cards { top: calc(var(--st) + 54px + var(--pw) + 18px); left: calc(var(--sl) + 14px); right: calc(var(--sr) + 14px); bottom: calc(var(--sb) + var(--tool) + 22px); }
     body.touch #tools { left: 0; right: 0; bottom: calc(var(--sb) + 12px); }
   }
-  @media (orientation: landscape) {
-    body.touch { --pw: min(60vh, 28vw); --cardmax: 36vh; }
-    body.touch #pic { top: calc(var(--st) + (100% - var(--st) - var(--pw)) / 2 + 14px); left: calc(var(--sl) + 16px + var(--pw) / 2); }
-    body.touch #cards { top: calc(var(--st) + 46px); bottom: calc(var(--sb) + 12px); left: calc(var(--sl) + 16px + var(--pw) + 20px); right: calc(var(--sr) + var(--tool) + 22px); }
-    body.touch #tools { flex-direction: column; top: calc(var(--st) + 46px); bottom: calc(var(--sb) + 8px); right: calc(var(--sr) + 10px); }
+  @media (orientation: landscape) { /* the buttons in a row along the top, by the stars (the user: "the menu bar at the top of the screen and not to the right") */
+    body.touch { --tool: clamp(44px, 12vmin, 80px); --band: calc(var(--st) + var(--tool) + 14px); --pw: min(calc(100vh - var(--tool) - 44px), 30vw); --cardmax: 34vh; }
+    body.touch #top { top: calc(var(--st) + 6px + (var(--tool) - 2em) / 2); }
+    body.touch #tools { flex-direction: row; top: calc(var(--st) + 6px); right: calc(var(--sr) + 60px); left: auto; }
+    body.touch #pic { top: calc(var(--band) + (100% - var(--band) - var(--sb) - var(--pw)) / 2); left: calc(var(--sl) + 16px + var(--pw) / 2); }
+    body.touch #cards { top: var(--band); bottom: calc(var(--sb) + 12px); left: calc(var(--sl) + 16px + var(--pw) + 20px); right: calc(var(--sr) + 16px); }
   }
 
   /* ---------- story mode: the bookshelf, then a book ---------- */
@@ -239,7 +240,7 @@
   </div>
 </div>
 
-<script src="sounds.js?v=d396228"></script>
-<script src="readit.js?v=d396228"></script>
+<script src="sounds.js?v=4ea3320"></script>
+<script src="readit.js?v=4ea3320"></script>
 </body>
 </html>
