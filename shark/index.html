@@ -3,13 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="robots" content="noindex">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>Shark Reef</title>
 <style>
-  html, body { margin: 0; height: 100%; overflow: hidden; background: #02121c; font-family: system-ui, -apple-system, sans-serif; user-select: none; -webkit-user-select: none; cursor: none; touch-action: none; }
+  html, body { margin: 0; height: 100%; overflow: hidden; background: #02121c; font-family: system-ui, -apple-system, sans-serif; cursor: none; }
   canvas { display: block; position: fixed; left: 0; top: 0; }
   #title { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #eaf8ff; z-index: 10;
            background: radial-gradient(ellipse at 50% 40%, rgba(2,18,28,0) 0%, rgba(2,18,28,0.55) 100%); transition: opacity 1.2s; pointer-events: auto; }
@@ -23,6 +23,21 @@
   body.touch #credit { bottom: auto; top: calc(env(safe-area-inset-top) + 1vmin); }
   #fps { display: none; position: fixed; left: 1vmin; top: 1vmin; color: #fff; font: 12px ui-monospace, monospace; z-index: 12; background: #0008; padding: 2px 6px; border-radius: 4px; }
 </style>
+<!-- 👆 No zoom, no text highlight, no long-press bubble: downloads/touch-feel.html -->
+<style id="touch-feel">
+  html, body { -webkit-text-size-adjust: 100%; -webkit-tap-highlight-color: transparent; overscroll-behavior: none; touch-action: none; } /* (nothing here scrolls, so the whole page is the game's) */
+  *, *::before, *::after { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+  input, textarea, [contenteditable] { -webkit-user-select: text; user-select: text; }
+  canvas { touch-action: none; }
+</style>
+<script id="touch-feel-js">
+  (() => {
+    const typing = (e) => e.target.closest?.('input, textarea, [contenteditable]');
+    for (const ev of ['contextmenu', 'selectstart', 'dragstart']) addEventListener(ev, (e) => { if (!typing(e)) e.preventDefault(); });
+    for (const ev of ['gesturestart', 'gesturechange', 'gestureend']) addEventListener(ev, (e) => e.preventDefault(), { passive: false });
+    addEventListener('touchmove', (e) => { if (e.touches.length > 1) e.preventDefault(); }, { passive: false });
+  })();
+</script>
 </head>
 <body>
 <div id="title">
@@ -32,6 +47,6 @@
 </div>
 <div id="credit">Blacktip Shark by DigitalLife3D (CC BY-NC 4.0)</div>
 <div id="fps"></div>
-<script src="shark.js?v=09d18ac"></script>
+<script src="shark.js?v=976d380"></script>
 </body>
 </html>

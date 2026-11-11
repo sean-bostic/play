@@ -7,10 +7,8 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <title>The Backyard</title>
 <style>
-  html, body { margin: 0; height: 100%; overflow: hidden; background: #b9c8d8; font-family: system-ui, -apple-system, sans-serif; -webkit-tap-highlight-color: transparent; }
-  *, *::before, *::after { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
-  input, textarea { -webkit-user-select: text; user-select: text; }
-  canvas { display: block; touch-action: none; }
+  html, body { margin: 0; height: 100%; overflow: hidden; background: #b9c8d8; font-family: system-ui, -apple-system, sans-serif; }
+  canvas { display: block; }
   #fx { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 3; }
   body.plan #fx, body.plan #speed, body.plan #hint { display: none; }
   #loading { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; font: 800 6vmin system-ui; color: #1d3557; background: #b9c8d8; z-index: 20; }
@@ -92,6 +90,22 @@
     font: 600 14px system-ui; opacity: 0; transition: opacity 0.5s; pointer-events: none; white-space: nowrap; }
   #hint.show { opacity: 1; }
 </style>
+<!-- 👆 No zoom, no text highlight, no long-press bubble: downloads/touch-feel.html -->
+<style id="touch-feel">
+  html, body { -webkit-text-size-adjust: 100%; -webkit-tap-highlight-color: transparent; overscroll-behavior: none; touch-action: manipulation; }
+  *, *::before, *::after { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+  input, textarea, [contenteditable] { -webkit-user-select: text; user-select: text; }
+  canvas { touch-action: none; }
+  #ed-legend, #ed-pal, #ed-form { touch-action: pan-y; } /* (these still scroll) */
+</style>
+<script id="touch-feel-js">
+  (() => {
+    const typing = (e) => e.target.closest?.('input, textarea, [contenteditable]');
+    for (const ev of ['contextmenu', 'selectstart', 'dragstart']) addEventListener(ev, (e) => { if (!typing(e)) e.preventDefault(); });
+    for (const ev of ['gesturestart', 'gesturechange', 'gestureend']) addEventListener(ev, (e) => e.preventDefault(), { passive: false });
+    addEventListener('touchmove', (e) => { if (e.touches.length > 1) e.preventDefault(); }, { passive: false });
+  })();
+</script>
 </head>
 <body>
 <div id="loading">🏡 The Backyard…</div>
@@ -110,6 +124,6 @@
 <div id="banner"></div>
 <div id="oob">Out of Bounds</div>
 <div id="hint">Arrows fly (↓ nose up) or run · Shift / Z throttle · Space barks / throws (hold: harder) · V: 1st / 3rd person · S: next one (✈️ planes, 🐕 🐶 🐈, ❄️ the family) · T or 🗺️ edits · Esc quits</div>
-<script src="backyard.js?v=7d6760f"></script>
+<script src="backyard.js?v=f0093e1"></script>
 </body>
 </html>

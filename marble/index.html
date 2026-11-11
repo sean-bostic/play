@@ -3,13 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="robots" content="noindex">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>Marble Rush</title>
 <style>
-  html, body { margin: 0; height: 100%; overflow: hidden; background: #87cefa; font-family: system-ui, -apple-system, sans-serif; user-select: none; cursor: default; }
+  html, body { margin: 0; height: 100%; overflow: hidden; background: #87cefa; font-family: system-ui, -apple-system, sans-serif; cursor: default; }
   canvas { display: block; position: fixed; left: 0; top: 0; } /* pinned, so an iPhone's toolbars can't shift it */
   .pill { position: fixed; padding: 6px 12px; border-radius: 12px; background: rgba(20, 16, 50, 0.55); color: #fff; font: 800 18px system-ui; z-index: 3; pointer-events: none; }
   #stage { left: 16px; top: 14px; }
@@ -64,6 +64,21 @@
   #parent .foot { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-top: 14px; color: #a99ad0; font-size: 13px; }
   #parent-close { background: #ffd23f !important; color: #1a0833 !important; font-weight: 700; }
 </style>
+<!-- 👆 No zoom, no text highlight, no long-press bubble: downloads/touch-feel.html -->
+<style id="touch-feel">
+  html, body { -webkit-text-size-adjust: 100%; -webkit-tap-highlight-color: transparent; overscroll-behavior: none; touch-action: manipulation; }
+  *, *::before, *::after { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+  input, textarea, [contenteditable] { -webkit-user-select: text; user-select: text; }
+  canvas { touch-action: none; }
+</style>
+<script id="touch-feel-js">
+  (() => {
+    const typing = (e) => e.target.closest?.('input, textarea, [contenteditable]');
+    for (const ev of ['contextmenu', 'selectstart', 'dragstart']) addEventListener(ev, (e) => { if (!typing(e)) e.preventDefault(); });
+    for (const ev of ['gesturestart', 'gesturechange', 'gestureend']) addEventListener(ev, (e) => e.preventDefault(), { passive: false });
+    addEventListener('touchmove', (e) => { if (e.touches.length > 1) e.preventDefault(); }, { passive: false });
+  })();
+</script>
 </head>
 <body>
 <div id="stage" class="pill"></div>
@@ -107,6 +122,6 @@
   </div>
 </div>
 
-<script src="marble.js?v=770ad53"></script>
+<script src="marble.js?v=7cec995"></script>
 </body>
 </html>

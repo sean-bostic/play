@@ -7,8 +7,8 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <title>The Basement</title>
 <style>
-  html, body { margin: 0; height: 100%; overflow: hidden; background: #2a2520; font-family: system-ui, -apple-system, sans-serif; user-select: none; cursor: default; }
-  canvas { display: block; touch-action: none; }
+  html, body { margin: 0; height: 100%; overflow: hidden; background: #2a2520; font-family: system-ui, -apple-system, sans-serif; cursor: default; }
+  canvas { display: block; }
   #banner { position: fixed; left: 0; right: 0; top: 30%; text-align: center; font: 900 10vmin system-ui; color: #fff3b0; pointer-events: none;
             text-shadow: 0 0.06em 0 #1d3557, 0 0 0.3em rgba(29,53,87,0.5); opacity: 0; }
   #banner.show { animation: banner 2s ease-out forwards; }
@@ -48,6 +48,22 @@
   @keyframes loadbar { 0% { transform: scaleX(0.05); } 70% { transform: scaleX(0.95); } 100% { transform: scaleX(1); opacity: 0; } }
   #fps { display: none; position: fixed; left: 2vmin; bottom: 2vmin; z-index: 9; padding: 0.6vmin 1.4vmin; border-radius: 1vmin; background: rgba(0,0,0,0.5); color: #fff; font: 600 2vmin system-ui; }
 </style>
+<!-- 👆 No zoom, no text highlight, no long-press bubble: downloads/touch-feel.html -->
+<style id="touch-feel">
+  html, body { -webkit-text-size-adjust: 100%; -webkit-tap-highlight-color: transparent; overscroll-behavior: none; touch-action: manipulation; }
+  *, *::before, *::after { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+  input, textarea, [contenteditable] { -webkit-user-select: text; user-select: text; }
+  canvas { touch-action: none; }
+  #legend { touch-action: pan-y; } /* (these still scroll) */
+</style>
+<script id="touch-feel-js">
+  (() => {
+    const typing = (e) => e.target.closest?.('input, textarea, [contenteditable]');
+    for (const ev of ['contextmenu', 'selectstart', 'dragstart']) addEventListener(ev, (e) => { if (!typing(e)) e.preventDefault(); });
+    for (const ev of ['gesturestart', 'gesturechange', 'gestureend']) addEventListener(ev, (e) => e.preventDefault(), { passive: false });
+    addEventListener('touchmove', (e) => { if (e.touches.length > 1) e.preventDefault(); }, { passive: false });
+  })();
+</script>
 </head>
 <body>
 <div id="loading"><div>🧸 THE BASEMENT</div><div class="bar"><i></i></div></div>
@@ -67,6 +83,6 @@
   <b>Throttle</b> go · <b>Stick</b> steer (back = brake / reverse; in the air, back = climb) · <b>Trigger</b> honk (helicopter: spin) · <b>Button 3</b> next vehicle · <b>Hold button 4</b> free cam<br>
   <b>Arrows</b> drive / fly · <b>Space</b> honk · <b>S</b> or <b>1–8</b> 911 / police 911 / big red tractor / old tractor / racing plane / big jet / F-117 / SR-71 / helicopter · <b>T</b> top view · <b>F</b> free cam (arrows move, Q/E down/up) · <b>Esc</b> quit
 </div>
-<script src="basement.js?v=2dccb80"></script>
+<script src="basement.js?v=06e7f4c"></script>
 </body>
 </html>

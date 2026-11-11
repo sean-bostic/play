@@ -3,11 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="robots" content="noindex">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <title>Dance Party</title>
 <style>
-  html, body { margin: 0; height: 100%; overflow: hidden; background: #1a0b33; font-family: system-ui, -apple-system, sans-serif; user-select: none; cursor: default; }
+  html, body { margin: 0; height: 100%; overflow: hidden; background: #1a0b33; font-family: system-ui, -apple-system, sans-serif; cursor: default; }
   canvas { display: block; }
 
   /* the dance meter, across the top */
@@ -32,12 +32,27 @@
   #keys.away { opacity: 0; }
   #fps { position: fixed; left: 10px; bottom: 8px; color: #fff3b0; font: 12px ui-monospace, monospace; z-index: 3; pointer-events: none; }
 </style>
+<!-- 👆 No zoom, no text highlight, no long-press bubble: downloads/touch-feel.html -->
+<style id="touch-feel">
+  html, body { -webkit-text-size-adjust: 100%; -webkit-tap-highlight-color: transparent; overscroll-behavior: none; touch-action: manipulation; }
+  *, *::before, *::after { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+  input, textarea, [contenteditable] { -webkit-user-select: text; user-select: text; }
+  canvas { touch-action: none; }
+</style>
+<script id="touch-feel-js">
+  (() => {
+    const typing = (e) => e.target.closest?.('input, textarea, [contenteditable]');
+    for (const ev of ['contextmenu', 'selectstart', 'dragstart']) addEventListener(ev, (e) => { if (!typing(e)) e.preventDefault(); });
+    for (const ev of ['gesturestart', 'gesturechange', 'gestureend']) addEventListener(ev, (e) => e.preventDefault(), { passive: false });
+    addEventListener('touchmove', (e) => { if (e.touches.length > 1) e.preventDefault(); }, { passive: false });
+  })();
+</script>
 </head>
 <body>
 <div id="meter"><span class="icon">🕺</span><div class="bar"><div id="fill"></div></div><span class="icon">🤸</span></div>
 <div id="banner"></div>
 <div id="fps"></div>
 <div id="keys" class="keys"><b>←</b><b>↑</b><b>→</b><b>↓</b> dance &nbsp;·&nbsp; <b>Space</b> spin &nbsp;·&nbsp; <b>Tab</b> 🦍🐶🐱🐕🧔</div>
-<script src="dance.js?v=1576fcb"></script>
+<script src="dance.js?v=fb7432c"></script>
 </body>
 </html>

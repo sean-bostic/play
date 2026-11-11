@@ -3,13 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="robots" content="noindex">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>CLAW!</title>
 <style>
-  html, body { margin: 0; height: 100%; overflow: hidden; background: #0b0614; font-family: system-ui, -apple-system, sans-serif; user-select: none; cursor: default; }
+  html, body { margin: 0; height: 100%; overflow: hidden; background: #0b0614; font-family: system-ui, -apple-system, sans-serif; cursor: default; }
   canvas { display: block; position: fixed; left: 0; top: 0; } /* pinned, so an iPhone's toolbars can't shift it */
 
   #start { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;
@@ -70,6 +70,22 @@
   #parent .foot { display: flex; justify-content: space-between; align-items: center; margin-top: 16px; color: #a99ad0; font-size: 13px; }
   #parent-close { background: #ffd23f !important; color: #1a0833 !important; font-weight: 700; }
 </style>
+<!-- 👆 No zoom, no text highlight, no long-press bubble: downloads/touch-feel.html -->
+<style id="touch-feel">
+  html, body { -webkit-text-size-adjust: 100%; -webkit-tap-highlight-color: transparent; overscroll-behavior: none; touch-action: manipulation; }
+  *, *::before, *::after { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+  input, textarea, [contenteditable] { -webkit-user-select: text; user-select: text; }
+  canvas { touch-action: none; }
+  #parent .box { touch-action: pan-y; } /* (these still scroll) */
+</style>
+<script id="touch-feel-js">
+  (() => {
+    const typing = (e) => e.target.closest?.('input, textarea, [contenteditable]');
+    for (const ev of ['contextmenu', 'selectstart', 'dragstart']) addEventListener(ev, (e) => { if (!typing(e)) e.preventDefault(); });
+    for (const ev of ['gesturestart', 'gesturechange', 'gestureend']) addEventListener(ev, (e) => e.preventDefault(), { passive: false });
+    addEventListener('touchmove', (e) => { if (e.touches.length > 1) e.preventDefault(); }, { passive: false });
+  })();
+</script>
 </head>
 <body>
 <div id="start">
@@ -114,7 +130,7 @@
   </div>
 </div>
 
-<script src="face-song-daddy.js?v=d1f9bfa"></script><script src="face-song-mommy.js?v=d1f9bfa"></script><script src="face-song-elliot.js?v=d1f9bfa"></script><script src="face-song-nora.js?v=d1f9bfa"></script><!-- songs: tools/make-face-song.sh -->
-<script src="claw.js?v=d1f9bfa"></script>
+<script src="face-song-daddy.js?v=58065d8"></script><script src="face-song-mommy.js?v=58065d8"></script><script src="face-song-elliot.js?v=58065d8"></script><script src="face-song-nora.js?v=58065d8"></script><!-- songs: tools/make-face-song.sh -->
+<script src="claw.js?v=58065d8"></script>
 </body>
 </html>
