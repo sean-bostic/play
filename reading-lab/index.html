@@ -1,0 +1,245 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>Reading Rainbow</title>
+<style>
+  html, body { margin: 0; height: 100%; overflow: hidden; user-select: none; cursor: default;
+    background: radial-gradient(circle at 50% 30%, #fff8e7 0%, #ffe3b3 60%, #ffc98a 100%); font-family: system-ui, -apple-system, sans-serif; }
+  /* single-storey a and g, like she's taught to write them */
+  .word, .card { font-family: "Andika", "Comic Sans MS", "Chalkboard SE", "Chalkboard", sans-serif; }
+
+  #top { position: fixed; top: 14px; left: 16px; right: 16px; display: flex; justify-content: space-between; align-items: center; gap: 12px; z-index: 3; }
+  .chip { padding: 6px 14px; border-radius: 14px; background: #fff; color: #5a3e8f; font: 900 2.6vmin system-ui; box-shadow: 0 3px 0 #e0c9a0; }
+  #soundout { background: #ff7eb6; color: #fff; box-shadow: 0 3px 0 #d94f8f; }
+  #stickers { font-size: 4.5vmin; letter-spacing: 0.15em; min-height: 5vmin; }
+  #stickers.pop { animation: pop 0.6s cubic-bezier(.3,1.7,.5,1); }
+
+  #pic { position: fixed; left: 50%; top: 9vh; transform: translateX(-50%); width: 38vmin; height: 38vmin; border-radius: 50%;
+    background: #fff; display: grid; place-items: center; font-size: 25vmin; line-height: 1; box-shadow: 0 1.2vmin 0 #e0c9a0, 0 0 0 1.2vmin #fff3d6; }
+  #pic img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
+  #pic.pop { animation: pop 0.5s cubic-bezier(.3,1.6,.5,1); }
+
+  #cards { position: fixed; left: 0; right: 0; bottom: 14vh; display: flex; justify-content: center; gap: 0.3em; font-size: 13vmin; }
+  /* sizes in em so the whole card shrinks with the letters when long words need room (fit() in main.js) */
+  .card { flex-shrink: 0; min-width: 1.85em; padding: 0.19em 0.23em; border-radius: 0.3em; background: #fff; color: #333; font-size: 1em; line-height: 1; white-space: nowrap;
+    text-align: center; box-shadow: 0 1.2vmin 0 #d9c2a0; transition: transform 0.12s, opacity 0.4s; border: 1vmin solid transparent; }
+  .card.sel { transform: translateY(-2vmin) scale(1.08); border-color: #ffbe0b; box-shadow: 0 1.2vmin 0 #e0a200, 0 0 5vmin #ffd23f; }
+  .card.out { opacity: 0.18; transform: scale(0.85); }
+  .card.hint:not(.out) { animation: glow 1.2s ease-in-out infinite; }
+  .card.ready.sel { border-color: #06d6a0; box-shadow: 0 1.2vmin 0 #04a77d, 0 0 5vmin #06d6a0; }
+  .card.right { background: #d8ffe9; border-color: #06d6a0; transform: scale(1.15); }
+  .card .l { display: inline-block; color: #bbb; transition: color 0.15s; }
+  .card .l.lit { color: #e5186d; }
+  /* letters that make one sound together (sh, ck, ee) share an underline */
+  .card .team { display: inline-block; margin: 0 0.04em; border-bottom: 0.06em solid #e2d6c2; border-radius: 0.03em; }
+  .card.right .l.lit { color: #06a77d; }
+  .card .l.bounce { animation: bounce 0.35s ease-out; }
+  .card.shake { animation: shake 0.5s; }
+  @keyframes bounce { 40% { transform: translateY(-2.5vmin) scale(1.2); } }
+  @keyframes shake { 20%, 60% { transform: translateX(-2vmin) rotate(-3deg); } 40%, 80% { transform: translateX(2vmin) rotate(3deg); } }
+  @keyframes glow { 50% { box-shadow: 0 1.2vmin 0 #d9c2a0, 0 0 6vmin #06d6a0; } }
+  @keyframes pop { 0% { transform: translateX(-50%) scale(0.4); } 100% { transform: translateX(-50%) scale(1); } }
+  #stickers.pop { animation-name: popS; }
+  @keyframes popS { 0% { transform: scale(1.8); } 100% { transform: scale(1); } }
+
+  #tip { position: fixed; left: 0; right: 0; bottom: 4vh; text-align: center; color: #8a6a3a; font: 700 2.6vmin system-ui; }
+  #banner { position: fixed; left: 0; right: 0; top: 36vh; text-align: center; font: 900 12vmin "Comic Sans MS", "Chalkboard SE", sans-serif; color: #ffbe0b; text-shadow: 0 0.07em 0 #5a3e8f; opacity: 0; pointer-events: none; z-index: 6; }
+  #banner.show { animation: ban 2.2s ease-out forwards; }
+  @keyframes ban { 0% { opacity: 0; transform: scale(0.3); } 15% { opacity: 1; transform: scale(1.15); } 25% { transform: scale(1); } 80% { opacity: 1; } 100% { opacity: 0; } }
+  #fx { position: fixed; left: 50%; top: 30vh; pointer-events: none; z-index: 5; }
+  .spark { position: absolute; font-size: 6vmin; animation: fly 1.3s ease-out forwards; }
+  @keyframes fly { 0% { transform: translate(0, 0) scale(0.3); opacity: 1; } 100% { transform: translate(var(--dx), var(--dy)) scale(1.3); opacity: 0; } }
+
+  #start { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10;
+    background: radial-gradient(circle, #ffb3d9 0%, #9b5de5 80%); color: #fff; transition: opacity 0.4s; }
+  #start.gone { opacity: 0; pointer-events: none; }
+  #start h1 { font-size: 16vmin; margin: 0; color: #fff3b0; text-shadow: 0 0.06em 0 #5a3e8f; animation: bobT 1.6s ease-in-out infinite; font-family: "Comic Sans MS", "Chalkboard SE", sans-serif; }
+  #start .e { font-size: 14vmin; }
+  #start p { font-size: 4vmin; animation: pulse 1.2s ease-in-out infinite; }
+  @keyframes bobT { 50% { transform: translateY(-1.5vmin) rotate(-2deg); } }
+  @keyframes pulse { 50% { opacity: 0.5; } }
+
+  #parent { position: fixed; inset: 0; display: none; align-items: center; justify-content: center; background: rgba(8, 4, 18, 0.82); z-index: 20; color: #eee; }
+  #parent.open { display: flex; }
+  #parent .box { background: #1d1238; border: 2px solid #5b3ea8; border-radius: 16px; padding: 20px 26px; width: min(640px, 94vw); max-height: 94vh; overflow-y: auto; box-sizing: border-box; }
+  #parent h2 { margin: 0 0 4px; color: #ffd23f; }
+  #parent .sub { margin: 0 0 12px; color: #a99ad0; font-size: 14px; }
+  #parent .row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 8px 0; border-top: 1px solid #33255c; }
+  #parent .row small { display: block; color: #a99ad0; font-size: 12px; margin-top: 2px; }
+  #parent .seg { display: flex; gap: 6px; flex-shrink: 0; }
+  #parent button { font: inherit; font-size: 14px; padding: 7px 11px; border-radius: 10px; border: 1px solid #5b3ea8; background: #2a1b52; color: #ddd; cursor: pointer; }
+  #parent button.on { background: #ffd23f; color: #1a0833; border-color: #ffd23f; font-weight: 700; }
+  #soundcheck { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 6px; }
+  #soundcheck .words { width: 100%; display: flex; flex-wrap: wrap; gap: 5px; margin-top: 4px; }
+  #parent .foot { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-top: 14px; color: #a99ad0; font-size: 13px; }
+  #parent-close { background: #ffd23f !important; color: #1a0833 !important; font-weight: 700; }
+
+  /* ---------- the first screen's two big picture buttons ---------- */
+  #modes { display: flex; gap: 6vmin; margin-top: 3vmin; }
+  .mode { width: 36vmin; height: 30vmin; display: flex; align-items: center; justify-content: center; gap: 1.5vmin; font-size: 13vmin; line-height: 1; border: 1vmin solid transparent; border-radius: 4vmin; background: #fff; box-shadow: 0 1.2vmin 0 #d9c2a0; cursor: pointer; padding: 0; }
+  .mode .m-word { font: 900 8vmin "Andika", "Comic Sans MS", "Chalkboard SE", sans-serif; color: #333; }
+  .mode.sel { border-color: #ffbe0b; box-shadow: 0 1.2vmin 0 #e0a200, 0 0 5vmin #ffd23f; }
+
+  /* ---------- real pictures, once there are some: fill the circle ---------- */
+  #pic img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; -webkit-user-drag: none; pointer-events: none; }
+
+  /* ---------- on a phone or tablet: tap instead of the stick (src/main.js sets body.touch) ---------- */
+  body { --st: env(safe-area-inset-top, 0px); --sr: env(safe-area-inset-right, 0px); --sb: env(safe-area-inset-bottom, 0px); --sl: env(safe-area-inset-left, 0px); }
+  #tools, #hold { display: none; }
+  body.touch { --tool: clamp(60px, 13vmin, 104px); }
+  body.touch #tip { display: none; }
+  body.touch #top { top: calc(var(--st) + 8px); left: calc(var(--sl) + 12px); right: calc(var(--sr) + 60px); justify-content: flex-start; }
+  body.touch .chip { font-size: clamp(12px, 3vmin, 22px); }
+  body.touch #stickers { font-size: clamp(14px, 3.6vmin, 30px); white-space: nowrap; overflow: hidden; min-height: 0; }
+  body.touch #pic { width: var(--pw); height: var(--pw); font-size: calc(var(--pw) * 0.62); box-shadow: 0 6px 0 #e0c9a0, 0 0 0 6px #fff3d6; }
+  body.touch #cards { position: fixed; flex-direction: column; justify-content: center; align-items: stretch; gap: min(14px, 2.4vmin); bottom: auto; }
+  body.touch .card { flex: 1 1 0; min-width: 0; min-height: 0; max-height: var(--cardmax); display: flex; align-items: center; justify-content: center; padding: 0 0.15em; border-width: 4px; box-shadow: 0 5px 0 #d9c2a0; position: relative; }
+  body.touch .card.sel { transform: scale(1.03); box-shadow: 0 5px 0 #e0a200, 0 0 18px #ffd23f; }
+  body.touch .card.ready.sel { box-shadow: 0 5px 0 #04a77d, 0 0 18px #06d6a0; }
+  body.touch .card.nudge::after { content: '👆'; position: absolute; right: 6%; bottom: -8%; font-size: 0.7em; animation: tapme 1s ease-in-out infinite; pointer-events: none; }
+  @keyframes tapme { 50% { transform: translateY(-14%) scale(1.15); } }
+  body.touch #tools { display: flex; position: fixed; z-index: 4; justify-content: center; gap: min(14px, 2.4vmin); }
+  .big { width: var(--tool, 76px); height: var(--tool, 76px); display: grid; place-items: center; padding: 0; border: none; border-radius: 26%; background: #fff; box-shadow: 0 5px 0 #d9c2a0; font-size: calc(var(--tool, 76px) * 0.56); line-height: 1; cursor: pointer; flex: none; }
+  .big:active { transform: translateY(3px); box-shadow: 0 2px 0 #d9c2a0; }
+  body.touch #hold { display: grid; place-items: center; position: fixed; top: calc(var(--st) + 2px); right: calc(var(--sr) + 2px); width: 52px; height: 52px; z-index: 30; font-size: 20px; opacity: 0.45; touch-action: none; }
+  #hold::before { content: ''; position: absolute; inset: 7px; border-radius: 50%; border: 4px solid #ffbe0b; opacity: 0; }
+  #hold.holding { opacity: 1; }
+  #hold.holding::before { animation: holdring 2.5s linear forwards; }
+  @keyframes holdring { from { opacity: 0.2; transform: scale(0.4); } to { opacity: 1; transform: scale(1); } }
+  body.touch #start { padding: var(--st) var(--sr) var(--sb) var(--sl); box-sizing: border-box; }
+  body.touch #start .e, body.touch #start p { display: none; }
+  body.touch #start h1 { font-size: 11vmin; text-align: center; line-height: 1.05; }
+  body.touch .mode { width: 40vmin; height: 36vmin; }
+  body.touch .mode.sel, body.touch .cover.sel { border-color: transparent; box-shadow: 0 5px 0 #d9c2a0; }
+  @media (orientation: portrait) { body.touch #modes { flex-direction: column; gap: 4vmin; } body.touch .mode { width: 62vw; height: 22vh; font-size: 16vmin; } }
+  @media (orientation: landscape) { body.touch #start h1 { font-size: 9vmin; } body.touch .mode { width: 34vw; height: 52vh; font-size: 22vh; } body.touch .mode .m-word { font-size: 13vh; } }
+  body.touch #parent .box { max-height: calc(100vh - var(--st) - var(--sb) - 12px); max-height: calc(100dvh - var(--st) - var(--sb) - 12px); touch-action: pan-y; -webkit-overflow-scrolling: touch; }
+  body.touch #parent button { font-size: 18px; min-width: 44px; min-height: 44px; }
+  body.touch #parent .foot span:first-child { display: none; }
+  body.touch #parent .foot { position: sticky; bottom: -20px; padding: 10px 0; margin-top: 8px; background: #1d1238; justify-content: flex-end; }
+
+  @media (orientation: portrait) {
+    body.touch { --pw: min(32vh, 62vw); --cardmax: 21vh; }
+    body.touch #pic { top: calc(var(--st) + 54px); left: 50%; }
+    body.touch #cards { top: calc(var(--st) + 54px + var(--pw) + 18px); left: calc(var(--sl) + 14px); right: calc(var(--sr) + 14px); bottom: calc(var(--sb) + var(--tool) + 22px); }
+    body.touch #tools { left: 0; right: 0; bottom: calc(var(--sb) + 12px); }
+  }
+  @media (orientation: landscape) {
+    body.touch { --pw: min(60vh, 28vw); --cardmax: 36vh; }
+    body.touch #pic { top: calc(var(--st) + (100% - var(--st) - var(--pw)) / 2 + 14px); left: calc(var(--sl) + 16px + var(--pw) / 2); }
+    body.touch #cards { top: calc(var(--st) + 46px); bottom: calc(var(--sb) + 12px); left: calc(var(--sl) + 16px + var(--pw) + 20px); right: calc(var(--sr) + var(--tool) + 22px); }
+    body.touch #tools { flex-direction: column; top: calc(var(--st) + 46px); bottom: calc(var(--sb) + 8px); right: calc(var(--sr) + 10px); }
+  }
+
+  /* ---------- story mode: the bookshelf, then a book ---------- */
+  #shelf, #story { position: fixed; inset: 0; z-index: 8; display: none; box-sizing: border-box; padding: calc(var(--st) + 8px) calc(var(--sr) + 12px) calc(var(--sb) + 10px) calc(var(--sl) + 12px); background: radial-gradient(circle at 50% 30%, #fff8e7 0%, #ffe3b3 60%, #ffc98a 100%); }
+  .bar { display: flex; gap: 12px; align-items: center; }
+  #shelf.open { display: flex; flex-direction: column; gap: 10px; }
+  #covers { flex: 1; min-height: 0; display: grid; gap: min(14px, 2.4vmin); grid-template-columns: repeat(4, 1fr); grid-template-rows: 1fr; }
+  .cover { display: flex; flex-direction: column; min-width: 0; min-height: 0; padding: 6px; border-radius: 16px; border: 4px solid transparent; background: #fff; box-shadow: 0 5px 0 #d9c2a0; cursor: pointer; }
+  .cover.sel { border-color: #ffbe0b; }
+  .cover-pic { flex: 1; min-height: 0; display: grid; place-items: center; font-size: clamp(30px, 11vmin, 90px); line-height: 1; border-radius: 10px; background: #fff3d6; overflow: hidden; letter-spacing: -0.1em; }
+  .cover-pic img, #story-pic img { width: 100%; height: 100%; object-fit: cover; display: block; pointer-events: none; -webkit-user-drag: none; }
+  .cover-title { padding: 6px 2px 2px; font: 800 clamp(13px, 2.8vmin, 24px) "Andika", "Comic Sans MS", "Chalkboard SE", sans-serif; color: #5a3e8f; }
+  #story.open { display: grid; gap: min(10px, 2vmin); touch-action: none; grid-template: 'bar' auto 'pic' minmax(0, 1fr) 'words' minmax(0, 1fr) 'nav' auto / minmax(0, 1fr); }
+  #story .bar { grid-area: bar; padding-right: 44px; }
+  #read-to-me.on { background: #ffd23f; box-shadow: 0 5px 0 #e0a200, 0 0 18px #ffd23f; }
+  #story-pic { grid-area: pic; display: grid; place-items: center; min-height: 0; overflow: hidden; border-radius: 18px; background: #fff3d6; font-size: min(22vmin, 170px); letter-spacing: -0.08em; line-height: 1; white-space: nowrap; box-shadow: 0 5px 0 #e0c9a0; }
+  #story-pic.turn { animation: pageturn 0.25s ease-out; }
+  @keyframes pageturn { from { opacity: 0.2; transform: scale(0.96); } }
+  #story-text { grid-area: words; display: flex; flex-wrap: wrap; justify-content: center; align-content: center; overflow: hidden; min-height: 0; line-height: 1.2; font-family: "Andika", "Comic Sans MS", "Chalkboard SE", "Chalkboard", sans-serif; color: #333; }
+  .sw { display: inline-block; padding: 0.06em 0.16em; border-radius: 0.22em; cursor: pointer; transition: background 0.12s; white-space: nowrap; }
+  .sw .l { display: inline-block; transition: color 0.15s; }
+  .sw .team { display: inline-block; border-bottom: 0.06em solid transparent; }
+  .sw.sounding { background: #fff; box-shadow: 0 2px 0 #d9c2a0; }
+  .sw.sounding .team { border-bottom-color: #e2d6c2; }
+  .sw.sounding .l { color: #bbb; }
+  .sw .l.lit, .sw.whole .l { color: #e5186d; }
+  .sw .l.bounce { animation: bounce 0.35s ease-out; }
+  .sw.reading { background: #ffd23f; }
+  .sw.cursor { outline: 0.06em solid #ffbe0b; }
+  .punct { color: #8a6a3a; }
+  #story-nav { grid-area: nav; display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+  #story-nav .big.hide { visibility: hidden; }
+  #dots { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; min-width: 0; }
+  .dot { width: 10px; height: 10px; border-radius: 50%; background: #e0c9a0; }
+  .dot.on { background: #ff7eb6; }
+  @media (orientation: landscape) {
+    #story.open { grid-template: 'bar bar' auto 'pic words' minmax(0, 1fr) 'pic nav' auto / minmax(0, 45%) minmax(0, 1fr); }
+  }
+  @media (orientation: portrait) { #covers { grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(2, 1fr); } }
+  #banner, #fx { z-index: 12; }
+</style>
+<style id="touch-feel">
+  html, body { -webkit-text-size-adjust: 100%; -webkit-tap-highlight-color: transparent; overscroll-behavior: none; touch-action: manipulation; }
+  *, *::before, *::after { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+  input, textarea, [contenteditable] { -webkit-user-select: text; user-select: text; }
+  canvas { touch-action: none; }
+</style>
+<script id="touch-feel-js">
+  (() => {
+    const typing = (e) => e.target.closest?.('input, textarea, [contenteditable]');
+    for (const ev of ['contextmenu', 'selectstart', 'dragstart']) addEventListener(ev, (e) => { if (!typing(e)) e.preventDefault(); });
+    for (const ev of ['gesturestart', 'gesturechange', 'gestureend']) addEventListener(ev, (e) => e.preventDefault(), { passive: false });
+    addEventListener('touchmove', (e) => { if (e.touches.length > 1) e.preventDefault(); }, { passive: false });
+  })();
+</script>
+</head>
+<body>
+<div id="top"><span><span id="stars" class="chip"></span> <span id="level" class="chip"></span> <span id="soundout" class="chip">SOUND IT OUT</span></span><span id="stickers"></span></div>
+<div id="pic"></div>
+<div id="cards"></div>
+<div id="tip"></div>
+<div id="tools"><button class="big" data-tool="hear" aria-label="Hear the letter sounds">👂</button><button class="big" data-tool="next" aria-label="New picture">🔄</button><button class="big" data-tool="which" aria-label="Which word is this?">❓</button><button class="big" data-tool="home" aria-label="Home">🏠</button></div>
+<div id="fx"></div>
+<div id="banner"></div>
+
+<div id="start">
+  <div class="e">🌈📖</div>
+  <h1>Reading Rainbow</h1>
+  <div id="modes">
+    <button id="mode-match" class="mode" aria-label="Match words to pictures">🐱<span class="m-word">cat</span></button>
+    <button id="mode-story" class="mode" aria-label="Stories">📚</button>
+  </div>
+  <p>Press the button to start!</p>
+</div>
+
+<div id="shelf">
+  <div class="bar"><button id="shelf-home" class="big" aria-label="Home">🏠</button></div>
+  <div id="covers"></div>
+</div>
+
+<div id="story">
+  <div class="bar"><button id="story-shelf" class="big" aria-label="Back to the bookshelf">📚</button><button id="read-to-me" class="big" aria-label="Read to me" aria-pressed="false">🗣️</button></div>
+  <div id="story-pic"></div>
+  <div id="story-text"></div>
+  <div id="story-nav"><button id="prev" class="big" aria-label="Back a page">⬅️</button><div id="dots"></div><button id="next" class="big" aria-label="Next page">➡️</button></div>
+</div>
+
+<div id="hold" aria-label="Parent settings: press and hold">⚙️</div>
+
+<div id="parent">
+  <div class="box">
+    <h2>Parent settings</h2>
+    <p class="sub" id="parent-sub">Saved automatically. Press P to go back.</p>
+    <div class="row"><span>Level<small id="level-names"></small></span>
+      <div class="seg" id="levels" style="flex-wrap: wrap; max-width: 210px; justify-content: flex-end"></div></div>
+    <div class="row"><span>Auto level<small>Up after 5 right on the first try in a row. Quietly down if she keeps needing the hint.</small></span>
+      <div class="seg"><button data-key="autoLevel" data-value="true">On</button><button data-key="autoLevel" data-value="false">Off</button></div></div>
+    <div class="row"><span>Sound it out<small>She must step through every letter's sound (trigger, letter by letter) before she can pick a word</small></span>
+      <div class="seg"><button data-key="soundOut" data-value="true">On</button><button data-key="soundOut" data-value="false">Off</button></div></div>
+    <div class="row"><span>Sound</span>
+      <div class="seg"><button data-key="sound" data-value="true">On</button><button data-key="sound" data-value="false">Off</button></div></div>
+    <div class="row" style="display:block"><span>Sound check<small>Each letter's sound, and some words. Tell Claude any that sound wrong.</small></span><div id="soundcheck"></div></div>
+    <div class="foot"><span>Joystick: stick or mini joystick = move · trigger = pick / next letter · button 3 = hear the sounds · button 4 = new picture · thumb = "which word is this?"<br>Keys: ← → · Space · H · N</span>
+      <span><button id="clear-stickers">Clear stickers</button> <button id="parent-close">Back</button></span></div>
+  </div>
+</div>
+
+<script src="sounds.js?v=e945f5e"></script>
+<script src="readit.js?v=e945f5e"></script>
+</body>
+</html>
