@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Drainage</title>
+<style>
+  :root { --ink: #0e1a24; --panel: rgba(12, 24, 34, 0.9); --line: #ffffff22; --text: #eef4f8; --dim: #9db0bf; --go: #2fa8ff; --gold: #ffd24a; --bad: #ff6b5e; --ok: #4fd08a;
+    --st: env(safe-area-inset-top); --sb: env(safe-area-inset-bottom); --sl: env(safe-area-inset-left); --sr: env(safe-area-inset-right); }
+  html, body { margin: 0; height: 100%; overflow: hidden; background: #9fb4c6; color: var(--text); font: 600 14px/1.3 system-ui, -apple-system, sans-serif; }
+  canvas#view { position: fixed; inset: 0; width: 100%; height: 100%; display: block; }
+  button { font: inherit; color: inherit; border: 0; cursor: pointer; }
+  #loading { position: fixed; inset: 0; display: flex; flex-direction: column; gap: 10px; align-items: center; justify-content: center; background: #16293a; z-index: 50; font: 800 26px system-ui; }
+  #loading small { font: 600 14px system-ui; color: var(--dim); }
+
+  /* top: the menu, the yard's name, the numbers */
+  #top { position: fixed; left: calc(var(--sl) + 8px); right: calc(var(--sr) + 8px); top: calc(var(--st) + 8px); display: flex; gap: 8px; align-items: flex-start; z-index: 10; pointer-events: none; }
+  #top > * { pointer-events: auto; }
+  .pill { background: var(--panel); border-radius: 12px; padding: 9px 12px; box-shadow: 0 2px 10px #0004; backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
+  #menu-btn { font-size: 18px; padding: 8px 12px; }
+  #title { display: flex; flex-direction: column; min-width: 0; }
+  #title b { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  #title small { color: var(--gold); font-weight: 700; font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; }
+  #stats { margin-left: auto; display: grid; grid-template-columns: repeat(2, auto); gap: 2px 12px; font-size: 12px; text-align: right; }
+  #stats span { color: var(--dim); font-weight: 600; } #stats b { font-variant-numeric: tabular-nums; }
+  #stats .wide { grid-column: 1 / -1; }
+  body:not(.pro) .pro-only { display: none !important; } body.pro .game-only { display: none !important; }
+
+  /* bottom: the storm, then the tools */
+  #bottom { position: fixed; left: calc(var(--sl) + 8px); right: calc(var(--sr) + 8px); bottom: calc(var(--sb) + 8px); display: flex; flex-direction: column; gap: 6px; z-index: 10; pointer-events: none; }
+  #bottom > * { pointer-events: auto; }
+  #tip { align-self: center; max-width: 560px; text-align: center; font-size: 13px; padding: 6px 12px; background: rgba(12, 24, 34, 0.78); border-radius: 10px; }
+  #tip:empty { display: none; } #tip.warn { background: rgba(140, 30, 20, 0.9); }
+  #stormbar { display: flex; gap: 6px; align-items: center; padding: 6px; }
+  #stormbar select { flex: 1; min-width: 0; font: 700 13px system-ui; color: var(--text); background: #1d3345; border: 0; border-radius: 9px; padding: 9px 8px; }
+  #rain-btn { background: var(--go); color: #04121c; font-weight: 800; border-radius: 9px; padding: 9px 14px; white-space: nowrap; }
+  #rain-btn.on { background: var(--gold); }
+  .sq { background: #1d3345; border-radius: 9px; padding: 9px 11px; white-space: nowrap; }
+  #progress { position: relative; height: 5px; border-radius: 3px; background: #ffffff1c; overflow: hidden; margin: 0 6px 2px; } #progress i { position: absolute; inset: 0 auto 0 0; width: 0; background: var(--go); } #progress i.after { background: var(--ok); }
+  #tools, #topo { display: flex; gap: 6px; padding: 6px; overflow-x: auto; touch-action: pan-x; scrollbar-width: none; } #tools::-webkit-scrollbar, #topo::-webkit-scrollbar { display: none; }
+  .tool { flex: 0 0 auto; min-width: 62px; display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 7px 8px; border-radius: 10px; background: #1d3345; font-size: 11px; font-weight: 700; }
+  .tool span { font-size: 21px; line-height: 1; } .tool.on { background: var(--gold); color: #1a1400; } .tool.act { background: #27455c; }
+  #topo { display: none; align-items: center; } body.terrain #topo { display: flex; } body.terrain #tools, body.terrain #stormbar-wrap { display: none; }
+  #topo label { display: flex; flex-direction: column; font-size: 10px; color: var(--dim); min-width: 84px; } #topo input[type=range] { width: 84px; accent-color: var(--gold); }
+  .pulse { animation: pulse 1s infinite; } @keyframes pulse { 50% { box-shadow: 0 0 0 5px #ffd24a88; } }
+
+  /* panels */
+  .sheet { position: fixed; z-index: 30; background: var(--panel); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border-radius: 16px; box-shadow: 0 10px 40px #0008; display: none; }
+  .sheet.open { display: block; }
+  #menu { left: calc(var(--sl) + 8px); top: calc(var(--st) + 8px); bottom: calc(var(--sb) + 8px); width: min(340px, calc(100vw - 16px)); overflow-y: auto; touch-action: pan-y; padding: 14px; box-sizing: border-box; }
+  #menu h3 { margin: 14px 0 6px; font-size: 11px; color: var(--dim); text-transform: uppercase; letter-spacing: 0.08em; } #menu h3:first-of-type { margin-top: 4px; }
+  .row { display: flex; gap: 6px; flex-wrap: wrap; } .row > * { flex: 1 1 auto; }
+  .btn { background: #1d3345; border-radius: 10px; padding: 10px 12px; text-align: left; font-weight: 700; } .btn.on { background: var(--gold); color: #1a1400; } .btn.wide { width: 100%; margin-bottom: 6px; box-sizing: border-box; } .btn small { display: block; font-weight: 500; color: var(--dim); } .btn.on small { color: #4a3d00; }
+  .btn.go { background: var(--go); color: #04121c; text-align: center; }
+  #menu input[type=text], #menu select, #menu input[type=number] { width: 100%; box-sizing: border-box; font: 600 14px system-ui; color: var(--text); background: #0d1a25; border: 1px solid var(--line); border-radius: 9px; padding: 9px; margin-bottom: 6px; }
+  #menu label { display: block; font-size: 12px; color: var(--dim); margin: 6px 0 3px; } #menu input[type=range] { width: 100%; accent-color: var(--gold); }
+  #menu p { font-weight: 500; font-size: 12.5px; color: var(--dim); margin: 6px 0; }
+  .close { float: right; background: none; font-size: 22px; line-height: 1; padding: 0 4px; color: var(--dim); }
+
+  #result { left: 50%; top: 50%; transform: translate(-50%, -50%); width: min(400px, calc(100vw - 24px)); padding: 16px; box-sizing: border-box; text-align: center; max-height: calc(100vh - 40px); overflow-y: auto; touch-action: pan-y; }
+  #result h2 { margin: 0 0 4px; font-size: 20px; } #result .stars { font-size: 34px; letter-spacing: 4px; color: var(--gold); } #result .big { font-size: 44px; font-weight: 900; font-variant-numeric: tabular-nums; }
+  #result table, #report table { width: 100%; border-collapse: collapse; margin: 8px 0; font-size: 13px; } #result td, #report td, #report th { padding: 4px 6px; border-bottom: 1px solid var(--line); text-align: right; } #result td:first-child, #report td:first-child, #report th:first-child { text-align: left; color: var(--dim); font-weight: 600; }
+  #result .good { color: var(--ok); } #result .bad, #report .bad { color: var(--bad); }
+  #report { inset: calc(var(--st) + 8px) calc(var(--sr) + 8px) calc(var(--sb) + 8px) calc(var(--sl) + 8px); max-width: 760px; margin: 0 auto; overflow-y: auto; touch-action: pan-y; padding: 18px; box-sizing: border-box; }
+  #report h2 { margin: 0 0 2px; } #report h3 { margin: 18px 0 4px; color: var(--gold); font-size: 13px; text-transform: uppercase; letter-spacing: 0.08em; } #report p { font-weight: 500; color: #cfdbe4; margin: 6px 0; } #report th { color: var(--dim); font-size: 11px; text-transform: uppercase; }
+  #report .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 8px; margin: 10px 0; } #report .kpi { background: #1d3345; border-radius: 12px; padding: 10px; } #report .kpi b { display: block; font-size: 22px; } #report .kpi span { color: var(--dim); font-size: 12px; }
+
+  /* the tutorial's bubble, labels on the ground, the challenge banner */
+  #coach { left: 50%; transform: translateX(-50%); top: calc(var(--st) + 74px); width: min(420px, calc(100vw - 24px)); padding: 12px 14px; box-sizing: border-box; border: 2px solid var(--gold); z-index: 25; }
+  #coach b { color: var(--gold); } #coach .row { margin-top: 8px; } #coach .btn { text-align: center; }
+  #labels { position: fixed; inset: 0; pointer-events: none; z-index: 6; overflow: hidden; }
+  #labels div { position: absolute; transform: translate(-50%, -130%); background: rgba(12, 24, 34, 0.85); border-radius: 8px; padding: 3px 7px; font-size: 11px; white-space: nowrap; } #labels div.warn { background: rgba(160, 35, 22, 0.95); }
+  #banner { position: fixed; left: 50%; transform: translateX(-50%); top: calc(var(--st) + 70px); z-index: 12; background: var(--gold); color: #1a1400; border-radius: 12px; padding: 8px 14px; font-weight: 800; display: none; text-align: center; max-width: calc(100vw - 30px); }
+  #toast { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(var(--sb) + 190px); z-index: 40; background: #04121ce6; border-radius: 10px; padding: 8px 14px; display: none; max-width: calc(100vw - 40px); text-align: center; }
+  @media (max-width: 520px) { #stats { font-size: 11px; gap: 1px 8px; } .tool { min-width: 54px; } #title b { max-width: 34vw; } }
+  @media (max-height: 460px) { #tip { display: none; } .tool { flex-direction: row; min-width: 0; } #coach { top: calc(var(--st) + 54px); } }
+  @media print { body > *:not(#report) { display: none !important; } #report { position: static; display: block; background: #fff; color: #000; box-shadow: none; max-width: none; } #report p, #report td { color: #000 !important; } #report .kpi { background: #eee; } #report .noprint { display: none; } html, body { overflow: visible; height: auto; background: #fff; } }
+</style>
+<!-- 👆 touch feel (downloads/touch-feel.html) -->
+<style id="touch-feel">
+  html, body { -webkit-text-size-adjust: 100%; -webkit-tap-highlight-color: transparent; overscroll-behavior: none; touch-action: manipulation; }
+  *, *::before, *::after { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+  input, textarea, [contenteditable] { -webkit-user-select: text; user-select: text; }
+  canvas { touch-action: none; }
+</style>
+<script id="touch-feel-js">
+  (() => {
+    const typing = (e) => e.target.closest?.('input, textarea, [contenteditable]');
+    for (const ev of ['contextmenu', 'selectstart', 'dragstart']) addEventListener(ev, (e) => { if (!typing(e)) e.preventDefault(); });
+    for (const ev of ['gesturestart', 'gesturechange', 'gestureend']) addEventListener(ev, (e) => e.preventDefault(), { passive: false });
+    addEventListener('touchmove', (e) => { if (e.touches.length > 1) e.preventDefault(); }, { passive: false });
+  })();
+</script>
+</head>
+<body>
+<canvas id="view"></canvas>
+<div id="labels"></div>
+<div id="loading">💧 Drainage<small>building the yard…</small></div>
+
+<div id="top">
+  <button id="menu-btn" class="pill">☰</button>
+  <div id="title" class="pill"><small id="mode-chip">Game</small><b id="yard-name">Yard</b></div>
+  <div id="stats" class="pill">
+    <span>Standing</span><b id="s-pond">0 gal</b>
+    <span>Deepest</span><b id="s-deep">0 in</b>
+    <span class="game-only">By the house</span><b class="game-only" id="s-house">0 gal</b>
+    <span>Cost</span><b id="s-cost">$0</b>
+    <span class="pro-only">Rain</span><b class="pro-only" id="s-rain">0 in/h</b>
+    <span class="pro-only">Outlet</span><b class="pro-only" id="s-out">0 gpm</b>
+    <span class="pro-only">Clock</span><b class="pro-only" id="s-clock">0:00</b>
+    <span class="pro-only">Speed</span><b class="pro-only" id="s-speed">–</b>
+  </div>
+</div>
+<div id="banner"></div>
+
+<div id="bottom">
+  <div id="tip"></div>
+  <div id="stormbar-wrap" class="pill" style="padding:0">
+    <div id="stormbar">
+      <select id="storm"></select>
+      <button id="rain-btn">▶ Rain</button>
+      <button id="speed-btn" class="sq">60×</button>
+      <button id="dry-btn" class="sq" title="Dry the yard">☀️</button>
+    </div>
+    <div id="progress"><i></i></div>
+  </div>
+  <div id="tools" class="pill" style="padding:6px"></div>
+  <div id="topo" class="pill"></div>
+</div>
+
+<div id="menu" class="sheet"></div>
+<div id="result" class="sheet"></div>
+<div id="report" class="sheet"></div>
+<div id="coach" class="sheet"></div>
+<div id="toast"></div>
+<script src="drainage.js?v=f1b7e27"></script>
+</body>
+</html>
