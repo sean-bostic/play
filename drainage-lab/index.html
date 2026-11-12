@@ -44,6 +44,11 @@
   .tool span { font-size: 21px; line-height: 1; } .tool.on { background: var(--gold); color: #1a1400; } .tool.act { background: #27455c; }
   #topo { display: none; align-items: center; } body.terrain #topo { display: flex; } body.terrain #tools, body.terrain #stormbar-wrap { display: none; }
   #topo label { display: flex; flex-direction: column; font-size: 10px; color: var(--dim); min-width: 84px; } #topo input[type=range] { width: 84px; accent-color: var(--gold); }
+  /* while it rains: only the storm's name, the speed, the cameras (and a way to stop) */
+  #storm-name, #stop-btn { display: none; }
+  body.raining #top, body.raining #tools, body.raining #tip, body.raining #labels, body.raining #banner, body.raining #storm, body.raining #rain-btn, body.raining #dry-btn { display: none !important; }
+  body.raining #storm-name { display: block; flex: 1; min-width: 0; padding-left: 8px; font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } body.raining #stop-btn { display: block; }
+  body.raining #stormbar-wrap { align-self: center; width: min(420px, 100%); }
   .pulse { animation: pulse 1s infinite; } @keyframes pulse { 50% { box-shadow: 0 0 0 5px #ffd24a88; } }
 
   /* panels */
@@ -71,7 +76,7 @@
   #coach { left: 50%; transform: translateX(-50%); top: calc(var(--st) + 74px); width: min(420px, calc(100vw - 24px)); padding: 12px 14px; box-sizing: border-box; border: 2px solid var(--gold); z-index: 25; }
   #coach b { color: var(--gold); } #coach .row { margin-top: 8px; } #coach .btn { text-align: center; }
   #labels { position: fixed; inset: 0; pointer-events: none; z-index: 6; overflow: hidden; }
-  #labels div { position: absolute; transform: translate(-50%, -130%); background: rgba(12, 24, 34, 0.85); border-radius: 8px; padding: 3px 7px; font-size: 11px; white-space: nowrap; } #labels div.warn { background: rgba(160, 35, 22, 0.95); }
+  #labels div { position: absolute; transform: translate(-50%, -130%); background: rgba(12, 24, 34, 0.85); border-radius: 8px; padding: 3px 7px; font-size: 11px; white-space: nowrap; } #labels div.warn { white-space: normal; width: max-content; max-width: min(300px, 76vw); text-align: center; } #labels div.warn { background: rgba(160, 35, 22, 0.95); }
   #banner { position: fixed; left: 50%; transform: translateX(-50%); top: calc(var(--st) + 70px); z-index: 12; background: var(--gold); color: #1a1400; border-radius: 12px; padding: 8px 14px; font-weight: 800; display: none; text-align: center; max-width: calc(100vw - 30px); }
   #toast { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(var(--sb) + 190px); z-index: 40; background: #04121ce6; border-radius: 10px; padding: 8px 14px; display: none; max-width: calc(100vw - 40px); text-align: center; }
   @media (max-width: 520px) { #stats { font-size: 11px; gap: 1px 8px; } .tool { min-width: 54px; } #title b { max-width: 34vw; } }
@@ -120,9 +125,12 @@
   <div id="stormbar-wrap" class="pill" style="padding:0">
     <div id="stormbar">
       <select id="storm"></select>
+      <b id="storm-name"></b>
       <button id="rain-btn">▶ Rain</button>
       <button id="speed-btn" class="sq">60×</button>
+      <button id="cam-btn" class="sq" title="Next camera">📷</button>
       <button id="dry-btn" class="sq" title="Dry the yard">☀️</button>
+      <button id="stop-btn" class="sq" title="Stop the storm">⏹</button>
     </div>
     <div id="progress"><i></i></div>
   </div>
@@ -135,6 +143,6 @@
 <div id="report" class="sheet"></div>
 <div id="coach" class="sheet"></div>
 <div id="toast"></div>
-<script src="drainage.js?v=646f72c"></script>
+<script src="drainage.js?v=3ed995f"></script>
 </body>
 </html>
