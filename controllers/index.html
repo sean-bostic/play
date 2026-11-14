@@ -97,26 +97,44 @@ button.act { font: 700 14px var(--body); border: 0; border-radius: 999px; paddin
 button.act.ghost { background: transparent; color: var(--fg); border: 1px solid var(--line); }
 textarea.out { width: 100%; min-height: 160px; font: 500 12px/1.4 var(--mono); color: var(--fg); background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 10px; touch-action: pan-y; }
 
-/* 🕹️ the drawn joystick: tap a part, press the real button, and that part is that button from then on */
+/* 🕹️ the drawn controllers: pick one by its picture, then tap a part and press the real button: it lights up from then on */
+.picker { display: flex; flex-wrap: wrap; gap: 8px; }
+.picker button { all: unset; cursor: pointer; display: grid; justify-items: center; gap: 4px; padding: 8px 10px 6px; border-radius: 12px; border: 2px solid var(--line); background: var(--bg); font: 600 12.5px var(--body); color: var(--fg); min-width: 92px; }
+.picker button svg { width: 92px; height: 56px; pointer-events: none; }
+.picker button[aria-pressed="true"] { border-color: var(--lamp); background: var(--lamp-soft); }
+.picker button:focus-visible { outline: 3px solid var(--lamp); outline-offset: 2px; }
 .pic { display: grid; gap: 10px; justify-items: center; }
-.pic svg { width: 100%; max-width: 440px; height: auto; touch-action: manipulation; }
+.pic > svg { width: 100%; max-width: 640px; height: auto; touch-action: manipulation; }
 .pic .base { fill: #23252b; stroke: #3b3e47; stroke-width: 2; }
 .pic .plate { fill: #2d3038; stroke: #474b56; stroke-width: 2; }
+.pic .bridge { fill: #16171b; stroke: #33363e; stroke-width: 2; }
+.pic .faint { font: 500 13px var(--mono); fill: #6f7486; text-anchor: middle; }
 .pic .shaft { fill: #b8262c; }
 .pic .ball { fill: #e0393f; stroke: #8f1c21; stroke-width: 2; }
 .pic .collar { fill: #15161a; }
 .pic .part { cursor: pointer; }
-.pic .part .cap { fill: #d8343a; stroke: #7c171b; stroke-width: 3; transition: fill .05s; }
+.pic .cap { transition: fill .05s; stroke-width: 3; }
+.pic.pro .cap { fill: #d8343a; stroke: #7c171b; }
+.pic.gamesir .cap { fill: #34373f; stroke: #5b606c; }
 .pic .part.on .cap { fill: var(--lamp-glow); stroke: #fff6dc; filter: drop-shadow(0 0 10px var(--lamp-glow)); }
-.pic .part.learn .cap { stroke: #fff; stroke-dasharray: 8 6; animation: learn 0.9s linear infinite; }
-@keyframes learn { to { stroke-dashoffset: -28; } }
-.pic .lbl { font: 700 14px var(--body); fill: var(--fg); text-anchor: middle; }
-.pic .idx { font: 600 12px var(--mono); fill: var(--muted); text-anchor: middle; }
-.pic .idx.set { fill: var(--money); }
-.pic .dir { fill: var(--line); }
+.pic .part.learn .cap { stroke: #fff; stroke-dasharray: 7 5; animation: learn 0.9s linear infinite; }
+@keyframes learn { to { stroke-dashoffset: -24; } }
+.pic .tag { font: 700 14px var(--body); fill: #fff; text-anchor: middle; dominant-baseline: central; pointer-events: none; }
+.pic .part.on .tag { fill: #2a1d05; }
+.pic .dir { fill: #3b3e47; }
 .pic .dir.on { fill: var(--lamp-glow); }
 .pic .help { font-size: 15px; color: var(--muted); text-align: center; min-height: 1.5em; }
 .pic .help b { color: var(--lamp); }
+.legend { width: 100%; border-collapse: collapse; font-size: 15px; }
+.legend td { padding: 7px 8px; border-top: 1px solid var(--line); }
+.legend tr:first-child td { border-top: 0; }
+.legend tr { cursor: pointer; }
+.legend td:nth-child(2) { font: 600 13px var(--mono); white-space: nowrap; }
+.legend td:nth-child(3) { color: var(--muted); }
+.legend .guess { color: var(--muted); font-weight: 500; }
+.legend tr.on td { background: var(--lamp-soft); }
+.legend tr.learn td { outline: 2px dashed var(--lamp); outline-offset: -2px; }
+.legend-wrap { width: 100%; }
 .log { list-style: none; margin: 0; padding: 0; font: 500 12.5px/1.6 var(--mono); max-height: 220px; overflow: auto; touch-action: pan-y; }
 .log li { border-top: 1px solid var(--line); padding: 3px 0; display: flex; gap: 10px; }
 .log li:first-child { border-top: 0; }
@@ -184,28 +202,61 @@ textarea.out { width: 100%; min-height: 160px; font: 500 12px/1.4 var(--mono); c
     if (!standard && i >= 12 && i <= 15) return CS_PAD[i] || '';
     return CS_PAD[i] || '';
   };
-  // 🕹️ The Speedlink Competition Pro Extra, drawn from above (from the box photo): the red ball stick on its raised plate,
-  // a red triangle at the plate's back left and front right, a big round button on the left and one at the front.
-  // Its chip calls itself "Game Controller for Android" (vendor 0079, product 181c).
-  const PRO = /competition|speedlink|game controller for android|0079.*181c/i;
-  const PARTS = [['backTri', 'Back triangle'], ['frontTri', 'Front triangle'], ['leftRound', 'Left round'], ['frontRound', 'Front round']];
-  const proSVG = `<div class="pic"><svg viewBox="0 0 440 400" role="img" aria-label="The Competition Pro joystick from above: tap a button, then press the real one">
-    <rect class="base" x="40" y="40" width="360" height="330" rx="46"/>
-    <rect class="plate" x="140" y="62" width="200" height="190" rx="22"/>
-    <g class="dirs">${[[0, -1], [1, -1], [1, 0], [1, 1], [0, 1], [-1, 1], [-1, 0], [-1, -1]].map(([x, y]) =>
-      `<circle class="dir" data-d="${x},${y}" cx="${240 + x * 78}" cy="${157 + y * 78}" r="6"/>`).join('')}</g>
-    <g class="stick"><circle class="collar" cx="240" cy="157" r="40"/><circle class="shaft" cx="240" cy="157" r="16"/>
-      <g class="knob"><circle class="ball" cx="240" cy="157" r="32"/><circle cx="230" cy="146" r="9" fill="#ff8a8e" opacity=".55"/></g></g>
-    <g class="part" data-part="backTri"><path class="cap" d="M150 76 L214 76 L150 132 Z" stroke-linejoin="round"/>
-      <text class="lbl" x="178" y="40">Back triangle</text><text class="idx" x="178" y="56">tap to set</text></g>
-    <g class="part" data-part="frontTri"><path class="cap" d="M326 238 L262 238 L326 182 Z" stroke-linejoin="round"/>
-      <text class="lbl" x="300" y="276">Front triangle</text><text class="idx" x="300" y="292">tap to set</text></g>
-    <g class="part" data-part="leftRound"><circle class="cap" cx="96" cy="200" r="42"/>
-      <text class="lbl" x="96" y="268">Left round</text><text class="idx" x="96" y="284">tap to set</text></g>
-    <g class="part" data-part="frontRound"><circle class="cap" cx="190" cy="318" r="42"/>
-      <text class="lbl" x="290" y="322">Front round</text><text class="idx" x="290" y="340">tap to set</text></g>
-  </svg><p class="help">Tap a red button in the picture, then press that same button on the real joystick.</p>
-  <div class="tools"><button class="act" data-learnall>Set all four, one by one</button></div></div>`;
+  // 🕹️ The controllers, drawn from the user's own photos (2026-11-14). Each part is one button; a knob moves with its axes.
+  // The Speedlink Competition Pro Extra from above: the red ball stick on its raised plate on the right, two big round
+  // buttons down the left edge, a red triangle beside each on the plate. Its chip calls itself "Game Controller for
+  // Android" (vendor 0079, product 181c). The GameSir X5 Lite from the front: left stick over the d-pad, ⧉ share and M
+  // on the left half; ≡ menu, A B X Y over the right stick and the G home button on the right; bumpers and triggers on top.
+  const dirs = (cx, cy, r) => [[0, -1], [1, -1], [1, 0], [1, 1], [0, 1], [-1, 1], [-1, 0], [-1, -1]]
+    .map(([x, y]) => `<circle class="dir" data-d="${x},${y}" cx="${cx + x * r}" cy="${cy + y * r}" r="6"/>`).join('');
+  const PICS = {
+    pro: {
+      name: 'Competition Pro', match: /competition|speedlink|game controller for android|0079.*181c/i, vb: '0 0 440 420',
+      body: `<rect class="base" x="24" y="24" width="392" height="372" rx="54"/><rect class="plate" x="172" y="48" width="222" height="324" rx="28"/>
+        ${dirs(300, 210, 74)}<circle class="collar" cx="300" cy="210" r="44"/>
+        <g class="knob" data-axes="0,1" data-scale="30"><circle class="shaft" cx="300" cy="210" r="16"/><circle class="ball" cx="300" cy="210" r="34"/><circle cx="290" cy="199" r="9" fill="#ff8a8e" opacity=".55"/></g>`,
+      parts: [
+        ['backRound', 'Back round button', '<circle class="cap" cx="98" cy="112" r="50"/>', 98, 112],
+        ['frontRound', 'Front round button', '<circle class="cap" cx="98" cy="308" r="50"/>', 98, 308],
+        ['backTri', 'Back triangle', '<path class="cap" d="M190 88 L242 114 L190 140 Z" stroke-linejoin="round"/>', 207, 114],
+        ['frontTri', 'Front triangle', '<path class="cap" d="M190 280 L242 306 L190 332 Z" stroke-linejoin="round"/>', 207, 306],
+      ],
+    },
+    gamesir: {
+      name: 'GameSir X5 Lite', match: /gamesir|3537|x5/i, vb: '0 0 640 330',
+      body: `<rect class="bridge" x="200" y="118" width="240" height="132" rx="8"/><text class="faint" x="320" y="190">phone goes here</text>
+        <rect class="base" x="20" y="58" width="196" height="252" rx="48"/><rect class="base" x="424" y="58" width="196" height="252" rx="48"/>
+        <rect class="plate" x="104" y="196" width="24" height="28" rx="3"/>`,
+      parts: [
+        ['lt', 'LT (left trigger, top)', '<rect class="cap" x="50" y="10" width="116" height="24" rx="10"/>', 108, 22, 'LT'],
+        ['lb', 'LB (left bumper)', '<rect class="cap" x="38" y="36" width="146" height="22" rx="9"/>', 111, 47, 'LB'],
+        ['rt', 'RT (right trigger, top)', '<rect class="cap" x="474" y="10" width="116" height="24" rx="10"/>', 532, 22, 'RT'],
+        ['rb', 'RB (right bumper)', '<rect class="cap" x="456" y="36" width="146" height="22" rx="9"/>', 529, 47, 'RB'],
+        ['ls', 'Left stick (press it)', '<g class="knob" data-axes="0,1" data-scale="18"><circle class="cap" cx="92" cy="124" r="32"/><circle cx="92" cy="124" r="20" fill="none" stroke="#6f7486" stroke-width="2"/></g>', null, null, ''],
+        ['up', 'D-pad up', '<rect class="cap" x="103" y="166" width="26" height="30" rx="4"/>', 116, 181, '▲'],
+        ['down', 'D-pad down', '<rect class="cap" x="103" y="224" width="26" height="30" rx="4"/>', 116, 239, '▼'],
+        ['left', 'D-pad left', '<rect class="cap" x="74" y="197" width="30" height="26" rx="4"/>', 89, 210, '◀'],
+        ['right', 'D-pad right', '<rect class="cap" x="128" y="197" width="30" height="26" rx="4"/>', 143, 210, '▶'],
+        ['share', 'Share (the two squares)', '<circle class="cap" cx="186" cy="90" r="13"/>', 186, 90, '⧉'],
+        ['m', 'M (the GameSir key)', '<circle class="cap" cx="186" cy="276" r="13"/>', 186, 276, 'M'],
+        ['menu', 'Menu (≡)', '<circle class="cap" cx="454" cy="90" r="13"/>', 454, 90, '≡'],
+        ['y', 'Y (top)', '<circle class="cap" cx="548" cy="86" r="19"/>', 548, 86, 'Y'],
+        ['x', 'X (left)', '<circle class="cap" cx="510" cy="122" r="19"/>', 510, 122, 'X'],
+        ['b', 'B (right)', '<circle class="cap" cx="586" cy="122" r="19"/>', 586, 122, 'B'],
+        ['a', 'A (bottom)', '<circle class="cap" cx="548" cy="158" r="19"/>', 548, 158, 'A'],
+        ['rs', 'Right stick (press it)', '<g class="knob" data-axes="2,3" data-scale="18"><circle class="cap" cx="546" cy="232" r="32"/><circle cx="546" cy="232" r="20" fill="none" stroke="#6f7486" stroke-width="2"/></g>', null, null, ''],
+        ['home', 'Home (G)', '<circle class="cap" cx="456" cy="278" r="14"/>', 456, 278, 'G'],
+      ],
+      // where the browser puts each one when the pad says "standard" (a guess until you set it: that's the point)
+      std: { a: 0, b: 1, x: 2, y: 3, lb: 4, rb: 5, lt: 6, rt: 7, share: 8, menu: 9, ls: 10, rs: 11, up: 12, down: 13, left: 14, right: 15, home: 16 },
+    },
+  };
+  const picFor = (pad) => Object.keys(PICS).find((k) => PICS[k].match.test(pad.id)) || (pad.mapping === 'standard' ? 'gamesir' : '');
+  const drawPic = (k, icon) => {
+    const d = PICS[k];
+    return `<svg viewBox="${d.vb}" ${icon ? 'aria-hidden="true"' : `role="img" aria-label="The ${d.name}: tap a button, then press the real one"`}>${d.body}
+      ${d.parts.map(([key, , shape, tx, ty, tag]) => `<g class="part" data-part="${key}">${shape}${!icon && tx != null ? `<text class="tag" x="${tx}" y="${ty}">${tag ?? ''}</text>` : ''}</g>`).join('')}</svg>`;
+  };
   const ACTIONS = ['', 'Fire (guns)', 'Bomb', 'Barrel roll', 'Replay / skip', 'Missile', 'Guns', 'Rocket', 'Zeppelin', 'Faster', 'Slower', 'Settings', 'Era back', 'Era next', 'Jump', 'Use / action', 'Pause'];
 
   const store = {
@@ -245,49 +296,66 @@ textarea.out { width: 100%; min-height: 160px; font: 500 12px/1.4 var(--mono); c
         <span class="badge ${standard ? 'ok' : 'raw'}">${standard ? 'standard layout' : 'raw: numbers only'}</span>
         <span class="badge">${pad.buttons.length} buttons · ${pad.axes.length} axes</span></div></div>
       <p class="note">Callsign treats this one as ${SAITEK.test(pad.id) ? 'the <b>Saitek flight stick</b> (trigger fires, button 2 bombs…)' : 'an <b>Xbox-style gamepad</b> (button 0 fires, 1 bombs, 2 rolls…)'}. Full name: <code>${esc(pad.id)}</code></p>
-      ${PRO.test(pad.id) ? proSVG : ''}
+      <div class="picker"></div><div class="picwrap"></div>
       <div class="top"><div class="sticks"></div><div class="axes"></div></div>
       <div class="buttons"></div>
       <div class="tools"><button class="act" data-copy>Copy the map</button><button class="act ghost" data-reset>Reset counts</button><button class="act ghost" data-clear>Clear names</button></div>
       <textarea class="out" readonly hidden></textarea>`;
     const v = { id: pad.id, el, standard, saved, btns: [], axes: [], sticks: [] };
 
-    // 🕹️ the drawn joystick: which real button each drawn one is (saved.pic), and "learn": the part waiting for a press
-    const pic = el.querySelector('.pic');
-    if (pic) {
-      saved.pic = saved.pic || {};
-      const help = pic.querySelector('.help');
-      v.pic = { knob: pic.querySelector('.knob'), dirs: [...pic.querySelectorAll('.dir')], parts: {}, learn: null, queue: [] };
-      const show = (key) => {
-        const p = v.pic.parts[key], i = saved.pic[key];
-        p.idx.textContent = i == null ? 'tap to set' : `button ${i}${saved.buttons[i]?.action ? ' · ' + saved.buttons[i].action : ''}`;
-        p.idx.classList.toggle('set', i != null);
+    // 🕹️ the drawn controller: picked by its picture (or by itself, from the name the pad gives), which real button each
+    // drawn one is (saved.pics[picture][part]; null = "not set", for a standard guess you've taken back), and "learn"
+    const pickerEl = el.querySelector('.picker'), picEl = el.querySelector('.picwrap');
+    saved.pics = saved.pics || {};
+    pickerEl.innerHTML = [...Object.keys(PICS), ''].map((k) => `<button type="button" class="${k ? `pic ${k}` : ``}" data-pick="${k}">${k ? drawPic(k, true) : '<svg viewBox="0 0 92 56" aria-hidden="true"><text x="46" y="34" text-anchor="middle" font-size="22" fill="currentColor">—</text></svg>'}<span>${k ? PICS[k].name : 'No picture'}</span></button>`).join('');
+    const setPic = (k) => {
+      saved.picture = k; store.set(keyFor(pad.id), saved);
+      pickerEl.querySelectorAll('button').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.pick === k)));
+      v.pic = null; picEl.innerHTML = '';
+      if (!k) return;
+      const d = PICS[k], map = (saved.pics[k] = saved.pics[k] || {});
+      picEl.innerHTML = `<div class="pic ${k}">${drawPic(k)}<p class="help"></p>
+        <div class="tools"><button class="act" data-learnall>Set every button, one by one</button><button class="act ghost" data-forget>Forget these</button></div>
+        <div class="legend-wrap"><table class="legend"><tbody>${d.parts.map(([key, label]) => `<tr data-part="${key}"><td>${esc(label)}</td><td></td><td></td></tr>`).join('')}</tbody></table></div></div>`;
+      const help = picEl.querySelector('.help');
+      const P = { def: d, key: k, knobs: [...picEl.querySelectorAll('.knob')], dirs: [...picEl.querySelectorAll('.dir')], parts: {}, learn: null, queue: [] };
+      P.idx = (key) => (key in map ? map[key] : standard && d.std ? d.std[key] : undefined);
+      P.show = () => d.parts.forEach(([key, , , , , tag]) => {
+        const p = P.parts[key], i = P.idx(key), guess = !(key in map) && i != null;
+        if (p.tag && tag == null) p.tag.textContent = i == null ? '?' : i;
+        p.cells[1].innerHTML = i == null ? '<span class="guess">not set</span>' : `button ${i}${guess ? ' <span class="guess">(guess)</span>' : ''}`;
+        p.cells[2].textContent = i != null && saved.buttons[i]?.action ? saved.buttons[i].action : i != null && callsign(pad.id, i, standard) ? 'Callsign now: ' + callsign(pad.id, i, standard) : '';
+      });
+      P.ask = (key) => {
+        for (const kk in P.parts) { P.parts[kk].g.classList.toggle('learn', kk === key); P.parts[kk].row.classList.toggle('learn', kk === key); }
+        P.learn = key;
+        help.innerHTML = key ? `Now press the <b>${esc(d.parts.find(([kk]) => kk === key)[1])}</b> on the real controller` : 'Tap a button in the picture (or a row below), then press that same button on the real controller.';
       };
-      v.pic.show = () => PARTS.forEach(([k]) => show(k));
-      v.pic.ask = (key) => {
-        PARTS.forEach(([k]) => v.pic.parts[k].g.classList.toggle('learn', k === key));
-        v.pic.learn = key;
-        help.innerHTML = key ? `Now press the <b>${PARTS.find(([k]) => k === key)[1].toLowerCase()}</b> on the real joystick` : 'Tap a red button in the picture, then press that same button on the real joystick.';
-      };
-      v.pic.got = (i) => {
-        const key = v.pic.learn; if (!key) return false;
-        for (const k in saved.pic) if (saved.pic[k] === i) delete saved.pic[k]; // (one real button, one drawn one)
-        saved.pic[key] = i; store.set(keyFor(pad.id), saved);
-        const name = v.btns[i]?.el.querySelector('input');
-        if (name && !name.value) { name.value = PARTS.find(([k]) => k === key)[1]; name.dispatchEvent(new Event('input')); }
-        log(`${PARTS.find(([k]) => k === key)[1]} = button ${i}`);
-        v.pic.show(); v.pic.ask(v.pic.queue.shift() || null);
+      P.got = (i) => {
+        const key = P.learn; if (!key) return false;
+        for (const [kk] of d.parts) if (kk !== key && P.idx(kk) === i) map[kk] = null; // (one real button, one drawn one)
+        map[key] = i; store.set(keyFor(pad.id), saved);
+        const label = d.parts.find(([kk]) => kk === key)[1], name = v.btns[i]?.el.querySelector('input');
+        if (name && !name.value) { name.value = label; name.dispatchEvent(new Event('input')); }
+        log(`${label} = button ${i}`);
+        P.show(); P.ask(P.queue.shift() || null);
         return true;
       };
-      for (const [key] of PARTS) {
-        const g = pic.querySelector(`[data-part="${key}"]`);
-        v.pic.parts[key] = { g, idx: g.querySelector('.idx') };
-        g.addEventListener('click', () => { v.pic.queue = []; v.pic.ask(v.pic.learn === key ? null : key); });
+      for (const [key] of d.parts) {
+        const g = picEl.querySelector(`.part[data-part="${key}"]`), row = picEl.querySelector(`tr[data-part="${key}"]`);
+        P.parts[key] = { g, row, tag: g.querySelector('.tag'), cells: row.children };
+        const pick = () => { P.queue = []; P.ask(P.learn === key ? null : key); };
+        g.addEventListener('click', pick); row.addEventListener('click', pick);
       }
-      pic.querySelector('[data-learnall]').addEventListener('click', () => { v.pic.queue = PARTS.map(([k]) => k); v.pic.ask(v.pic.queue.shift()); });
-      el.addEventListener('change', () => v.pic.show()); // (a "should do" pick shows on the drawing too)
-      v.pic.show();
-    }
+      picEl.querySelector('[data-learnall]').addEventListener('click', () => { P.queue = d.parts.map(([kk]) => kk); P.ask(P.queue.shift()); });
+      picEl.querySelector('[data-forget]').addEventListener('click', () => { saved.pics[k] = {}; setPic(k); });
+      v.pic = P; P.show(); P.ask(null);
+    };
+    v.setPic = setPic;
+    pickerEl.addEventListener('click', (e) => { const b = e.target.closest('[data-pick]'); if (b) setPic(b.dataset.pick); });
+    el.addEventListener('change', () => v.pic && v.pic.show()); // (a "should do" pick shows in the list too)
+    setPic(saved.picture ?? picFor(pad));
+
 
     const sticksEl = el.querySelector('.sticks');
     for (let s = 0; s + 1 < pad.axes.length && s < 4; s += 2) {
@@ -327,7 +395,7 @@ textarea.out { width: 100%; min-height: 160px; font: 500 12px/1.4 var(--mono); c
     el.querySelector('[data-copy]').addEventListener('click', async () => {
       const map = { controller: pad.id, ids: vp, layout: standard ? 'standard' : 'raw', buttons: pad.buttons.length, axes: pad.axes.length,
         map: v.btns.map((b, i) => ({ button: i, standard: standard ? STD[i] || null : null, name: saved.buttons[i]?.name || '', should: saved.buttons[i]?.action || '', callsignNow: callsign(pad.id, i, standard) || '', pressed: b.n })),
-        picture: saved.pic || null, axisNames: saved.axes, rapidFire: v.btns.map((b, i) => b.peak ? { button: i, perSecond: b.peak } : null).filter(Boolean) };
+        picture: saved.picture || null, pictureMap: saved.picture ? Object.fromEntries(PICS[saved.picture].parts.map(([k]) => [k, v.pic?.idx(k) ?? null])) : null, axisNames: saved.axes, rapidFire: v.btns.map((b, i) => b.peak ? { button: i, perSecond: b.peak } : null).filter(Boolean) };
       out.value = JSON.stringify(map, null, 2); out.hidden = false;
       try { await navigator.clipboard.writeText(out.value); log(`copied the map for ${nice(pad.id)}`); } catch { out.focus(); out.select(); log('select the text below and copy it'); }
     });
@@ -358,7 +426,7 @@ textarea.out { width: 100%; min-height: 160px; font: 500 12px/1.4 var(--mono); c
         b.bar.style.width = `${Math.round(Math.max(0, Math.min(1, val)) * 100)}%`;
         if (on !== b.on) {
           b.on = on; b.el.classList.toggle('on', on);
-          if (on && v.pic && v.pic.got(i)) { /* (learned: that drawn button is this one now) */ }
+          if (on && v.pic) v.pic.got(i); // (learning: that drawn button is this one now)
           if (on) {
             b.n++; b.count.textContent = `${b.n}×`; b.times.push(now);
             if (b.times.length < 4 || now - b.times[b.times.length - 4] > 1000) log(`button ${i} down${v.standard && STD[i] ? ` (${STD[i]})` : ''}`);
@@ -383,10 +451,16 @@ textarea.out { width: 100%; min-height: 160px; font: 500 12px/1.4 var(--mono); c
         x.last = val;
       });
       if (v.pic) {
-        for (const [key] of PARTS) { const i = v.saved.pic[key]; v.pic.parts[key].g.classList.toggle('on', i != null && !!v.btns[i]?.on); }
-        const ax = Math.max(-1, Math.min(1, pad.axes[0] || 0)), ay = Math.max(-1, Math.min(1, pad.axes[1] || 0));
-        v.pic.knob.setAttribute('transform', `translate(${(ax * 34).toFixed(1)} ${(ay * 34).toFixed(1)})`);
-        const dx = Math.abs(ax) > 0.5 ? Math.sign(ax) : 0, dy = Math.abs(ay) > 0.5 ? Math.sign(ay) : 0;
+        for (const [key] of v.pic.def.parts) {
+          const i = v.pic.idx(key), on = i != null && !!v.btns[i]?.on, p = v.pic.parts[key];
+          p.g.classList.toggle('on', on); p.row.classList.toggle('on', on);
+        }
+        for (const k of v.pic.knobs) {
+          const [a, b] = k.dataset.axes.split(',').map(Number), sc = +k.dataset.scale;
+          const ax = Math.max(-1, Math.min(1, pad.axes[a] || 0)), ay = Math.max(-1, Math.min(1, pad.axes[b] || 0));
+          k.setAttribute('transform', `translate(${(ax * sc).toFixed(1)} ${(ay * sc).toFixed(1)})`);
+        }
+        const dx = Math.abs(pad.axes[0] || 0) > 0.5 ? Math.sign(pad.axes[0]) : 0, dy = Math.abs(pad.axes[1] || 0) > 0.5 ? Math.sign(pad.axes[1]) : 0;
         v.pic.dirs.forEach((d) => d.classList.toggle('on', d.dataset.d === `${dx},${dy}`));
       }
       for (const s of v.sticks) {
