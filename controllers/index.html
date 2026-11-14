@@ -1,0 +1,318 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>Controller Sandbox</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;800&family=JetBrains+Mono:wght@500;600&family=Source+Sans+3:wght@400;600;700&display=swap">
+<style>
+/* 🎮 Controller Sandbox: plug in any joystick or gamepad and see every button and axis the browser gets from it, live,
+   with what Callsign does with each today. Name them, pick what each should do, and copy the map out for the games.
+   Nothing here changes a game. One page, no build. The house theme (night band, desk lamp). */
+:root {
+  --bg: #eef1f6; --paper: #ffffff; --fg: #172033; --muted: #586179; --line: #d9dee8;
+  --night: #121a30; --night-2: #1d2848; --night-fg: #eef0f7; --night-muted: #a3abc4;
+  --lamp: #b8740f; --lamp-soft: #fbeed6; --lamp-glow: #f4b63f;
+  --money: #18805f; --money-soft: #dcf2e8; --risk: #c23b45; --risk-soft: #f9e0e2;
+  --display: "Bricolage Grotesque", "Avenir Next Condensed", "Arial Narrow", sans-serif;
+  --body: "Source Sans 3", "Segoe UI", system-ui, sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0f1424; --paper: #171e33; --fg: #e7eaf3; --muted: #9ba4bd; --line: #2a3350;
+  --night: #0a0f1d; --night-2: #151d36; --lamp: #f4b63f; --lamp-soft: #3a2c12;
+  --money: #4fca98; --money-soft: #153527; --risk: #f07a83; --risk-soft: #3b1b20; color-scheme: dark; } }
+:root[data-theme="dark"] {
+  --bg: #0f1424; --paper: #171e33; --fg: #e7eaf3; --muted: #9ba4bd; --line: #2a3350;
+  --night: #0a0f1d; --night-2: #151d36; --lamp: #f4b63f; --lamp-soft: #3a2c12;
+  --money: #4fca98; --money-soft: #153527; --risk: #f07a83; --risk-soft: #3b1b20; color-scheme: dark; }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--fg); font: 17px/1.5 var(--body); }
+.wrap { max-width: 1000px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+h1, h2, h3 { font-family: var(--display); line-height: 1.1; margin: 0; text-wrap: balance; }
+p { margin: 0; }
+code, .mono { font: 500 .86em var(--mono); }
+.eyebrow { font: 600 12px/1.3 var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+
+.band { background: radial-gradient(circle at 82% 30%, color-mix(in srgb, var(--lamp-glow) 26%, transparent), transparent 46%), linear-gradient(160deg, var(--night), var(--night-2)); color: var(--night-fg); }
+.band .wrap { padding-block: 28px 24px; display: grid; gap: 8px; }
+.band .eyebrow { color: var(--lamp-glow); }
+.band h1 { font-size: clamp(32px, 6vw, 48px); font-weight: 800; }
+.band h1 span { color: var(--lamp-glow); }
+.band p { color: var(--night-muted); max-width: 62ch; }
+
+main { display: grid; gap: 20px; padding-block: 20px 40px; }
+.card { background: var(--paper); border: 1px solid var(--line); border-radius: 14px; padding: 18px clamp(14px, 3vw, 26px); display: grid; gap: 14px; min-width: 0; }
+.empty { text-align: center; padding: 40px 18px; }
+.empty h2 { font-size: 24px; }
+.empty p { color: var(--muted); margin-top: 6px; }
+.pulse { width: 18px; height: 18px; border-radius: 50%; background: var(--lamp); margin: 0 auto 14px; animation: pulse 1.6s infinite; }
+@keyframes pulse { 50% { transform: scale(1.6); opacity: .35; } }
+
+.padhead { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: baseline; justify-content: space-between; }
+.padhead h2 { font-size: 22px; overflow-wrap: anywhere; }
+.badges { display: flex; flex-wrap: wrap; gap: 6px; }
+.badge { font: 600 11.5px var(--mono); padding: 3px 9px; border-radius: 999px; background: var(--line); color: var(--fg); }
+.badge.ok { background: var(--money-soft); color: var(--money); }
+.badge.raw { background: var(--lamp-soft); color: var(--lamp); }
+.note { color: var(--muted); font-size: 15px; }
+
+.top { display: grid; grid-template-columns: minmax(0, 220px) minmax(0, 1fr); gap: 18px; align-items: start; }
+@media (max-width: 640px) { .top { grid-template-columns: minmax(0, 1fr); } }
+.sticks { display: flex; gap: 12px; flex-wrap: wrap; }
+.stick { display: grid; gap: 4px; justify-items: center; }
+.stick svg { width: 100px; height: 100px; }
+.stick .ring { fill: var(--bg); stroke: var(--line); stroke-width: 2; }
+.stick .cross { stroke: var(--line); stroke-width: 1; }
+.stick .dot { fill: var(--lamp); }
+.stick small { font: 500 11px var(--mono); color: var(--muted); }
+
+.axes { display: grid; gap: 8px; }
+.axis { display: grid; grid-template-columns: 56px minmax(0, 1fr) 54px; gap: 10px; align-items: center; font: 500 12.5px var(--mono); }
+.axis .track { position: relative; height: 12px; border-radius: 6px; background: var(--line); overflow: hidden; }
+.axis .track::after { content: ""; position: absolute; left: 50%; top: 0; bottom: 0; width: 1px; background: var(--muted); opacity: .5; }
+.axis .fill { position: absolute; top: 0; bottom: 0; background: var(--lamp); }
+.axis.live .fill { background: var(--money); }
+.axis .val { text-align: right; font-variant-numeric: tabular-nums; }
+.axis .who { grid-column: 2 / 4; color: var(--muted); font: 500 11.5px var(--mono); margin-top: -4px; }
+
+.buttons { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 210px), 1fr)); gap: 10px; }
+.btn { border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; display: grid; gap: 6px; transition: background .06s, border-color .06s; min-width: 0; }
+.btn.on { background: var(--lamp-soft); border-color: var(--lamp); }
+.btn.rapid { border-color: var(--risk); }
+.btn .row1 { display: flex; align-items: center; gap: 8px; }
+.btn .num { font: 800 22px/1 var(--display); min-width: 28px; }
+.btn .std { font: 600 12px var(--mono); color: var(--muted); }
+.btn .count { margin-left: auto; font: 500 11.5px var(--mono); color: var(--muted); font-variant-numeric: tabular-nums; }
+.btn .now { font: 600 12px var(--mono); color: var(--money); }
+.btn .rate { font: 700 12px var(--mono); color: var(--risk); min-height: 1em; }
+.btn input, .btn select, .axis-name { font: 500 14px var(--body); color: var(--fg); background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 6px 8px; width: 100%; min-width: 0; }
+.vbar { height: 4px; border-radius: 2px; background: var(--line); overflow: hidden; }
+.vbar i { display: block; height: 100%; width: 0; background: var(--lamp); }
+
+.tools { display: flex; flex-wrap: wrap; gap: 8px; }
+button.act { font: 700 14px var(--body); border: 0; border-radius: 999px; padding: 9px 16px; min-height: 40px; cursor: pointer; background: var(--lamp); color: #10162a; }
+button.act.ghost { background: transparent; color: var(--fg); border: 1px solid var(--line); }
+textarea.out { width: 100%; min-height: 160px; font: 500 12px/1.4 var(--mono); color: var(--fg); background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 10px; touch-action: pan-y; }
+
+.log { list-style: none; margin: 0; padding: 0; font: 500 12.5px/1.6 var(--mono); max-height: 220px; overflow: auto; touch-action: pan-y; }
+.log li { border-top: 1px solid var(--line); padding: 3px 0; display: flex; gap: 10px; }
+.log li:first-child { border-top: 0; }
+.log time { color: var(--muted); }
+.tips { margin: 0; padding-left: 1.2em; display: grid; gap: 6px; color: var(--muted); font-size: 15px; }
+.tips b { color: var(--fg); }
+</style>
+<!-- 👆 the touch feel (downloads/touch-feel.html) -->
+<style id="touch-feel">
+  html, body { -webkit-text-size-adjust: 100%; -webkit-tap-highlight-color: transparent; overscroll-behavior: none; touch-action: manipulation; }
+  *, *::before, *::after { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+  input, textarea, [contenteditable] { -webkit-user-select: text; user-select: text; }
+  canvas { touch-action: none; }
+</style>
+<script id="touch-feel-js">
+  (() => {
+    const typing = (e) => e.target.closest?.('input, textarea, [contenteditable]');
+    for (const ev of ['contextmenu', 'selectstart', 'dragstart']) addEventListener(ev, (e) => { if (!typing(e)) e.preventDefault(); });
+    for (const ev of ['gesturestart', 'gesturechange', 'gestureend']) addEventListener(ev, (e) => e.preventDefault(), { passive: false });
+    addEventListener('touchmove', (e) => { if (e.touches.length > 1) e.preventDefault(); }, { passive: false });
+  })();
+</script>
+</head>
+<body>
+<header class="band">
+  <div class="wrap">
+    <p class="eyebrow">Dad Hour Studios · sandbox</p>
+    <h1>Controller <span>Sandbox</span></h1>
+    <p>Plug in a joystick or gamepad and press its buttons. You'll see the number the browser gives each one, what Callsign does with it today, and you can name it and pick what it should do.</p>
+  </div>
+</header>
+
+<div class="wrap">
+<main>
+  <div id="pads"></div>
+
+  <section class="card" id="logcard">
+    <h3>What just happened</h3>
+    <ul class="log" id="log"><li><time>--</time><span>nothing yet</span></li></ul>
+  </section>
+
+  <section class="card">
+    <h3>Things to try</h3>
+    <ul class="tips">
+      <li><b>Rapid fire (the Competition Pro):</b> flip its rapid-fire switch, hold a fire button, and watch its tile: a red ⚡ shows how many presses a second the stick is sending by itself.</li>
+      <li><b>The four fire buttons:</b> press each of the two round ones and the two red triangles in turn, and note which numbers they are. A buyer says left and right send different numbers.</li>
+      <li><b>The GameSir X5 Lite:</b> hold <b>M + A</b> for 2 seconds to swap its A/B and X/Y, then press them again here and see what moved.</li>
+      <li><b>“standard” vs “raw”:</b> standard means the browser knows the layout (A is 0, the d-pad is 12–15). Raw means it's just numbers, and that's when games guess wrong.</li>
+      <li>Names and picks are saved on this device for each controller. <b>Copy the map</b> to send it to me for the games.</li>
+    </ul>
+  </section>
+</main>
+</div>
+
+<script>
+(() => {
+  // What the browser calls each button when a pad reports the "standard" layout (Xbox positions)
+  const STD = ['A (bottom)', 'B (right)', 'X (left)', 'Y (top)', 'LB', 'RB', 'LT', 'RT', 'Back / Select', 'Start', 'Left stick press', 'Right stick press', 'D-pad up', 'D-pad down', 'D-pad left', 'D-pad right', 'Home / Guide'];
+  // What Callsign does with each button today (dogfight src/controls.js)
+  const SAITEK = /cyborg|saitek|06a3/i;
+  const CS_STICK = ['Fire (guns)', 'Bomb', 'Barrel roll', 'Replay / skip', '🚀 Missile', '🎈 Zeppelin'];
+  const CS_PAD = ['Fire (guns)', 'Bomb', 'Barrel roll', 'Replay / skip', '🚀 Missile · era back', '🔫 Guns · era next', 'Slower (throttle)', 'Faster (throttle)', '⚙️ Settings', '⚙️ Settings', '', '', '☢️ Rocket', '🎈 Zeppelin', '', ''];
+  const callsign = (id, i, standard) => {
+    if (SAITEK.test(id)) return CS_STICK[i] || '⚙️ Settings';
+    if (!standard && i >= 12 && i <= 15) return CS_PAD[i] || '';
+    return CS_PAD[i] || '';
+  };
+  const ACTIONS = ['', 'Fire (guns)', 'Bomb', 'Barrel roll', 'Replay / skip', 'Missile', 'Guns', 'Rocket', 'Zeppelin', 'Faster', 'Slower', 'Settings', 'Era back', 'Era next', 'Jump', 'Use / action', 'Pause'];
+
+  const store = {
+    get(k) { try { return JSON.parse(localStorage.getItem(k) || 'null'); } catch { return null; } },
+    set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} },
+  };
+  const keyFor = (id) => 'controller-map:' + id;
+  const ids = (id) => { const m = id.match(/vendor:\s*([0-9a-f]{4}).*product:\s*([0-9a-f]{4})/i) || id.match(/^([0-9a-f]{4})-([0-9a-f]{4})-/i); return m ? `${m[1]}:${m[2]}` : ''; };
+  const nice = (id) => id.replace(/\s*\((?:STANDARD GAMEPAD\s*)?vendor.*$/i, '').replace(/^[0-9a-f]{4}-[0-9a-f]{4}-/i, '').trim() || id;
+  const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
+
+  const padsEl = document.getElementById('pads'), logEl = document.getElementById('log');
+  const views = new Map(); // gamepad index → { id, el, btns: [], axes: [], state }
+  const t0 = performance.now();
+  const log = (msg) => {
+    if (logEl.firstChild && logEl.firstChild.textContent.includes('nothing yet')) logEl.innerHTML = '';
+    const li = document.createElement('li');
+    li.innerHTML = `<time>${((performance.now() - t0) / 1000).toFixed(1)}s</time><span>${esc(msg)}</span>`;
+    logEl.prepend(li);
+    while (logEl.children.length > 40) logEl.lastChild.remove();
+  };
+
+  function emptyView() {
+    padsEl.innerHTML = `<section class="card empty"><div class="pulse"></div><h2>Press any button on a controller</h2>
+      <p>Browsers only show a controller after it's been pressed once. On the iPhone, plug the GameSir in first, then press A.</p></section>`;
+  }
+
+  function build(pad) {
+    const standard = pad.mapping === 'standard';
+    const saved = store.get(keyFor(pad.id)) || { buttons: {}, axes: {} };
+    const el = document.createElement('section');
+    el.className = 'card';
+    const vp = ids(pad.id);
+    el.innerHTML = `
+      <div class="padhead"><h2>${esc(nice(pad.id))}</h2>
+        <div class="badges"><span class="badge">pad ${pad.index}</span>${vp ? `<span class="badge">${vp}</span>` : ''}
+        <span class="badge ${standard ? 'ok' : 'raw'}">${standard ? 'standard layout' : 'raw: numbers only'}</span>
+        <span class="badge">${pad.buttons.length} buttons · ${pad.axes.length} axes</span></div></div>
+      <p class="note">Callsign treats this one as ${SAITEK.test(pad.id) ? 'the <b>Saitek flight stick</b> (trigger fires, button 2 bombs…)' : 'an <b>Xbox-style gamepad</b> (button 0 fires, 1 bombs, 2 rolls…)'}. Full name: <code>${esc(pad.id)}</code></p>
+      <div class="top"><div class="sticks"></div><div class="axes"></div></div>
+      <div class="buttons"></div>
+      <div class="tools"><button class="act" data-copy>Copy the map</button><button class="act ghost" data-reset>Reset counts</button><button class="act ghost" data-clear>Clear names</button></div>
+      <textarea class="out" readonly hidden></textarea>`;
+    const v = { id: pad.id, el, standard, saved, btns: [], axes: [], sticks: [] };
+
+    const sticksEl = el.querySelector('.sticks');
+    for (let s = 0; s + 1 < pad.axes.length && s < 4; s += 2) {
+      const d = document.createElement('div'); d.className = 'stick';
+      d.innerHTML = `<svg viewBox="-55 -55 110 110" aria-hidden="true"><circle class="ring" r="50"/><line class="cross" x1="-50" x2="50"/><line class="cross" y1="-50" y2="50"/><circle class="dot" r="9"/></svg><small>axes ${s} + ${s + 1}</small>`;
+      sticksEl.append(d); v.sticks.push({ dot: d.querySelector('.dot'), a: s });
+    }
+    const axesEl = el.querySelector('.axes');
+    pad.axes.forEach((_, i) => {
+      const r = document.createElement('div'); r.className = 'axis';
+      const cs = i === 0 ? 'Callsign: steer' : i === 1 ? 'Callsign: nose up / down' : SAITEK.test(pad.id) && i === 2 ? 'Callsign: throttle lever' : 'Callsign: not used (nothing reads it yet)';
+      r.innerHTML = `<span>axis ${i}</span><div class="track"><div class="fill"></div></div><span class="val">0.00</span>
+        <div class="who"><input class="axis-name" placeholder="name it (e.g. left / right)" value="${esc(saved.axes[i] || '')}">${cs ? `<div>${cs}</div>` : ''}</div>`;
+      r.querySelector('input').addEventListener('input', (e) => { saved.axes[i] = e.target.value; store.set(keyFor(pad.id), saved); });
+      axesEl.append(r); v.axes.push({ el: r, fill: r.querySelector('.fill'), val: r.querySelector('.val'), last: 0, moved: 0 });
+    });
+
+    const btnsEl = el.querySelector('.buttons');
+    pad.buttons.forEach((_, i) => {
+      const b = document.createElement('div'); b.className = 'btn';
+      const s = saved.buttons[i] || {};
+      const cs = callsign(pad.id, i, standard);
+      b.innerHTML = `<div class="row1"><span class="num">${i}</span><span class="std">${standard ? esc(STD[i] || '') : ''}</span><span class="count">0×</span></div>
+        <div class="vbar"><i></i></div>
+        <div class="now">${cs ? 'Callsign now: ' + esc(cs) : 'Callsign now: nothing'}</div>
+        <input placeholder="what is it? (e.g. red triangle)" value="${esc(s.name || '')}">
+        <select aria-label="What it should do">${ACTIONS.map((a) => `<option value="${esc(a)}"${a === (s.action || '') ? ' selected' : ''}>${a ? esc(a) : 'should do…'}</option>`).join('')}</select>
+        <div class="rate"></div>`;
+      const save = () => { saved.buttons[i] = { name: b.querySelector('input').value, action: b.querySelector('select').value }; store.set(keyFor(pad.id), saved); };
+      b.querySelector('input').addEventListener('input', save);
+      b.querySelector('select').addEventListener('change', save);
+      btnsEl.append(b);
+      v.btns.push({ el: b, bar: b.querySelector('.vbar i'), count: b.querySelector('.count'), rate: b.querySelector('.rate'), on: false, n: 0, times: [], rapidSince: 0 });
+    });
+
+    const out = el.querySelector('.out');
+    el.querySelector('[data-copy]').addEventListener('click', async () => {
+      const map = { controller: pad.id, ids: vp, layout: standard ? 'standard' : 'raw', buttons: pad.buttons.length, axes: pad.axes.length,
+        map: v.btns.map((b, i) => ({ button: i, standard: standard ? STD[i] || null : null, name: saved.buttons[i]?.name || '', should: saved.buttons[i]?.action || '', callsignNow: callsign(pad.id, i, standard) || '', pressed: b.n })),
+        axisNames: saved.axes, rapidFire: v.btns.map((b, i) => b.peak ? { button: i, perSecond: b.peak } : null).filter(Boolean) };
+      out.value = JSON.stringify(map, null, 2); out.hidden = false;
+      try { await navigator.clipboard.writeText(out.value); log(`copied the map for ${nice(pad.id)}`); } catch { out.focus(); out.select(); log('select the text below and copy it'); }
+    });
+    el.querySelector('[data-reset]').addEventListener('click', () => { v.btns.forEach((b) => { b.n = 0; b.peak = 0; b.times = []; b.count.textContent = '0×'; b.rate.textContent = ''; }); });
+    el.querySelector('[data-clear]').addEventListener('click', () => {
+      saved.buttons = {}; saved.axes = {}; store.set(keyFor(pad.id), saved);
+      el.querySelectorAll('.btn input, .axis-name').forEach((x) => (x.value = '')); el.querySelectorAll('.btn select').forEach((x) => (x.value = ''));
+    });
+    return v;
+  }
+
+  function frame() {
+    const now = performance.now();
+    const list = [...(navigator.getGamepads ? navigator.getGamepads() : [])].filter((p) => p && p.connected);
+    const seen = new Set();
+    for (const pad of list) {
+      seen.add(pad.index);
+      let v = views.get(pad.index);
+      if (!v || v.id !== pad.id || v.btns.length !== pad.buttons.length) {
+        if (v) v.el.remove();
+        if (!views.size) padsEl.innerHTML = '';
+        v = build(pad); views.set(pad.index, v); padsEl.append(v.el);
+        log(`connected: ${nice(pad.id)} (${pad.mapping === 'standard' ? 'standard' : 'raw'}, ${pad.buttons.length} buttons, ${pad.axes.length} axes)`);
+      }
+      pad.buttons.forEach((btn, i) => {
+        const b = v.btns[i]; if (!b) return;
+        const val = typeof btn === 'object' ? btn.value : btn, on = typeof btn === 'object' ? (btn.pressed || val > 0.5) : val > 0.5;
+        b.bar.style.width = `${Math.round(Math.max(0, Math.min(1, val)) * 100)}%`;
+        if (on !== b.on) {
+          b.on = on; b.el.classList.toggle('on', on);
+          if (on) {
+            b.n++; b.count.textContent = `${b.n}×`; b.times.push(now);
+            if (b.times.length < 4 || now - b.times[b.times.length - 4] > 1000) log(`button ${i} down${v.standard && STD[i] ? ` (${STD[i]})` : ''}`);
+          }
+        }
+        b.times = b.times.filter((t) => now - t < 1000);
+        const rate = b.times.length;
+        if (rate >= 5) { b.peak = Math.max(b.peak || 0, rate); if (!b.rapidSince) { b.rapidSince = now; log(`⚡ button ${i}: rapid fire, about ${rate} a second`); } }
+        else if (rate < 2) b.rapidSince = 0;
+        b.el.classList.toggle('rapid', rate >= 5);
+        b.rate.textContent = rate >= 5 ? `⚡ rapid fire: ${rate} a second` : b.peak ? `⚡ peak ${b.peak} a second` : '';
+      });
+      pad.axes.forEach((a, i) => {
+        const x = v.axes[i]; if (!x) return;
+        const val = Number.isFinite(a) ? a : 0;
+        const c = Math.max(-1, Math.min(1, val));
+        x.fill.style.left = `${50 + Math.min(0, c) * 50}%`; x.fill.style.width = `${Math.abs(c) * 50}%`;
+        x.val.textContent = val.toFixed(2);
+        const live = Math.abs(val - x.last) > 0.02; x.el.classList.toggle('live', live || now - x.moved < 300);
+        if (live) x.moved = now;
+        if (Math.abs(val) > 0.9 && Math.abs(x.last) <= 0.9) log(`axis ${i} → ${val > 0 ? '+' : ''}${val.toFixed(2)}`);
+        x.last = val;
+      });
+      for (const s of v.sticks) {
+        const ax = Math.max(-1, Math.min(1, pad.axes[s.a] || 0)), ay = Math.max(-1, Math.min(1, pad.axes[s.a + 1] || 0));
+        s.dot.setAttribute('cx', (ax * 41).toFixed(1)); s.dot.setAttribute('cy', (ay * 41).toFixed(1));
+      }
+    }
+    for (const [i, v] of views) if (!seen.has(i)) { v.el.remove(); views.delete(i); log(`unplugged: ${nice(v.id)}`); }
+    if (!views.size && !padsEl.querySelector('.empty')) emptyView();
+    requestAnimationFrame(frame);
+  }
+  emptyView();
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
