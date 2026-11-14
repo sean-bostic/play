@@ -130,7 +130,9 @@ textarea.out { width: 100%; min-height: 160px; font: 500 12px/1.4 var(--mono); c
 .legend tr:first-child td { border-top: 0; }
 .legend tr { cursor: pointer; }
 .legend td:nth-child(2) { font: 600 13px var(--mono); white-space: nowrap; }
-.legend td:nth-child(3) { color: var(--muted); }
+.legend td:nth-child(3) { color: var(--muted); min-width: 150px; }
+.legend select { font: 500 14px var(--body); color: var(--fg); background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 6px 8px; width: 100%; }
+.legend div.guess { font-size: 12.5px; margin-top: 3px; }
 .legend .guess { color: var(--muted); font-weight: 500; }
 .legend tr.on td { background: var(--lamp-soft); }
 .legend tr.learn td { outline: 2px dashed var(--lamp); outline-offset: -2px; }
@@ -324,7 +326,13 @@ textarea.out { width: 100%; min-height: 160px; font: 500 12px/1.4 var(--mono); c
         const p = P.parts[key], i = P.idx(key), guess = !(key in map) && i != null;
         if (p.tag && tag == null) p.tag.textContent = i == null ? '?' : i;
         p.cells[1].innerHTML = i == null ? '<span class="guess">not set</span>' : `button ${i}${guess ? ' <span class="guess">(guess)</span>' : ''}`;
-        p.cells[2].textContent = i != null && saved.buttons[i]?.action ? saved.buttons[i].action : i != null && callsign(pad.id, i, standard) ? 'Callsign now: ' + callsign(pad.id, i, standard) : '';
+        const twin = i == null ? null : d.parts.find(([kk]) => kk !== key && P.idx(kk) === i);
+        if (twin) p.cells[1].innerHTML += ` <span class="guess">(same as ${esc(twin[1].toLowerCase())})</span>`;
+        p.cells[2].innerHTML = i == null ? '<span class="guess">set its button first</span>'
+          : `<select aria-label="What it should do">${ACTIONS.map((a) => `<option value="${esc(a)}"${a === (saved.buttons[i]?.action || '') ? ' selected' : ''}>${a ? esc(a) : 'should do…'}</option>`).join('')}</select>`
+            + (callsign(pad.id, i, standard) ? `<div class="guess">Callsign now: ${esc(callsign(pad.id, i, standard))}</div>` : '');
+        const sel = p.cells[2].querySelector('select');
+        if (sel) sel.addEventListener('change', () => { const t = v.btns[i]?.el.querySelector('select'); if (t) { t.value = sel.value; t.dispatchEvent(new Event('change', { bubbles: true })); } });
       });
       P.ask = (key) => {
         for (const kk in P.parts) { P.parts[kk].g.classList.toggle('learn', kk === key); P.parts[kk].row.classList.toggle('learn', kk === key); }
@@ -333,18 +341,18 @@ textarea.out { width: 100%; min-height: 160px; font: 500 12px/1.4 var(--mono); c
       };
       P.got = (i) => {
         const key = P.learn; if (!key) return false;
-        for (const [kk] of d.parts) if (kk !== key && P.idx(kk) === i) map[kk] = null; // (one real button, one drawn one)
         map[key] = i; store.set(keyFor(pad.id), saved);
         const label = d.parts.find(([kk]) => kk === key)[1], name = v.btns[i]?.el.querySelector('input');
         if (name && !name.value) { name.value = label; name.dispatchEvent(new Event('input')); }
-        log(`${label} = button ${i}`);
+        const twin = d.parts.find(([kk]) => kk !== key && P.idx(kk) === i);
+        log(`${label} = button ${i}${twin ? ` (the same as the ${twin[1].toLowerCase()}: they're wired together, so a game can't tell them apart)` : ''}`);
         P.show(); P.ask(P.queue.shift() || null);
         return true;
       };
       for (const [key] of d.parts) {
         const g = picEl.querySelector(`.part[data-part="${key}"]`), row = picEl.querySelector(`tr[data-part="${key}"]`);
         P.parts[key] = { g, row, tag: g.querySelector('.tag'), cells: row.children };
-        const pick = () => { P.queue = []; P.ask(P.learn === key ? null : key); };
+        const pick = (e) => { if (e.target.closest('select')) return; P.queue = []; P.ask(P.learn === key ? null : key); };
         g.addEventListener('click', pick); row.addEventListener('click', pick);
       }
       picEl.querySelector('[data-learnall]').addEventListener('click', () => { P.queue = d.parts.map(([kk]) => kk); P.ask(P.queue.shift()); });
