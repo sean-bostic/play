@@ -203,23 +203,23 @@ textarea.out { width: 100%; min-height: 160px; font: 500 12px/1.4 var(--mono); c
     return CS_PAD[i] || '';
   };
   // 🕹️ The controllers, drawn from the user's own photos (2026-11-14). Each part is one button; a knob moves with its axes.
-  // The Speedlink Competition Pro Extra from above: the red ball stick on its raised plate on the right, two big round
-  // buttons down the left edge, a red triangle beside each on the plate. Its chip calls itself "Game Controller for
+  // The Speedlink Competition Pro Extra from above, held with the cable's edge away: two big round buttons along the
+  // top, a red triangle under each on the raised plate, the red ball stick in the middle of it. Its chip calls itself "Game Controller for
   // Android" (vendor 0079, product 181c). The GameSir X5 Lite from the front: left stick over the d-pad, ⧉ share and M
   // on the left half; ≡ menu, A B X Y over the right stick and the G home button on the right; bumpers and triggers on top.
   const dirs = (cx, cy, r) => [[0, -1], [1, -1], [1, 0], [1, 1], [0, 1], [-1, 1], [-1, 0], [-1, -1]]
     .map(([x, y]) => `<circle class="dir" data-d="${x},${y}" cx="${cx + x * r}" cy="${cy + y * r}" r="6"/>`).join('');
   const PICS = {
-    pro: {
-      name: 'Competition Pro', match: /competition|speedlink|game controller for android|0079.*181c/i, vb: '0 0 440 420',
-      body: `<rect class="base" x="24" y="24" width="392" height="372" rx="54"/><rect class="plate" x="172" y="48" width="222" height="324" rx="28"/>
-        ${dirs(300, 210, 74)}<circle class="collar" cx="300" cy="210" r="44"/>
-        <g class="knob" data-axes="0,1" data-scale="30"><circle class="shaft" cx="300" cy="210" r="16"/><circle class="ball" cx="300" cy="210" r="34"/><circle cx="290" cy="199" r="9" fill="#ff8a8e" opacity=".55"/></g>`,
-      parts: [
-        ['backRound', 'Back round button', '<circle class="cap" cx="98" cy="112" r="50"/>', 98, 112],
-        ['frontRound', 'Front round button', '<circle class="cap" cx="98" cy="308" r="50"/>', 98, 308],
-        ['backTri', 'Back triangle', '<path class="cap" d="M190 88 L242 114 L190 140 Z" stroke-linejoin="round"/>', 207, 114],
-        ['frontTri', 'Front triangle', '<path class="cap" d="M190 280 L242 306 L190 332 Z" stroke-linejoin="round"/>', 207, 306],
+    pro: { // (the buttons along the top, the way the user holds it: the cable's edge away from you)
+      name: 'Competition Pro', match: /competition|speedlink|game controller for android|0079.*181c/i, vb: '0 0 420 440',
+      body: `<rect class="base" x="24" y="24" width="372" height="392" rx="54"/><rect class="plate" x="48" y="172" width="324" height="222" rx="28"/>
+        ${dirs(210, 292, 72)}<circle class="collar" cx="210" cy="292" r="44"/>
+        <g class="knob" data-axes="0,1" data-scale="30"><circle class="shaft" cx="210" cy="292" r="16"/><circle class="ball" cx="210" cy="292" r="34"/><circle cx="200" cy="281" r="9" fill="#ff8a8e" opacity=".55"/></g>`,
+      parts: [ // (keys from the first drawing, so a map already set still fits: "back" was the cable's edge, now the top)
+        ['frontRound', 'Left round button', '<circle class="cap" cx="112" cy="96" r="50"/>', 112, 96],
+        ['backRound', 'Right round button', '<circle class="cap" cx="308" cy="96" r="50"/>', 308, 96],
+        ['frontTri', 'Left triangle', '<path class="cap" d="M84 190 L140 190 L112 244 Z" stroke-linejoin="round"/>', 112, 206],
+        ['backTri', 'Right triangle', '<path class="cap" d="M280 190 L336 190 L308 244 Z" stroke-linejoin="round"/>', 308, 206],
       ],
     },
     gamesir: {
