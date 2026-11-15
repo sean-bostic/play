@@ -23,6 +23,7 @@
 
   /* the top. Round the tavern: your purse and how much you've had. In a fight: your blood and his. */
   #purse, #hud { position: fixed; z-index: 3; left: calc(var(--sl) + 12px); right: calc(var(--sr) + 12px); top: calc(var(--st) + 10px); display: none; pointer-events: none; text-shadow: 0 1px 0 #000, 0 0 6px #000; }
+  #hands { pointer-events: auto; font: inherit; color: inherit; background: rgba(0,0,0,0.45); border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; padding: 2px 9px; margin-left: auto; margin-right: auto; }
   body.tavern #purse, body.fight #purse { display: flex; gap: 16px; } body.fight #purse { top: calc(var(--st) + 52px); font-size: 13px; color: var(--dim); }
   body.tapper #note { bottom: auto; top: calc(var(--st) + 12px); } body.fight #note { bottom: auto; top: calc(var(--st) + 78px); font-size: 15px; }
   body.fight #hud { display: flex; gap: 14px; align-items: flex-start; }
@@ -88,7 +89,7 @@
   <div class="side"><div class="bar"><i id="hp0"></i></div><div class="bar wind"><i id="wd0"></i></div><div class="who">You</div></div>
   <div class="side r"><div class="bar"><i id="hp1"></i></div><div class="bar wind"><i id="wd1"></i></div><div class="who" id="them"></div></div>
 </div>
-<div id="purse"><span id="coin"></span><span id="ale"></span></div>
+<div id="purse"><span id="coin"></span><span id="ale"></span><button id="hands"></button></div>
 <div id="says"><div></div><div></div><div></div></div>
 <div id="note"></div>
 
@@ -110,10 +111,10 @@
   <h1>The Split Lip</h1>
   <p>A tavern. Ale, dice, and bare knuckles in the hay. It's where things get settled.</p>
   <button id="enter">Push the door open</button>
-  <p class="keys">Walk: WASD · Look: ← → or drag · In a fight: J punch (hold for a haymaker; step sideways first for a hook or an uppercut), K kick, L block, Space slip · Answer: Enter or N · Esc quits</p>
+  <p class="keys">Walk: WASD · Look: ← → or drag · In a fight: J punch (hold for a haymaker; step sideways first for a hook or an uppercut), K kick, L block, Space slip, H other arms · Answer: Enter or N · Esc quits</p>
 </div>
 <div id="after"><div id="cap"></div></div>
 <div id="fade"></div>
-<script src="brawl.js?v=92291da"></script>
+<script src="brawl.js?v=5c0e41f"></script>
 </body>
 </html>
