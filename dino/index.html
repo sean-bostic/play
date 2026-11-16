@@ -35,6 +35,13 @@
           text-shadow: 0 0.3vmin 0 #1d5c2a; transition: opacity 0.6s; }
   #keys b { display: inline-block; min-width: 1.4em; padding: 0.1em 0.35em; margin: 0 0.1em; border-radius: 0.3em; background: rgba(0,0,0,0.28); border: 0.3vmin solid rgba(255,255,255,0.7); }
   #keys.away { opacity: 0; }
+  /* the arrow to the nearest baby */
+  #finder { position: fixed; left: 50%; top: calc(env(safe-area-inset-top) + 2vmin); transform: translateX(-50%); z-index: 3; pointer-events: none; display: none;
+            align-items: center; gap: 1vmin; padding: 0.8vmin 2.2vmin; border-radius: 6vmin; background: rgba(0,0,0,0.28); border: 0.4vmin solid rgba(255,255,255,0.7); font-size: 5vmin; }
+  #finder.show { display: flex; }
+  #finder-arrow { display: inline-block; color: #ffe14d; font-size: 6vmin; line-height: 1; text-shadow: 0 0.06em 0 #1d5c2a; }
+  #finder.close { border-color: #ffe14d; animation: near 0.5s ease-in-out infinite alternate; }
+  @keyframes near { to { transform: translateX(-50%) scale(1.15); } }
   #fps { position: fixed; left: 10px; bottom: 8px; color: #fff; font: 12px ui-monospace, monospace; z-index: 3; pointer-events: none; }
 </style>
 <!-- 👆 No zoom, no text highlight, no long-press bubble: downloads/touch-feel.html -->
@@ -57,10 +64,11 @@
 <div id="loading">🦖 …</div>
 <div id="round"></div>
 <div id="count"></div>
+<div id="finder"><span id="finder-arrow">▲</span><span>🦖</span></div>
 <div id="victory">VICTORY<small>🕹️ press a button for more babies</small></div>
 <div id="banner"></div>
 <div id="fps"></div>
 <div id="keys" class="keys">🕹️ or <b>←</b><b>↑</b><b>→</b><b>↓</b> walk &nbsp;·&nbsp; <b>Space</b> jump &nbsp;·&nbsp; <b>X</b> roar &nbsp;·&nbsp; <b>C</b> dance</div>
-<script src="dino.js?v=c598e1f"></script>
+<script src="dino.js?v=08a0b63"></script>
 </body>
 </html>
