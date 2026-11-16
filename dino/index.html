@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Dino</title>
+<style>
+  html, body { margin: 0; height: 100%; overflow: hidden; background: #58b6ff; font-family: system-ui, -apple-system, sans-serif; cursor: default; }
+  canvas { display: block; }
+  #loading { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; font: 900 9vmin system-ui; color: #fff; text-shadow: 0 0.06em 0 #1d5c2a; z-index: 20; }
+
+  /* "BABY DINOS: 2 / 3", top right as in the first game */
+  #count { position: fixed; right: calc(env(safe-area-inset-right) + 3vmin); top: calc(env(safe-area-inset-top) + 2.5vmin); font: 900 5.2vmin system-ui; color: #fff; z-index: 3; pointer-events: none;
+           text-shadow: 0 0.07em 0 #1d5c2a, 0 0 0.4em rgba(0,0,0,0.35); letter-spacing: 0.02em; }
+  #round { position: fixed; left: calc(env(safe-area-inset-left) + 3vmin); top: calc(env(safe-area-inset-top) + 2.5vmin); font: 800 3.6vmin system-ui; color: #fff3b0; z-index: 3; pointer-events: none;
+           text-shadow: 0 0.08em 0 #1d5c2a; }
+
+  /* VICTORY, in gold, as in the first game */
+  #victory { position: fixed; left: 0; right: 0; top: 24%; text-align: center; font: 900 21vmin system-ui; color: #ffd700; z-index: 8; pointer-events: none;
+             text-shadow: 0 0.05em 0 #a85b00, 0 0.09em 0 #5a2d00, 0 0 0.35em rgba(255,240,150,0.9); opacity: 0; transform: scale(0.2); letter-spacing: 0.03em; }
+  #victory.show { animation: victory 1s cubic-bezier(.2,1.6,.4,1) forwards, wobble 1.2s ease-in-out 1s infinite alternate; }
+  #victory small { display: block; font: 800 4vmin system-ui; color: #fff; text-shadow: 0 0.08em 0 #1d5c2a; letter-spacing: 0; margin-top: 1vmin; }
+  @keyframes victory { to { opacity: 1; transform: scale(1); } }
+  @keyframes wobble { from { transform: scale(1) rotate(-2deg); } to { transform: scale(1.06) rotate(2deg); } }
+
+  #banner { position: fixed; left: 0; right: 0; top: 56%; text-align: center; font: 900 9vmin system-ui; color: #fff; z-index: 7; pointer-events: none;
+            text-shadow: 0 0.06em 0 #1d5c2a, 0 0 0.3em rgba(0,0,0,0.3); opacity: 0; }
+  #banner.show { animation: banner 1.5s ease-out forwards; }
+  @keyframes banner { 0% { opacity: 0; transform: scale(0.3); } 15% { opacity: 1; transform: scale(1.15); } 25% { transform: scale(1); } 70% { opacity: 1; } 100% { opacity: 0; transform: translateY(-8vmin); } }
+
+  /* what the keys do, until they start walking (and again if they stop for a while) */
+  #keys { position: fixed; left: 0; right: 0; bottom: 3.5vmin; text-align: center; font: 800 3.2vmin system-ui; color: #fff; z-index: 3; pointer-events: none;
+          text-shadow: 0 0.3vmin 0 #1d5c2a; transition: opacity 0.6s; }
+  #keys b { display: inline-block; min-width: 1.4em; padding: 0.1em 0.35em; margin: 0 0.1em; border-radius: 0.3em; background: rgba(0,0,0,0.28); border: 0.3vmin solid rgba(255,255,255,0.7); }
+  #keys.away { opacity: 0; }
+  #fps { position: fixed; left: 10px; bottom: 8px; color: #fff; font: 12px ui-monospace, monospace; z-index: 3; pointer-events: none; }
+</style>
+<!-- 👆 No zoom, no text highlight, no long-press bubble: downloads/touch-feel.html -->
+<style id="touch-feel">
+  html, body { -webkit-text-size-adjust: 100%; -webkit-tap-highlight-color: transparent; overscroll-behavior: none; touch-action: manipulation; }
+  *, *::before, *::after { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+  input, textarea, [contenteditable] { -webkit-user-select: text; user-select: text; }
+  canvas { touch-action: none; }
+</style>
+<script id="touch-feel-js">
+  (() => {
+    const typing = (e) => e.target.closest?.('input, textarea, [contenteditable]');
+    for (const ev of ['contextmenu', 'selectstart', 'dragstart']) addEventListener(ev, (e) => { if (!typing(e)) e.preventDefault(); });
+    for (const ev of ['gesturestart', 'gesturechange', 'gestureend']) addEventListener(ev, (e) => e.preventDefault(), { passive: false });
+    addEventListener('touchmove', (e) => { if (e.touches.length > 1) e.preventDefault(); }, { passive: false });
+  })();
+</script>
+</head>
+<body>
+<div id="loading">🦖 …</div>
+<div id="round"></div>
+<div id="count"></div>
+<div id="victory">VICTORY<small>🕹️ press a button for more babies</small></div>
+<div id="banner"></div>
+<div id="fps"></div>
+<div id="keys" class="keys">🕹️ or <b>←</b><b>↑</b><b>→</b><b>↓</b> walk &nbsp;·&nbsp; <b>Space</b> jump &nbsp;·&nbsp; <b>X</b> roar &nbsp;·&nbsp; <b>C</b> dance</div>
+<script src="dino.js?v=c598e1f"></script>
+</body>
+</html>
