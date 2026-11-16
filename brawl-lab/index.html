@@ -15,7 +15,7 @@
   button { font: inherit; color: inherit; border: 0; cursor: pointer; }
   #loading { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; background: var(--ink); z-index: 50; font-size: 24px; font-style: italic; }
   /* the room's edges fall away into the dark, as in the paintings */
-  #grade { position: fixed; inset: 0; z-index: 2; pointer-events: none; background: radial-gradient(ellipse at 50% 46%, #0000 45%, #080402b8 100%); } body.tapper #grade { display: none; }
+  #grade { position: fixed; inset: 0; z-index: 2; pointer-events: none; background: radial-gradient(ellipse at 50% 46%, #0000 52%, #08040288 100%); } body.tapper #grade { display: none; }
   #after { position: fixed; inset: 0; z-index: 30; display: flex; align-items: flex-end; justify-content: center; background: #0d0907 url(art/after.jpg) center / cover; filter: brightness(1.12) saturate(0.9); opacity: 0; pointer-events: none; transition: opacity 0.6s; }
   #after.on { opacity: 1; pointer-events: auto; }
   #cap { margin: 0 0 calc(var(--sb) + 7vh); padding: 10px 18px; max-width: min(88vw, 560px); background: #0d0907cc; border: 1px solid #5a4630; text-align: center; font-size: 18px; font-style: italic; }
@@ -23,7 +23,8 @@
 
   /* the top. Round the tavern: your purse and how much you've had. In a fight: your blood and his. */
   #purse, #hud { position: fixed; z-index: 3; left: calc(var(--sl) + 12px); right: calc(var(--sr) + 12px); top: calc(var(--st) + 10px); display: none; pointer-events: none; text-shadow: 0 1px 0 #000, 0 0 6px #000; }
-  #hands { pointer-events: auto; font: inherit; color: inherit; background: rgba(0,0,0,0.45); border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; padding: 2px 9px; margin-left: auto; margin-right: auto; }
+  #hands, #cam { pointer-events: auto; font: inherit; color: inherit; background: rgba(0,0,0,0.45); border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; padding: 2px 9px; } #hands { margin-left: auto; } #cam { margin-right: auto; }
+  body.tavern #hands { display: none; } body.tavern #cam { margin-left: auto; }
   body.tavern #purse, body.fight #purse { display: flex; gap: 16px; } body.fight #purse { top: calc(var(--st) + 52px); font-size: 13px; color: var(--dim); }
   body.tapper #note { bottom: auto; top: calc(var(--st) + 12px); } body.fight #note { bottom: auto; top: calc(var(--st) + 78px); font-size: 15px; }
   body.fight #hud { display: flex; gap: 14px; align-items: flex-start; }
@@ -32,6 +33,15 @@
   .bar i { display: block; height: 100%; width: 100%; background: var(--blood); transition: width 0.15s; }
   .bar.wind { height: 4px; margin-top: 2px; border-width: 1px; } .bar.wind i { background: var(--dim); transition: none; } .bar.wind i.out { background: #c9a227; }
   .who { margin-top: 3px; font-size: 13px; font-style: italic; }
+
+  /* a man's dropped: the big word slams in, a line under it */
+  #pow { position: fixed; z-index: 5; left: 0; right: 0; top: calc(var(--st) + 84px); bottom: calc(var(--sb) + 7%); display: none; flex-direction: column; justify-content: space-between; text-align: center; pointer-events: none; }
+  #pow.on { display: flex; }
+  #pow b { display: block; font: 700 min(15vw, 21vh, 130px)/0.9 Georgia, serif; letter-spacing: 0.02em; color: #f3e6c4; -webkit-text-stroke: min(0.5vw, 4px) #0d0907; text-shadow: 0 0.06em 0 var(--blood), 0 0.1em 0 #0d0907, 0 0 0.5em #000; transform-origin: 50% 60%; animation: slam 2s cubic-bezier(0.2, 1.6, 0.3, 1) both; }
+  #pow.lost b { color: #c9bfae; text-shadow: 0 0.06em 0 #2a2622, 0 0.1em 0 #0d0907, 0 0 0.5em #000; }
+  #pow i { display: block; margin-top: 0.5em; font-size: min(5vw, 24px); text-shadow: 0 1px 0 #000, 0 0 8px #000, 0 0 3px #000; animation: under 3.3s both; }
+  @keyframes slam { 0% { transform: scale(4.5) rotate(-9deg); opacity: 0; } 7% { transform: scale(0.92) rotate(-4deg); opacity: 1; } 11% { transform: scale(1.08) rotate(-4deg); } 15%, 78% { transform: scale(1) rotate(-4deg); opacity: 1; } 100% { transform: scale(1.15) rotate(-4deg); opacity: 0; } }
+  @keyframes under { 0%, 18% { opacity: 0; } 26%, 80% { opacity: 1; } 100% { opacity: 0; } }
 
   /* what's said: a line over a man's head; the story at the bottom; a question in the middle */
   #says div { display: none; position: fixed; z-index: 3; transform: translate(-50%, -100%); max-width: min(62vw, 300px); padding: 4px 9px; background: #0d0907d9; border: 1px solid #5a4630; border-radius: 3px; font-size: 14px; font-style: italic; text-align: center; pointer-events: none; }
@@ -89,9 +99,10 @@
   <div class="side"><div class="bar"><i id="hp0"></i></div><div class="bar wind"><i id="wd0"></i></div><div class="who">You</div></div>
   <div class="side r"><div class="bar"><i id="hp1"></i></div><div class="bar wind"><i id="wd1"></i></div><div class="who" id="them"></div></div>
 </div>
-<div id="purse"><span id="coin"></span><span id="ale"></span><button id="hands"></button></div>
+<div id="purse"><span id="coin"></span><span id="ale"></span><button id="hands"></button><button id="cam"></button></div>
 <div id="says"><div></div><div></div><div></div></div>
 <div id="note"></div>
+<div id="pow"><b></b><i></i></div>
 
 <div id="look"></div>
 <div id="stick"><div id="ring"><div id="nub"></div></div></div>
@@ -111,10 +122,10 @@
   <h1>The Split Lip</h1>
   <p>A tavern. Ale, dice, and bare knuckles in the hay. It's where things get settled.</p>
   <button id="enter">Push the door open</button>
-  <p class="keys">Walk: WASD · Look: ← → or drag · In a fight: J punch (hold for a haymaker; step sideways first for a hook or an uppercut), K kick, L block, Space slip, H other arms · Answer: Enter or N · Esc quits</p>
+  <p class="keys">Walk: WASD · Look: ← → or drag · In a fight: J punch (hold for a haymaker; step sideways first for a hook or an uppercut), K kick, L block, Space slip (it goes the way you're stepping), H other arms · V: your eyes or over the shoulder · Answer: Enter or N · Esc quits</p>
 </div>
 <div id="after"><div id="cap"></div></div>
 <div id="fade"></div>
-<script src="brawl.js?v=5c0e41f"></script>
+<script src="brawl.js?v=834c357"></script>
 </body>
 </html>
