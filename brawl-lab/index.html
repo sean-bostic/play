@@ -72,6 +72,11 @@
   body.tavern #title, body.fight #title, body.tapper #title { display: none; }
   h1 { margin: 0; font: 400 min(11vw, 84px)/0.95 Georgia, serif; letter-spacing: 0.04em; color: var(--bone); text-shadow: 0 3px 0 #000, 0 0 30px #b3320e88; }
   #title p { margin: 0; color: var(--bone); text-shadow: 0 1px 0 #000, 0 0 8px #000; font-style: italic; max-width: 30em; }
+  #mp { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; align-items: center; max-width: 30em; } #mp input { font: inherit; color: var(--bone); background: #0d0907cc; border: 1px solid #5a4630; padding: 10px; width: 8.5em; text-align: center; -webkit-user-select: text; user-select: text; } #mp #code { width: 4.2em; text-transform: uppercase; letter-spacing: 0.15em; }
+  #mp button { padding: 10px 14px; background: var(--wood); border: 1px solid #5a4630; } #net { flex-basis: 100%; min-height: 1.2em; font-size: 14px; font-style: italic; color: var(--bone); text-shadow: 0 1px 0 #000, 0 0 6px #000; }
+  #room { pointer-events: auto; font: inherit; color: inherit; background: rgba(120,20,16,0.6); border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; padding: 2px 9px; } #room:empty { display: none; }
+  #shove { display: none; position: fixed; z-index: 3; right: calc(var(--sr) + 20px); bottom: calc(var(--sb) + 24px); width: 92px; height: 92px; border-radius: 50%; background: #1a110bcc; border: 2px solid #e8dcc077; font-size: 17px; font-style: italic; touch-action: none; } #shove:active { background: #5a1410; }
+  @media (pointer: coarse) { body.tavern #shove { display: block; } } body.watch #stick, body.watch #pad { display: none !important; }
   #enter { margin-top: 8px; padding: 14px 26px; background: var(--blood); border: 1px solid var(--ink); font-size: 19px; }
 </style>
 <style id="touch-feel">
@@ -96,16 +101,17 @@
 <div id="loading">The Split Lip…</div>
 
 <div id="hud">
-  <div class="side"><div class="bar"><i id="hp0"></i></div><div class="bar wind"><i id="wd0"></i></div><div class="who">You</div></div>
+  <div class="side"><div class="bar"><i id="hp0"></i></div><div class="bar wind"><i id="wd0"></i></div><div class="who" id="us">You</div></div>
   <div class="side r"><div class="bar"><i id="hp1"></i></div><div class="bar wind"><i id="wd1"></i></div><div class="who" id="them"></div></div>
 </div>
-<div id="purse"><span id="coin"></span><span id="ale"></span><button id="hands"></button><button id="cam"></button></div>
+<div id="purse"><span id="coin"></span><span id="ale"></span><button id="room"></button><button id="hands"></button><button id="cam"></button></div>
 <div id="says"><div></div><div></div><div></div></div>
 <div id="note"></div>
 <div id="pow"><b></b><i></i></div>
 
 <div id="look"></div>
 <div id="stick"><div id="ring"><div id="nub"></div></div></div>
+<button id="shove">Shove</button>
 <div id="pad">
   <button data-do="kick">Kick</button>
   <button data-do="block">Block</button>
@@ -122,10 +128,11 @@
   <h1>The Split Lip</h1>
   <p>A tavern. Ale, dice, and bare knuckles in the hay. It's where things get settled.</p>
   <button id="enter">Push the door open</button>
-  <p class="keys">Walk: WASD · Look: ← → or drag · In a fight: J punch (hold for a haymaker; step sideways first for a hook or an uppercut), K kick, L block, Space slip (it goes the way you're stepping), H other arms · V: your eyes or over the shoulder · Answer: Enter or N · Esc quits</p>
+  <div id="mp"><input id="name" maxlength="12" placeholder="Your name" autocomplete="off" autocapitalize="words" spellcheck="false"><button id="hostit">Host a room for friends</button><input id="code" maxlength="4" placeholder="CODE" autocomplete="off" autocapitalize="characters" spellcheck="false"><button id="joinit">Join a friend's</button><div id="net"></div></div>
+  <p class="keys">Walk: WASD · Look: ← → or drag · F shoves the man in front of you (that starts it) · In a fight: J punch (hold for a haymaker; step sideways first for a hook or an uppercut), K kick, L block, Space slip (it goes the way you're stepping), H other arms · V: your eyes or over the shoulder · Answer: Enter or N · Esc quits</p>
 </div>
 <div id="after"><div id="cap"></div></div>
 <div id="fade"></div>
-<script src="brawl.js?v=a1118b2"></script>
+<script src="brawl.js?v=d6b172e"></script>
 </body>
 </html>
