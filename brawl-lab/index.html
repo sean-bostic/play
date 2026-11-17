@@ -77,6 +77,18 @@
   #room { pointer-events: auto; font: inherit; color: inherit; background: rgba(120,20,16,0.6); border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; padding: 2px 9px; } #room:empty { display: none; }
   #shove { display: none; position: fixed; z-index: 3; right: calc(var(--sr) + 20px); bottom: calc(var(--sb) + 24px); width: 92px; height: 92px; border-radius: 50%; background: #1a110bcc; border: 2px solid #e8dcc077; font-size: 17px; font-style: italic; touch-action: none; } #shove:active { background: #5a1410; }
   @media (pointer: coarse) { body.tavern #shove { display: block; } } body.watch #stick, body.watch #pad { display: none !important; }
+  /* the lesson: the words at the top; the stick and the buttons are there on a computer too, and light as they're pressed */
+  #coach { display: none; position: fixed; z-index: 6; left: 50%; top: calc(var(--st) + 40px); transform: translateX(-50%); width: min(92vw, 540px); box-sizing: border-box; padding: 8px 12px 9px; background: #140d09e0; border: 1px solid #5a4630; text-align: center; pointer-events: none; }
+  body.lesson #coach { display: block; } body.lesson #hud, body.lesson #coin, body.lesson #ale { display: none; } body.lesson #purse { top: calc(var(--st) + 8px); font-size: 13px; }
+  #cwho { font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--dim); } #cname { font-size: 26px; line-height: 1.1; }
+  #csteps { display: flex; flex-wrap: wrap; gap: 4px 14px; justify-content: center; margin: 4px 0; font-size: 17px; } #csteps span { padding: 1px 7px; border: 1px solid #0000; border-radius: 4px; } #csteps .now { background: var(--blood); border-color: var(--bone); }
+  #csay { font-size: 14px; font-style: italic; color: var(--dim); min-height: 2.5em; } #csay.said { color: #f0c860; }
+  #coach .row { display: flex; gap: 8px; justify-content: center; margin-top: 4px; } #coach button { pointer-events: auto; padding: 7px 12px; background: var(--wood); border: 1px solid #5a4630; font-size: 14px; } #coach button[hidden] { display: none; }
+  body.lesson #stick, body.lesson #pad { display: block; } body.lesson #pad button.on { box-shadow: 0 0 0 4px var(--bone), 0 0 26px 6px #ff5a4a; } #ring.ghost #nub { transition: transform 0.12s; background: #e8dcc0; } #ring.ghost { border-color: var(--bone); }
+  @media (pointer: fine) { body.lesson #pad button::after { content: attr(data-key); display: block; font: 11px/1 system-ui, sans-serif; color: var(--dim); } body.lesson #ring::after { content: 'W A S D'; position: absolute; left: 0; right: 0; top: 104%; text-align: center; font: 11px/1 system-ui, sans-serif; color: var(--dim); } }
+  @media (max-height: 460px) { #cname { display: inline; font-size: 20px; } #cwho { display: inline; margin-right: 10px; } #csay { min-height: 1.25em; } #csteps { font-size: 15px; gap: 2px 8px; } /* a phone on its side: up in the corner, off his face */
+    #coach { left: calc(var(--sl) + 8px); top: calc(var(--st) + 8px); transform: none; width: min(47vw, 430px); padding: 6px 8px 7px; } body.lesson #cam { margin-right: 0; } }
+  #learn { padding: 10px 18px; background: var(--wood); border: 1px solid #5a4630; }
   #enter { margin-top: 8px; padding: 14px 26px; background: var(--blood); border: 1px solid var(--ink); font-size: 19px; }
 </style>
 <style id="touch-feel">
@@ -113,10 +125,15 @@
 <div id="stick"><div id="ring"><div id="nub"></div></div></div>
 <button id="shove">Shove</button>
 <div id="pad">
-  <button data-do="kick">Kick</button>
-  <button data-do="block">Block</button>
-  <button data-do="dodge">Slip</button>
-  <button data-do="punch">Punch</button>
+  <button data-do="kick" data-key="K">Kick</button>
+  <button data-do="block" data-key="L">Block</button>
+  <button data-do="dodge" data-key="Space">Slip</button>
+  <button data-do="punch" data-key="J">Punch</button>
+</div>
+
+<div id="coach">
+  <div id="cwho"></div><div id="cname"></div><div id="csteps"></div><div id="csay"></div>
+  <div class="row"><button id="cshow">Show me again</button><button id="cskip">Skip</button><button id="cleave">Leave</button></div>
 </div>
 
 <div id="ask" hidden>
@@ -128,11 +145,12 @@
   <h1>The Split Lip</h1>
   <p>A tavern. Ale, dice, and bare knuckles in the hay. It's where things get settled.</p>
   <button id="enter">Push the door open</button>
+  <button id="learn">Learn to fight</button>
   <div id="mp"><input id="name" maxlength="12" placeholder="Your name" autocomplete="off" autocapitalize="words" spellcheck="false"><button id="hostit">Host a room for friends</button><input id="code" maxlength="4" placeholder="CODE" autocomplete="off" autocapitalize="characters" spellcheck="false"><button id="joinit">Join a friend's</button><div id="net"></div></div>
   <p class="keys">Walk: WASD · Look: ← → or drag · F shoves the man in front of you (that starts it) · In a fight: J punch (hold for a haymaker; step sideways first for a hook or an uppercut), K kick, L block, Space slip (it goes the way you're stepping), H other arms · V: your eyes or over the shoulder · Answer: Enter or N · Esc quits</p>
 </div>
 <div id="after"><div id="cap"></div></div>
 <div id="fade"></div>
-<script src="brawl.js?v=d6b172e"></script>
+<script src="brawl.js?v=9f286ae"></script>
 </body>
 </html>
