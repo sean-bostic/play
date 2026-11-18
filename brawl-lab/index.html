@@ -86,7 +86,7 @@
   #mp button { padding: 10px 14px; background: var(--wood); border: 1px solid #5a4630; } #net { flex-basis: 100%; min-height: 1.2em; font-size: 14px; font-style: italic; color: var(--bone); text-shadow: 0 1px 0 #000, 0 0 6px #000; }
   #room { pointer-events: auto; font: inherit; color: inherit; background: rgba(120,20,16,0.6); border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; padding: 2px 9px; } #room:empty { display: none; }
   #shove { display: none; position: fixed; z-index: 3; right: calc(var(--sr) + 20px); bottom: calc(var(--sb) + 24px); width: 92px; height: 92px; border-radius: 50%; background: #1a110bcc; border: 2px solid #e8dcc077; font-size: 17px; font-style: italic; touch-action: none; } #shove:active { background: #5a1410; }
-  @media (pointer: coarse) { body.tavern #shove { display: block; } } body.watch #stick, body.watch #pad { display: none !important; }
+  @media (pointer: coarse) { body.tavern #shove { display: block; } } body.tavern #shove.pal { display: block; background: #8c1c13e6; border-color: var(--bone); font-size: 15px; line-height: 1.1; padding: 4px; } body.watch #stick, body.watch #pad { display: none !important; }
   /* the lesson: the words at the top; the stick and the buttons are there on a computer too, and light as they're pressed */
   #coach { display: none; position: fixed; z-index: 6; left: 50%; top: calc(var(--st) + 50px); transform: translateX(-50%); width: min(92vw, 540px); box-sizing: border-box; padding: 8px 12px 9px; background: #140d09e0; border: 1px solid #5a4630; text-align: center; pointer-events: none; }
   body.lesson #coach { display: block; } body.lesson #hud, body.lesson #coin, body.lesson #ale { display: none; } body.lesson #purse { top: calc(var(--st) + 4px); font-size: 13px; }
@@ -164,6 +164,6 @@
 </div>
 <div id="after"><div id="cap"></div></div>
 <div id="fade"></div>
-<script src="brawl.js?v=de83b0d"></script>
+<script src="brawl.js?v=d87408f"></script>
 </body>
 </html>
