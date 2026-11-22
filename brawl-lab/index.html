@@ -77,6 +77,18 @@
   #pad [data-do=kick] { right: 98px; bottom: 74px; width: 84px; height: 84px; }
   #pad [data-do=block] { right: 122px; bottom: 0; width: 72px; height: 72px; }
   #pad [data-do=dodge] { right: 6px; bottom: 114px; width: 72px; height: 72px; }
+  #pad [data-do=stance] { right: 96px; bottom: 166px; width: 84px; height: 34px; border-radius: 10px; font-size: 12px; font-style: normal; letter-spacing: 0.06em; }
+  /* the swipe fight (beat.js): stroke the right half for a punch; the combo you've swiped, his as it comes, and the beat */
+  #swipe { display: none; position: fixed; z-index: 2; right: 0; top: 0; bottom: 0; width: 50%; touch-action: none; }
+  body.fight.swipe #swipe { display: block; } body.swipe #pad [data-do=punch] { display: none; } @media (pointer: fine) { body.fight #pad { display: block; } body.fight:not(.swipe):not(.lesson) #pad button:not([data-do=stance]) { display: none; } }
+  #combo, #combo2 { display: none; position: fixed; z-index: 4; left: 50%; transform: translateX(-50%); gap: 8px; pointer-events: none; }
+  body.fight.swipe #combo, body.fight.swipe #combo2 { display: flex; } #combo { bottom: calc(var(--sb) + 64px); } #combo2 { top: calc(var(--st) + 44px); left: auto; right: calc(var(--sr) + 128px); transform: none; gap: 5px; }
+  .mv { width: 46px; height: 46px; border-radius: 8px; background: #1a110bcc; border: 2px solid #e8dcc055; color: var(--bone); display: flex; flex-direction: column; align-items: center; justify-content: center; font: 600 22px/1 Georgia, serif; }
+  .mv small { font: 9px/1 system-ui, sans-serif; letter-spacing: 0.05em; color: var(--dim); margin-top: 2px; } .mv.flip b { display: inline-block; transform: scaleX(-1); }
+  .mv.now { background: #5a1410; border-color: var(--bone); } #combo2 .mv { width: 34px; height: 34px; font-size: 16px; } #combo2 .mv small { display: none; } #combo2.tell .mv { animation: tell 0.18s steps(2) infinite; }
+  @keyframes tell { 50% { opacity: 0.25; } } #combo.no { animation: no 0.25s; } @keyframes no { 25% { transform: translateX(calc(-50% - 8px)); } 75% { transform: translateX(calc(-50% + 8px)); } }
+  #beat { display: none; position: fixed; z-index: 4; left: 50%; bottom: calc(var(--sb) + 22px); transform: translateX(-50%); width: min(40vw, 260px); text-align: center; pointer-events: none; font-size: 15px; font-style: italic; text-shadow: 0 1px 0 #000; }
+  body.fight.swipe #beat { display: block; } #beat i { display: block; height: 5px; margin-top: 4px; background: #f0c860; border-radius: 3px; transform-origin: left; } #beat.his i { background: #c0392b; }
 
   #title { position: fixed; z-index: 10; inset: 0; display: flex; flex-direction: column; gap: 14px; align-items: center; justify-content: center; background: linear-gradient(#0d090740, #0d090790), #0d0907 url(art/before.jpg) center / cover; text-align: center; padding: 16px; box-sizing: border-box; }
   body.tavern #title, body.fight #title, body.tapper #title { display: none; }
@@ -133,12 +145,15 @@
 
 <div id="look"></div>
 <div id="stick"><div id="ring"><div id="nub"></div></div></div>
+<div id="swipe"></div>
+<div id="combo"></div><div id="combo2"></div><div id="beat"><span></span><i></i></div>
 <button id="shove">Shove</button>
 <div id="pad">
   <button data-do="kick" data-key="K">Kick</button>
   <button data-do="block" data-key="L">Block</button>
   <button data-do="dodge" data-key="Space">Slip</button>
   <button data-do="punch" data-key="J">Punch</button>
+  <button data-do="stance" data-key="T">Orthodox</button>
 </div>
 
 <div id="kcam">KNUCKLE CAM</div>
@@ -160,10 +175,10 @@
   <button id="enter">Push the door open</button>
   <div><button id="learn">Learn to fight</button> <button id="gear2">Settings</button></div>
   <div id="mp"><input id="name" maxlength="12" placeholder="Your name" autocomplete="off" autocapitalize="words" spellcheck="false"><button id="hostit">Host a room for friends</button><input id="code" maxlength="4" placeholder="CODE" autocomplete="off" autocapitalize="characters" spellcheck="false"><button id="joinit">Join a friend's</button><div id="net"></div></div>
-  <p class="keys">Walk: WASD · Look: ← → or drag · F shoves the man in front of you (that starts it) · In a fight: J punch (hold for a haymaker; step sideways first for a hook or an uppercut), K kick, L block, Space slip (it goes the way you're stepping), H other arms · V: your eyes or over the shoulder · M: settings · Answer: Enter or N · Esc quits</p>
+  <p class="keys">Walk: WASD · Look: ← → or drag · F shoves the man in front of you (that starts it) · In a fight: J punch (hold for a haymaker; step sideways first for a hook or an uppercut), K kick, L block, Space slip (it goes the way you're stepping), H other arms, T stance (southpaw or not) · Swipe fight (menu): 1 jab, 2 and 3 left and right hooks, 4 and 5 uppercuts · V: your eyes or over the shoulder · M: settings · Answer: Enter or N · Esc quits</p>
 </div>
 <div id="after"><div id="cap"></div></div>
 <div id="fade"></div>
-<script src="brawl.js?v=6e6c75c"></script>
+<script src="brawl.js?v=95420e9"></script>
 </body>
 </html>
