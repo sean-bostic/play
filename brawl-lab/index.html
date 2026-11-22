@@ -80,7 +80,7 @@
   #pad [data-do=stance] { right: 96px; bottom: 166px; width: 84px; height: 34px; border-radius: 10px; font-size: 12px; font-style: normal; letter-spacing: 0.06em; }
   /* the swipe fight (beat.js): stroke the right half for a punch; the combo you've swiped, his as it comes, and the beat */
   #swipe { display: none; position: fixed; z-index: 2; right: 0; top: 0; bottom: 0; width: 50%; touch-action: none; }
-  body.fight.swipe #swipe { display: block; } body.swipe #pad [data-do=punch] { display: none; } @media (pointer: fine) { body.fight #pad { display: block; } body.fight:not(.swipe):not(.lesson) #pad button:not([data-do=stance]) { display: none; } }
+  body.fight.swipe #swipe { display: block; } body.swipe #pad { pointer-events: none; } body.swipe #pad button { pointer-events: auto; } body.duel #pad [data-do=stance] { display: none; } /* (a swipe can start between the buttons; no stance in a friend fight: it isn't sent over the wire) */ body.swipe #pad [data-do=punch] { display: none; } @media (pointer: fine) { body.fight #pad { display: block; } body.fight:not(.swipe):not(.lesson) #pad button:not([data-do=stance]) { display: none; } }
   #combo, #combo2 { display: none; position: fixed; z-index: 4; left: 50%; transform: translateX(-50%); gap: 8px; pointer-events: none; }
   body.fight.swipe #combo, body.fight.swipe #combo2 { display: flex; } #combo { bottom: calc(var(--sb) + 64px); } #combo2 { top: calc(var(--st) + 44px); left: auto; right: calc(var(--sr) + 128px); transform: none; gap: 5px; }
   .mv { width: 46px; height: 46px; border-radius: 8px; background: #1a110bcc; border: 2px solid #e8dcc055; color: var(--bone); display: flex; flex-direction: column; align-items: center; justify-content: center; font: 600 22px/1 Georgia, serif; }
@@ -179,6 +179,6 @@
 </div>
 <div id="after"><div id="cap"></div></div>
 <div id="fade"></div>
-<script src="brawl.js?v=95420e9"></script>
+<script src="brawl.js?v=8df8705"></script>
 </body>
 </html>
