@@ -77,6 +77,7 @@
   #pad [data-do=kick] { right: 98px; bottom: 74px; width: 84px; height: 84px; }
   #pad [data-do=block] { right: 122px; bottom: 0; width: 72px; height: 72px; }
   #pad [data-do=dodge] { right: 6px; bottom: 114px; width: 72px; height: 72px; }
+  #pad [data-do=upper] { right: 188px; bottom: 92px; width: 66px; height: 66px; font-size: 14px; } html:not(.upbtn) #pad [data-do=upper], body.swipe #pad [data-do=upper] { display: none; } /* the menu's Uppercut: Button (not in the swipe fight: the J swipe is its uppercut) */
   #pad [data-do=stance] { right: 96px; bottom: 166px; width: 84px; height: 34px; border-radius: 10px; font-size: 12px; font-style: normal; letter-spacing: 0.06em; }
   /* the swipe fight (beat.js): stroke the right half for a punch; the combo you've swiped, his as it comes, and the beat */
   #swipe { display: none; position: fixed; z-index: 2; right: 0; top: 0; bottom: 0; width: 50%; touch-action: none; }
@@ -153,6 +154,7 @@
   <button data-do="block" data-key="L">Block</button>
   <button data-do="dodge" data-key="Space">Slip</button>
   <button data-do="punch" data-key="J">Punch</button>
+  <button data-do="upper" data-key="U">Upper</button>
   <button data-do="stance" data-key="T">Orthodox</button>
 </div>
 
@@ -175,10 +177,10 @@
   <button id="enter">Push the door open</button>
   <div><button id="learn">Learn to fight</button> <button id="gear2">Settings</button></div>
   <div id="mp"><input id="name" maxlength="12" placeholder="Your name" autocomplete="off" autocapitalize="words" spellcheck="false"><button id="hostit">Host a room for friends</button><input id="code" maxlength="4" placeholder="CODE" autocomplete="off" autocapitalize="characters" spellcheck="false"><button id="joinit">Join a friend's</button><div id="net"></div></div>
-  <p class="keys">Walk: WASD · Look: ← → or drag · F shoves the man in front of you (that starts it) · In a fight: J punch (hold for a haymaker; step sideways first for a hook or an uppercut), K kick, L block, Space slip (it goes the way you're stepping), H other arms, T stance (southpaw or not) · Swipe fight (menu): 1 jab, 2 and 3 left and right hooks, 4 and 5 uppercuts · V: your eyes or over the shoulder · M: settings · Answer: Enter or N · Esc quits</p>
+  <p class="keys">Walk: WASD · Look: ← → or drag · F shoves the man in front of you (that starts it) · In a fight: J punch (hold for a haymaker; step sideways first for a hook or an uppercut), U uppercut (menu: Uppercut), K kick, L block, Space slip (it goes the way you're stepping), H other arms, T stance (southpaw or not) · Swipe fight (menu): 1 jab, 2 and 3 left and right hooks, 4 and 5 uppercuts · V: your eyes or over the shoulder · M: settings · Answer: Enter or N · Esc quits</p>
 </div>
 <div id="after"><div id="cap"></div></div>
 <div id="fade"></div>
-<script src="brawl.js?v=8df8705"></script>
+<script src="brawl.js?v=19d873f"></script>
 </body>
 </html>
