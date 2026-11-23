@@ -19,7 +19,7 @@
   #after { position: fixed; inset: 0; z-index: 30; display: flex; align-items: flex-end; justify-content: center; background: #0d0907 url(art/after.jpg) center / cover; filter: brightness(1.12) saturate(0.9); opacity: 0; pointer-events: none; transition: opacity 0.6s; }
   #after.on { opacity: 1; pointer-events: auto; }
   #cap { margin: 0 0 calc(var(--sb) + 7vh); padding: 10px 18px; max-width: min(88vw, 560px); background: #0d0907cc; border: 1px solid #5a4630; text-align: center; font-size: 18px; font-style: italic; }
-  #fade { position: fixed; inset: 0; z-index: 40; background: #000; opacity: 0; pointer-events: none; transition: opacity 0.38s; } #fade.on { opacity: 1; }
+  #fade { position: fixed; inset: 0; z-index: 40; background: #000; opacity: 0; pointer-events: none; transition: opacity 0.38s; display: flex; align-items: center; justify-content: center; font: italic 700 min(13vw, 18vh, 110px)/1 Georgia, serif; color: #f3e6c4; -webkit-text-stroke: min(0.3vw, 2px) #0d0907; text-shadow: 0 0.06em 0 var(--blood, #8a1a14); letter-spacing: 0.02em; } #fade.on { opacity: 1; } /* ("To the pit!" on the black, main.js fade()) */
 
   /* the top. Round the tavern: your purse and how much you've had. In a fight: your blood and his. */
   #purse, #hud { position: fixed; z-index: 3; left: calc(var(--sl) + 12px); right: calc(var(--sr) + 12px); top: calc(var(--st) + 10px); display: none; pointer-events: none; text-shadow: 0 1px 0 #000, 0 0 6px #000; }
@@ -189,6 +189,6 @@
 </div>
 <div id="after"><div id="cap"></div></div>
 <div id="fade"></div>
-<script src="brawl.js?v=e6cb054"></script>
+<script src="brawl.js?v=4035a7e"></script>
 </body>
 </html>
