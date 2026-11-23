@@ -13,7 +13,17 @@
   .glass { background: var(--glass); -webkit-backdrop-filter: blur(12px) saturate(1.2); backdrop-filter: blur(12px) saturate(1.2); border: 1px solid var(--line); border-radius: 14px; }
   #card { position: fixed; left: max(10px, env(safe-area-inset-left)); top: max(10px, env(safe-area-inset-top)); padding: 8px 12px; z-index: 5; max-width: calc(100vw - 190px); }
   #card .row { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
-  #h-sym { font-weight: 700; color: var(--dim); font-size: 13px; letter-spacing: .06em; }
+  #h-coin { display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--line); background: rgba(255,255,255,0.06); border-radius: 99px; padding: 2px 9px 2px 3px; align-self: center; }
+  #h-sym { font-weight: 700; color: var(--ink); font-size: 13px; letter-spacing: .06em; }
+  #h-coin .caret { font-size: 10px; color: var(--dim); }
+  .coinlogo { display: inline-grid; place-items: center; flex: none; border-radius: 99px; background: #fbfaf6; overflow: hidden; box-shadow: 0 0 0 1px rgba(255,200,97,.55); color: #18233d; font-weight: 800; letter-spacing: .02em; }
+  .coinlogo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  #c-list { list-style: none; padding: 0; margin: 6px 0; }
+  #c-list li { margin: 0; }
+  #c-list .coin { display: flex; align-items: center; gap: 12px; width: 100%; text-align: left; border: 0; border-bottom: 1px solid var(--line); background: none; padding: 9px 4px; min-height: 54px; }
+  #c-list .coin.on { background: rgba(127,231,255,0.10); border-radius: 10px; }
+  #c-list .nm { flex: 1; display: flex; flex-direction: column; min-width: 0; } #c-list .nm b { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  #c-list .px { display: flex; flex-direction: column; align-items: flex-end; font-variant-numeric: tabular-nums; } #c-list .px b { font: 700 15px ui-monospace, "SF Mono", Menlo, monospace; } #c-list .ch { font-size: 12px; font-weight: 700; }
   #h-price { font: 700 24px/1.1 ui-monospace, "SF Mono", Menlo, monospace; font-variant-numeric: tabular-nums; }
   #h-chg { font-weight: 700; font-size: 14px; }
   #h-status { font-size: 13px; color: var(--dim); margin-top: 2px; }
@@ -25,7 +35,7 @@
   #btns button { min-width: 40px; height: 40px; padding: 0 10px; font-size: 16px; font-weight: 600; }
   #spark-wrap { position: fixed; left: max(10px, env(safe-area-inset-left)); right: max(10px, env(safe-area-inset-right)); bottom: max(10px, env(safe-area-inset-bottom)); height: 58px; padding: 16px 10px 4px; z-index: 5; box-sizing: border-box; }
   @media (min-aspect-ratio: 1/1) { #spark-wrap { right: auto; width: 360px; } }
-  @media (max-width: 520px) { #card { padding: 6px 10px; } #h-price { font-size: 20px; } #h-status { font-size: 12px; } #h-stats { font-size: 11px; } #btns { flex-direction: column; align-items: flex-end; } #btns button { min-width: 38px; height: 38px; font-size: 14px; padding: 0 9px; } #card { max-width: calc(100vw - 80px); } #spark-wrap { height: 50px; } #h-stats { display: none; } }
+  @media (max-width: 520px) { #card { padding: 6px 10px; } #h-price { font-size: 20px; } #h-status { font-size: 12px; } #h-stats { font-size: 11px; } #btns { flex-direction: column; align-items: flex-end; } #btns button { min-width: 38px; height: 38px; font-size: 14px; padding: 0 9px; } #card { max-width: calc(100vw - 80px); } #spark-wrap { height: 50px; } #h-stats { display: none; } #b-add .wide { display: none; } #h-coin { padding-right: 7px; gap: 5px; } #h-coin .caret { display: none; } }
   #spark-wrap .cap { position: absolute; left: 10px; top: 2px; font-size: 11px; color: var(--dim); }
   #spark { width: 100%; height: 100%; display: block; }
   .panel { position: fixed; z-index: 10; left: 50%; top: 50%; transform: translate(-50%, -50%); width: min(440px, calc(100vw - 24px)); max-height: calc(100vh - 40px); max-height: calc(100dvh - 40px); overflow-y: auto; touch-action: pan-y; -webkit-overflow-scrolling: touch; padding: 16px 18px; display: none; background: rgba(12,18,24,0.92); box-sizing: border-box; }
@@ -63,45 +73,47 @@
 <div id="loading">Running the bath…</div>
 
 <div id="card" class="glass">
-  <div class="row"><span id="h-sym">XRP</span><span id="h-price">—</span><span id="h-chg"></span><span id="h-badge" class="badge"></span></div>
+  <div class="row"><button id="h-coin" aria-label="Pick a coin"><span id="h-logo"></span><span id="h-sym">XRP</span><span class="caret">▾</span></button><span id="h-price">—</span><span id="h-chg"></span><span id="h-badge" class="badge"></span></div>
   <div id="h-status">Connecting to the market…</div>
   <div id="h-stats"></div>
 </div>
-<div id="btns"><button id="b-info" class="glass" aria-label="What this shows">ⓘ</button><button id="b-add" class="glass" aria-label="Add a target line">＋ Target</button><button id="b-set" class="glass" aria-label="Settings">⚙</button></div>
+<div id="btns"><button id="b-info" class="glass" aria-label="What this shows">ⓘ</button><button id="b-add" class="glass" aria-label="Add a target line">＋<span class="wide"> Target</span></button><button id="b-set" class="glass" aria-label="Settings">⚙</button></div>
 <div id="spark-wrap" class="glass"><span class="cap" id="spark-cap">Buying vs selling, last 10 min</span><canvas id="spark"></canvas></div>
 <div id="toast" class="glass"></div>
 
 <div id="p-info" class="panel glass"><button class="close" aria-label="Close">✕</button>
-  <h2>The XRP Bathtub</h2>
+  <h2>The XRP Bathtub <span class="small">· now showing <span class="v-sym">XRP</span></span></h2>
   <ul>
-    <li><b>The water level is the price</b> on the tub's own scale: the bottom of the tub is <span class="v-min">$0.10</span>, the rim is <span class="v-max">$10</span>. It's a log scale, so each step up the tub is a multiple ($0.10 → $1 → $10 is the same climb twice). Change the scale in ⚙.</li>
-    <li><b>The faucet runs when buyers are winning:</b> over the last minute, more dollars of XRP were bought from sellers than sold to buyers, counting every trade on Coinbase as it happens. The harder the buying, the harder it pours.</li>
+    <li><b>The water level is the price</b> on the tub's own scale: the bottom of the tub is <span class="v-min">$0.10</span>, the rim is <span class="v-max">$10</span>. It's a log scale, so each step up the tub is a multiple ($0.10 → $1 → $10 is the same climb twice). Change the scale in ⚙ (each coin keeps its own).</li>
+    <li><b>Pick the coin:</b> tap its logo (top left, or the logo on the wall) for the top ten by market cap. XRP is the default. Each coin has its own scale, its own target lines and its own all-time high.</li>
+    <li><b>The faucet runs when buyers are winning:</b> over the last minute, more dollars of <span class="v-sym">XRP</span> were bought from sellers than sold to buyers, counting every trade on one exchange as it happens. The harder the buying, the harder it pours.</li>
     <li><b>The drain opens when sellers are winning</b> the minute. The harder the selling, the faster it swirls.</li>
     <li>The flow also nudges the water a little above or below the price, so you can watch buying pour in and selling drain out (⚙ → Flow nudge).</li>
     <li><b>Lines in the tub:</b> gold is the all-time high (from CoinGecko). Add your own with ＋ Target; tap a line's label to remove it.</li>
-    <li><b>The lettering on the wall</b> above the tub has it all: the price, the day's change, the 24-hour high, low and volume, market cap, Coinbase's volume, the all-time high (in gold) and the last minute's flow with the last ten minutes beside it. Tap it to look at it straight on; tap again to come back.</li>
+    <li><b>The lettering on the wall</b> above the tub has it all: the price, the day's change, the 24-hour high, low and volume, market cap, the exchange's volume, the all-time high (in gold) and the last minute's flow with the last ten minutes beside it. Tap it to look at it straight on; tap again to come back.</li>
   </ul>
   <h3>"Liquidity", "volume", "flow"</h3>
   <p><b>Volume</b> is how much traded in 24 hours. <b>Flow</b> here is buying minus selling: on every trade one side crossed over to take the other's price, and that's who we count. <b>Liquidity</b>, strictly, is how much can be bought or sold without moving the price much (how deep the order book is). This first pass shows flow and volume, the closest live numbers that are free; order-book depth could come next.</p>
   <h3>Where the numbers come from</h3>
-  <p>Coinbase Exchange (XRP-USD: every trade and the price, live). CoinGecko (all-time high, market cap, 24 h volume across all exchanges, every 90 s). If a feed is down you'll see — and an "offline" badge, never made-up numbers. <span class="small">Add ?demo to the address for a pretend market that fills and drains on its own.</span></p>
+  <p><b>The flow for <span class="v-sym">XRP</span> comes from</b> <span id="i-venue">Coinbase</span>. CoinGecko: the coin list and logos, all-time high, market cap, 24 h volume across all exchanges (one call a minute for all ten). All free, public, no account. If a feed is down you'll see — and an "offline" badge, never made-up numbers. <span class="small">Add ?demo to the address for a pretend market that fills and drains on its own.</span></p>
   <p class="small">Bathtub model: "Photorealistic Bathtub" by Igrium (sketchfab.com/Sam54123), CC BY 4.0. Everything else is drawn in code.</p>
 </div>
 
 <div id="p-set" class="panel glass"><button class="close" aria-label="Close">✕</button>
   <h2>Settings</h2>
+  <h3>The tub's scale for <span class="v-sym">XRP</span></h3>
   <label>Price at the tub's bottom <input id="s-min" type="number" step="any" min="0.0001" inputmode="decimal"></label>
   <label>Price at the rim <input id="s-max" type="number" step="any" min="0.001" inputmode="decimal"></label>
   <label>Scale <select id="s-log"><option value="1">Log (multiples)</option><option value="0">Straight</option></select></label>
   <label>Flow nudge <select id="s-effect"><option value="off">Off</option><option value="subtle">Subtle</option><option value="strong">Strong</option></select></label>
   <label>Picture quality <select id="s-quality"><option value="auto">Auto</option><option value="high">High</option><option value="low">Low (cooler phone)</option></select></label>
-  <h3>Target lines</h3>
+  <h3><span class="v-sym">XRP</span> target lines</h3>
   <ul class="tlist" id="s-targets"></ul>
   <p><button class="act" id="s-add">＋ Add a target</button><button class="act" id="s-reset">Reset scale</button></p>
 </div>
 
 <div id="p-add" class="panel glass"><button class="close" aria-label="Close">✕</button>
-  <h2>Mark a target on the tub</h2>
+  <h2 id="a-title">Mark a target on the tub</h2>
   <label>Price ($) <input id="a-price" type="text" inputmode="decimal" placeholder="5.00" autocomplete="off"></label>
   <label>Name (optional) <input id="a-label" type="text" maxlength="24" placeholder="Moon" autocomplete="off"></label>
   <p class="small" id="a-hint"></p>
@@ -113,5 +125,11 @@
   <p><button class="act danger" id="l-del">Remove this line</button></p>
 </div>
 
-<script src="bathtub.js?v=2ed0529"></script>
+<div id="p-coin" class="panel glass"><button class="close" aria-label="Close">✕</button>
+  <h2>Pick a coin</h2>
+  <ul id="c-list"></ul>
+  <p class="small" id="c-note"></p>
+</div>
+
+<script src="bathtub.js?v=4602ee0"></script>
 </body></html>
