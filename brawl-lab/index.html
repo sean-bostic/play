@@ -47,6 +47,13 @@
   /* a man's dropped: the big word slams in, a line under it */
   #pow { position: fixed; z-index: 5; left: 0; right: 0; top: calc(var(--st) + 84px); bottom: calc(var(--sb) + 7%); display: none; flex-direction: column; justify-content: space-between; text-align: center; pointer-events: none; }
   #pow.on { display: flex; }
+  /* the pit's count: 3, 2, 1, FIGHT! (main.js entered()) */
+  #count { display: none; position: fixed; z-index: 5; left: 0; right: 0; top: calc(var(--st) + 22%); text-align: center; pointer-events: none; font: 700 min(24vw, 32vh, 200px)/1 Georgia, serif; color: #f3e6c4; -webkit-text-stroke: min(0.5vw, 4px) #0d0907; text-shadow: 0 0.06em 0 var(--blood), 0 0.1em 0 #0d0907, 0 0 0.5em #000; }
+  #count.on { display: block; animation: count 0.9s cubic-bezier(0.2, 1.3, 0.4, 1) both; }
+  #count.go { font-size: min(17vw, 26vh, 150px); color: #ffd27a; letter-spacing: 0.03em; animation: countgo 0.9s cubic-bezier(0.2, 1.4, 0.4, 1) both; }
+  @keyframes count { 0% { transform: scale(2.3); opacity: 0; } 22% { transform: scale(1); opacity: 1; } 78% { opacity: 1; } 100% { transform: scale(0.88); opacity: 0; } }
+  @keyframes countgo { 0% { transform: scale(2.8) rotate(-4deg); opacity: 0; } 18% { transform: scale(1) rotate(-2deg); opacity: 1; } 30% { transform: scale(1.08) rotate(-2deg); } 80% { opacity: 1; } 100% { transform: scale(1.25) rotate(-2deg); opacity: 0; } }
+  body.kcam #count { display: none; }
   #pow b { display: block; font: 700 min(15vw, 21vh, 130px)/0.9 Georgia, serif; letter-spacing: 0.02em; color: #f3e6c4; -webkit-text-stroke: min(0.5vw, 4px) #0d0907; text-shadow: 0 0.06em 0 var(--blood), 0 0.1em 0 #0d0907, 0 0 0.5em #000; transform-origin: 50% 60%; animation: slam 2s cubic-bezier(0.2, 1.6, 0.3, 1) both; }
   #pow.lost b { color: #c9bfae; text-shadow: 0 0.06em 0 #2a2622, 0 0.1em 0 #0d0907, 0 0 0.5em #000; }
   #pow i { display: block; margin-top: 0.5em; font-size: min(5vw, 24px); text-shadow: 0 1px 0 #000, 0 0 8px #000, 0 0 3px #000; animation: under 3.3s both; }
@@ -143,6 +150,7 @@
 <div id="says"><div></div><div></div><div></div></div>
 <div id="note"></div>
 <div id="pow"><b></b><i></i></div>
+<div id="count"></div>
 
 <div id="look"></div>
 <div id="stick"><div id="ring"><div id="nub"></div></div></div>
@@ -181,6 +189,6 @@
 </div>
 <div id="after"><div id="cap"></div></div>
 <div id="fade"></div>
-<script src="brawl.js?v=19d873f"></script>
+<script src="brawl.js?v=5a97c78"></script>
 </body>
 </html>
