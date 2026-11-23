@@ -25,7 +25,7 @@
   #btns button { min-width: 40px; height: 40px; padding: 0 10px; font-size: 16px; font-weight: 600; }
   #spark-wrap { position: fixed; left: max(10px, env(safe-area-inset-left)); right: max(10px, env(safe-area-inset-right)); bottom: max(10px, env(safe-area-inset-bottom)); height: 58px; padding: 16px 10px 4px; z-index: 5; box-sizing: border-box; }
   @media (min-aspect-ratio: 1/1) { #spark-wrap { right: auto; width: 360px; } }
-  @media (max-width: 520px) { #card { padding: 6px 10px; } #h-price { font-size: 20px; } #h-status { font-size: 12px; } #h-stats { font-size: 11px; } #btns { flex-direction: column; align-items: flex-end; } #btns button { min-width: 38px; height: 38px; font-size: 14px; padding: 0 9px; } #card { max-width: calc(100vw - 80px); } #spark-wrap { height: 50px; } }
+  @media (max-width: 520px) { #card { padding: 6px 10px; } #h-price { font-size: 20px; } #h-status { font-size: 12px; } #h-stats { font-size: 11px; } #btns { flex-direction: column; align-items: flex-end; } #btns button { min-width: 38px; height: 38px; font-size: 14px; padding: 0 9px; } #card { max-width: calc(100vw - 80px); } #spark-wrap { height: 50px; } #h-stats { display: none; } }
   #spark-wrap .cap { position: absolute; left: 10px; top: 2px; font-size: 11px; color: var(--dim); }
   #spark { width: 100%; height: 100%; display: block; }
   .panel { position: fixed; z-index: 10; left: 50%; top: 50%; transform: translate(-50%, -50%); width: min(440px, calc(100vw - 24px)); max-height: calc(100vh - 40px); max-height: calc(100dvh - 40px); overflow-y: auto; touch-action: pan-y; -webkit-overflow-scrolling: touch; padding: 16px 18px; display: none; background: rgba(12,18,24,0.92); box-sizing: border-box; }
@@ -79,7 +79,7 @@
     <li><b>The drain opens when sellers are winning</b> the minute. The harder the selling, the faster it swirls.</li>
     <li>The flow also nudges the water a little above or below the price, so you can watch buying pour in and selling drain out (⚙ → Flow nudge).</li>
     <li><b>Lines in the tub:</b> gold is the all-time high (from CoinGecko). Add your own with ＋ Target; tap a line's label to remove it.</li>
-    <li><b>The display on the wall:</b> tap it to switch between price, volume and flow.</li>
+    <li><b>The lettering on the wall</b> above the tub has it all: the price, the day's change, the 24-hour high, low and volume, market cap, Coinbase's volume, the all-time high (in gold) and the last minute's flow with the last ten minutes beside it. Tap it to look at it straight on; tap again to come back.</li>
   </ul>
   <h3>"Liquidity", "volume", "flow"</h3>
   <p><b>Volume</b> is how much traded in 24 hours. <b>Flow</b> here is buying minus selling: on every trade one side crossed over to take the other's price, and that's who we count. <b>Liquidity</b>, strictly, is how much can be bought or sold without moving the price much (how deep the order book is). This first pass shows flow and volume, the closest live numbers that are free; order-book depth could come next.</p>
@@ -113,5 +113,5 @@
   <p><button class="act danger" id="l-del">Remove this line</button></p>
 </div>
 
-<script src="bathtub.js?v=39ca0bd"></script>
+<script src="bathtub.js?v=f196354"></script>
 </body></html>
