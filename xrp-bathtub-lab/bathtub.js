@@ -1,0 +1,1 @@
+(()=>{var r=/\/[^/]+-lab\//.test(location.pathname);if(r)for(let t of["getItem","setItem","removeItem"]){let e=Storage.prototype[t];Storage.prototype[t]=function(o,...n){return e.call(this,`lab:${o}`,...n)}}document.getElementById("msg").textContent="XRP Bathtub: filling the tub... (first build on its way)";})();
