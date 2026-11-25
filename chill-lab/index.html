@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Chill House</title>
+<style>
+  :root { --ink: #10181c; --sand: #f4ead6; --sun: #ffc870; --sea: #3f8f86;
+    --st: env(safe-area-inset-top); --sb: env(safe-area-inset-bottom); --sl: env(safe-area-inset-left); --sr: env(safe-area-inset-right); }
+  html, body { margin: 0; height: 100%; overflow: hidden; background: #c9cfd0; color: var(--sand); font: 16px/1.3 ui-rounded, "SF Pro Rounded", system-ui, -apple-system, sans-serif; }
+  canvas { position: fixed; inset: 0; width: 100%; height: 100%; display: block; }
+  .hud { position: fixed; z-index: 3; pointer-events: none; text-shadow: 0 1px 2px #0008, 0 0 10px #0006; }
+  #stats { left: calc(var(--sl) + 14px); top: calc(var(--st) + 12px); font-size: 15px; opacity: 0.85; }
+  #vibe { left: calc(var(--sl) + 14px); top: calc(var(--st) + 34px); font-size: 13px; font-style: italic; opacity: 0.7; }
+  #vibe::before { content: 'vibe: '; opacity: 0.7; }
+  #fps { right: calc(var(--sr) + 12px); bottom: calc(var(--sb) + 8px); font-size: 11px; opacity: 0.35; }
+  #q { right: calc(var(--sr) + 12px); bottom: calc(var(--sb) + 22px); font-size: 11px; opacity: 0.35; }
+  #prompt { left: 50%; bottom: calc(var(--sb) + 9vh); transform: translateX(-50%) translateY(8px); padding: 9px 18px; border-radius: 999px; background: #10181cb0; backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+    font-size: 17px; white-space: nowrap; opacity: 0; transition: opacity 0.25s, transform 0.25s; text-shadow: none; }
+  #prompt.on { opacity: 1; transform: translateX(-50%); }
+  #say { left: 50%; top: calc(var(--st) + 16%); transform: translateX(-50%); font-size: 22px; font-style: italic; opacity: 0; transition: opacity 0.6s; text-align: center; max-width: 86vw; }
+  #say.on { opacity: 1; }
+  #cross { left: 50%; top: 50%; width: 4px; height: 4px; margin: -2px; border-radius: 50%; background: #fff8; box-shadow: 0 0 3px #0008; }
+  body.touch #cross { display: none; }
+  #meter { left: 50%; bottom: calc(var(--sb) + 15vh); width: 220px; height: 12px; margin-left: -110px; border-radius: 6px; background: #10181cb0; overflow: hidden; display: none; }
+  #meter.on { display: block; }
+  #meter::after { content: ''; position: absolute; left: 66%; width: 12%; top: 0; bottom: 0; background: #5ad88a55; border-left: 2px solid #5ad88a; border-right: 2px solid #5ad88a; }
+  #fill { height: 100%; width: 0; background: linear-gradient(90deg, var(--sun), #ff8a3a); }
+  #fade { position: fixed; inset: 0; z-index: 20; background: #0a0d10; display: flex; align-items: center; justify-content: center; font-size: 26px; font-style: italic; opacity: 0; pointer-events: none; transition: opacity 0.9s; }
+  #fade.on { opacity: 1; }
+  #title { position: fixed; inset: 0; z-index: 30; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; cursor: pointer;
+    background: radial-gradient(ellipse at 50% 120%, #ffb86a66, transparent 60%), linear-gradient(#1d3a4acc, #10181c99); transition: opacity 1.2s; text-align: center; padding: 0 20px; }
+  #title.gone { opacity: 0; pointer-events: none; }
+  #title h1 { margin: 0; font: 800 min(15vw, 96px)/0.95 ui-rounded, "SF Pro Rounded", system-ui, sans-serif; letter-spacing: -0.02em; color: var(--sun); text-shadow: 0 4px 0 #b8502a, 0 10px 30px #0008; }
+  #title p { margin: 0; font-size: 19px; opacity: 0.9; } #title .go { margin-top: 22px; padding: 12px 30px; border-radius: 999px; background: var(--sea); font-weight: 700; font-size: 18px; box-shadow: 0 6px 20px #0006; }
+  #help { position: fixed; z-index: 25; left: 50%; top: 50%; transform: translate(-50%, -50%); width: min(92vw, 520px); max-height: 86vh; overflow-y: auto; touch-action: pan-y; padding: 18px 22px; border-radius: 18px; background: #10181ce8; display: none; font-size: 15px; }
+  #help.on { display: block; } #help h2 { margin: 0 0 8px; color: var(--sun); } #help td { padding: 3px 10px 3px 0; vertical-align: top; } #help td:first-child { color: var(--sun); white-space: nowrap; }
+  /* the phone: a stick for the left thumb, drag to look, four buttons */
+  #t-stick, #t-look, #t-buttons, #t-top { display: none; }
+  body.touch #t-stick { display: block; position: fixed; left: 0; bottom: 0; width: 45%; height: 65%; z-index: 4; }
+  body.touch #t-look { display: block; position: fixed; right: 0; top: 0; width: 55%; height: 100%; z-index: 3; }
+  #t-ring { position: fixed; width: 112px; height: 112px; margin: -56px 0 0 -56px; border-radius: 50%; border: 2px solid #ffffff70; background: #10181c30; display: none; pointer-events: none; z-index: 5; }
+  #t-nub { position: absolute; left: 50%; top: 50%; width: 50px; height: 50px; border-radius: 50%; background: #f4ead6cc; transform: translate(-50%, -50%); }
+  body.touch #t-buttons { display: block; }
+  #t-buttons button { position: fixed; z-index: 6; border: 2px solid #ffffff90; border-radius: 50%; background: #10181c70; color: #fff; font: 700 16px system-ui, sans-serif; -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px); }
+  #t-buttons button.on { background: var(--sea); transform: scale(0.94); }
+  #t-use { width: 84px; height: 84px; right: calc(var(--sr) + 22px); bottom: calc(var(--sb) + 30px); font-size: 19px !important; }
+  #t-act { width: 70px; height: 70px; right: calc(var(--sr) + 118px); bottom: calc(var(--sb) + 22px); font-size: 28px !important; }
+  #t-jump { width: 54px; height: 54px; right: calc(var(--sr) + 40px); bottom: calc(var(--sb) + 128px); }
+  #t-view { width: 46px; height: 46px; right: calc(var(--sr) + 14px); top: calc(var(--st) + 12px); }
+  #t-music { width: 46px; height: 46px; right: calc(var(--sr) + 68px); top: calc(var(--st) + 12px); }
+  #t-help { width: 46px; height: 46px; right: calc(var(--sr) + 122px); top: calc(var(--st) + 12px); }
+</style>
+<style id="touch-feel">
+  html, body { -webkit-text-size-adjust: 100%; -webkit-tap-highlight-color: transparent; overscroll-behavior: none; touch-action: manipulation; }
+  *, *::before, *::after { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+  input, textarea, [contenteditable] { -webkit-user-select: text; user-select: text; }
+  canvas { touch-action: none; }
+</style>
+<script id="touch-feel-js">
+  (() => {
+    const typing = (e) => e.target.closest?.('input, textarea, [contenteditable]');
+    for (const ev of ['contextmenu', 'selectstart', 'dragstart']) addEventListener(ev, (e) => { if (!typing(e)) e.preventDefault(); });
+    for (const ev of ['gesturestart', 'gesturechange', 'gestureend']) addEventListener(ev, (e) => e.preventDefault(), { passive: false });
+    addEventListener('touchmove', (e) => { if (e.touches.length > 1) e.preventDefault(); }, { passive: false });
+  })();
+</script>
+
+</head>
+<body>
+<div id="title"><h1>Chill House</h1><p>No goals. No timer. Grab a cold one.</p><div class="go">Come on in</div></div>
+<div id="stats" class="hud"></div><div id="vibe" class="hud"></div>
+<div id="prompt" class="hud"></div><div id="say" class="hud"></div><div id="cross" class="hud"></div>
+<div id="meter" class="hud"><div id="fill"></div></div>
+<div id="fps" class="hud"></div><div id="q" class="hud"></div>
+<div id="fade"></div>
+<div id="help"><h2>How to chill</h2><table>
+  <tr><td>WASD · mouse</td><td>walk and look (click to grab the mouse; Esc quits)</td></tr>
+  <tr><td>E</td><td>use what's in front of you: grab a beer, sit, eat a slice, pet Biscuit, get in the El Camino. Again to get up or out.</td></tr>
+  <tr><td>Click (or F)</td><td>do the thing in your hand: sip, take a hit, bite, throw the ball. With the basketball: hold, let go on the green.</td></tr>
+  <tr><td>Q</td><td>put it down</td></tr>
+  <tr><td>V</td><td>first or third person</td></tr>
+  <tr><td>Shift · Space</td><td>jog · hop</td></tr>
+  <tr><td>Driving</td><td>W gas, S brake and back up, A D steer, Space handbrake, E get out</td></tr>
+  <tr><td>M · G · H</td><td>music · graphics (Mac or phone look) · this card</td></tr>
+  <tr><td>Gamepad</td><td>sticks walk and look, A use, X action, Y view, B hop, LB jog; RT gas, LT brake</td></tr>
+  <tr><td>Phone</td><td>left thumb walks, drag to look; Use, ✋ action, ⬆ hop, 👁 view</td></tr>
+</table><p style="opacity:.7">Things to do: the fridge and the coolers, the joint on the coffee table and on the porch, the pizza box, the TV, the stereo, the hammock, the chairs on the west deck at sunset, the fire pit, the end of the dock, the bed, the hoop, Biscuit's ball by the stairs, the El Camino and the bike.</p></div>
+<div id="t-stick"></div><div id="t-ring"><div id="t-nub"></div></div><div id="t-look"></div>
+<div id="t-buttons">
+  <button id="t-use" data-do="use">Use</button><button id="t-act" data-do="act">✋</button><button id="t-jump" data-do="jump">⬆</button>
+  <button id="t-view" data-do="view">👁</button><button id="t-music" data-do="music">🎵</button><button id="t-help" data-do="help">?</button>
+</div>
+<script src="chill.js?v=0c792ce"></script>
+</body>
+</html>
