@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="robots" content="noindex">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#0b1014">
+<title>XRP Bathtub</title>
+<style>
+  :root { --ink: #e9f6ff; --dim: rgba(220,240,255,0.66); --glass: rgba(10,16,22,0.62); --line: rgba(160,220,255,0.16); --up: #5dffa4; --down: #ff6150; --gold: #ffc861; --cyan: #7fe7ff; }
+  html, body { margin: 0; height: 100%; overflow: hidden; background: #0b1014; color: var(--ink); font: 15px/1.35 system-ui, -apple-system, "Segoe UI", sans-serif; }
+  canvas#view { position: fixed; inset: 0; width: 100%; height: 100%; display: block; }
+  #loading { position: fixed; inset: 0; display: grid; place-items: center; background: #0b1014; z-index: 20; font-weight: 600; letter-spacing: .02em; transition: opacity .6s; }
+  #loading.gone { opacity: 0; pointer-events: none; }
+  .glass { background: var(--glass); -webkit-backdrop-filter: blur(12px) saturate(1.2); backdrop-filter: blur(12px) saturate(1.2); border: 1px solid var(--line); border-radius: 14px; }
+  #card { position: fixed; left: max(10px, env(safe-area-inset-left)); top: max(10px, env(safe-area-inset-top)); padding: 8px 12px; z-index: 5; max-width: calc(100vw - 190px); }
+  #card .row { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+  #h-coin { display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--line); background: rgba(255,255,255,0.06); border-radius: 99px; padding: 2px 9px 2px 3px; align-self: center; }
+  #h-sym { font-weight: 700; color: var(--ink); font-size: 13px; letter-spacing: .06em; }
+  #h-coin .caret { font-size: 10px; color: var(--dim); }
+  .coinlogo { display: inline-grid; place-items: center; flex: none; border-radius: 99px; background: #fbfaf6; overflow: hidden; box-shadow: 0 0 0 1px rgba(255,200,97,.55); color: #18233d; font-weight: 800; letter-spacing: .02em; }
+  .coinlogo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  #c-list { list-style: none; padding: 0; margin: 6px 0; }
+  #c-list li { margin: 0; }
+  #c-list .coin { display: flex; align-items: center; gap: 12px; width: 100%; text-align: left; border: 0; border-bottom: 1px solid var(--line); background: none; padding: 9px 4px; min-height: 54px; }
+  #c-list .coin.on { background: rgba(127,231,255,0.10); border-radius: 10px; }
+  #c-list .nm { flex: 1; display: flex; flex-direction: column; min-width: 0; } #c-list .nm b { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  #c-list .px { display: flex; flex-direction: column; align-items: flex-end; font-variant-numeric: tabular-nums; } #c-list .px b { font: 700 15px ui-monospace, "SF Mono", Menlo, monospace; } #c-list .ch { font-size: 12px; font-weight: 700; }
+  #h-price { font: 700 24px/1.1 ui-monospace, "SF Mono", Menlo, monospace; font-variant-numeric: tabular-nums; }
+  #h-chg { font-weight: 700; font-size: 14px; }
+  #h-status { font-size: 13px; color: var(--dim); margin-top: 2px; }
+  #h-stats { font-size: 12px; color: var(--dim); margin-top: 2px; font-variant-numeric: tabular-nums; }
+  .badge { font-size: 11px; font-weight: 700; padding: 1px 7px; border-radius: 99px; letter-spacing: .05em; }
+  .badge.off { background: rgba(255,97,80,.2); color: var(--down); } .badge.demo { background: rgba(255,200,97,.2); color: var(--gold); } .badge.live { background: rgba(93,255,164,.14); color: var(--up); }
+  #btns { position: fixed; right: max(10px, env(safe-area-inset-right)); top: max(10px, env(safe-area-inset-top)); display: flex; gap: 6px; z-index: 5; }
+  button { font: inherit; color: var(--ink); cursor: pointer; }
+  #btns button { min-width: 40px; height: 40px; padding: 0 10px; font-size: 16px; font-weight: 600; }
+  #spark-wrap { position: fixed; left: max(10px, env(safe-area-inset-left)); right: max(10px, env(safe-area-inset-right)); bottom: max(10px, env(safe-area-inset-bottom)); height: 58px; padding: 16px 10px 4px; z-index: 5; box-sizing: border-box; }
+  @media (min-aspect-ratio: 1/1) { #spark-wrap { right: auto; width: 360px; } }
+  @media (max-width: 520px) { #card { padding: 6px 10px; } #h-price { font-size: 20px; } #h-status { font-size: 12px; } #h-stats { font-size: 11px; } #btns { flex-direction: column; align-items: flex-end; } #btns button { min-width: 38px; height: 38px; font-size: 14px; padding: 0 9px; } #card { max-width: calc(100vw - 80px); } #spark-wrap { height: 50px; } #h-stats { display: none; } #b-add .wide { display: none; } #h-coin { padding-right: 7px; gap: 5px; } #h-coin .caret { display: none; } }
+  #spark-wrap .cap { position: absolute; left: 10px; top: 2px; font-size: 11px; color: var(--dim); }
+  #spark { width: 100%; height: 100%; display: block; }
+  .panel { position: fixed; z-index: 10; left: 50%; top: 50%; transform: translate(-50%, -50%); width: min(440px, calc(100vw - 24px)); max-height: calc(100vh - 40px); max-height: calc(100dvh - 40px); overflow-y: auto; touch-action: pan-y; -webkit-overflow-scrolling: touch; padding: 16px 18px; display: none; background: rgba(12,18,24,0.92); box-sizing: border-box; }
+  .panel.open { display: block; }
+  .panel h2 { margin: 0 34px 8px 0; font-size: 18px; } .panel h3 { margin: 14px 0 4px; font-size: 14px; color: var(--cyan); }
+  .panel p, .panel li { color: #d4e6f2; margin: 6px 0; } .panel ul { padding-left: 18px; margin: 6px 0; }
+  .panel .close { position: absolute; right: 8px; top: 8px; width: 36px; height: 36px; border-radius: 99px; border: 0; background: rgba(255,255,255,0.08); font-size: 18px; }
+  .panel label { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin: 8px 0; }
+  .panel input, .panel select { font: inherit; font-size: 16px; color: var(--ink); background: rgba(255,255,255,0.08); border: 1px solid var(--line); border-radius: 8px; padding: 6px 8px; width: 140px; box-sizing: border-box; }
+  .panel select option { color: #000; }
+  .panel .act { border: 1px solid var(--line); background: rgba(127,231,255,0.14); border-radius: 10px; padding: 8px 14px; font-weight: 600; margin: 2px 4px 2px 0; }
+  .panel .act.danger { background: rgba(255,97,80,0.16); }
+  .tlist { list-style: none; padding: 0 !important; } .tlist li { display: flex; justify-content: space-between; align-items: center; padding: 4px 0; border-bottom: 1px solid var(--line); }
+  .tlist button { border: 0; background: rgba(255,97,80,.16); border-radius: 8px; padding: 4px 10px; }
+  .small { font-size: 12px; color: var(--dim) !important; }
+  #toast { position: fixed; left: 50%; bottom: 84px; transform: translateX(-50%); padding: 8px 14px; z-index: 12; display: none; font-size: 14px; white-space: nowrap; }
+</style>
+<!-- 👆 Callsign's touch feel: no zoom, no text highlight, no long-press bubble (downloads/touch-feel.html). -->
+<style id="touch-feel">
+  html, body { -webkit-text-size-adjust: 100%; -webkit-tap-highlight-color: transparent; overscroll-behavior: none; touch-action: manipulation; }
+  *, *::before, *::after { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+  input, textarea, [contenteditable] { -webkit-user-select: text; user-select: text; }
+  canvas { touch-action: none; }
+</style>
+<script id="touch-feel-js">
+  (() => {
+    const typing = (e) => e.target.closest?.('input, textarea, [contenteditable]');
+    for (const ev of ['contextmenu', 'selectstart', 'dragstart']) addEventListener(ev, (e) => { if (!typing(e)) e.preventDefault(); });
+    for (const ev of ['gesturestart', 'gesturechange', 'gestureend']) addEventListener(ev, (e) => e.preventDefault(), { passive: false });
+    addEventListener('touchmove', (e) => { if (e.touches.length > 1) e.preventDefault(); }, { passive: false });
+  })();
+</script>
+</head><body>
+<canvas id="view"></canvas>
+<div id="loading">Running the bath…</div>
+
+<div id="card" class="glass">
+  <div class="row"><button id="h-coin" aria-label="Pick a coin"><span id="h-logo"></span><span id="h-sym">XRP</span><span class="caret">▾</span></button><span id="h-price">—</span><span id="h-chg"></span><span id="h-badge" class="badge"></span></div>
+  <div id="h-status">Connecting to the market…</div>
+  <div id="h-stats"></div>
+</div>
+<div id="btns"><button id="b-info" class="glass" aria-label="What this shows">ⓘ</button><button id="b-add" class="glass" aria-label="Add a target line">＋<span class="wide"> Target</span></button><button id="b-set" class="glass" aria-label="Settings">⚙</button></div>
+<div id="spark-wrap" class="glass"><span class="cap" id="spark-cap">Buying vs selling, last 10 min</span><canvas id="spark"></canvas></div>
+<div id="toast" class="glass"></div>
+
+<div id="p-info" class="panel glass"><button class="close" aria-label="Close">✕</button>
+  <h2>The XRP Bathtub <span class="small">· now showing <span class="v-sym">XRP</span></span></h2>
+  <ul>
+    <li><b>The water level is the price</b> on the tub's own scale: the bottom of the tub is <span class="v-min">$0.10</span>, the rim is <span class="v-max">$10</span>. It's a log scale, so each step up the tub is a multiple ($0.10 → $1 → $10 is the same climb twice). Change the scale in ⚙ (each coin keeps its own).</li>
+    <li><b>Pick the coin:</b> tap its logo (top left, or the logo on the wall) for the top ten by market cap. XRP is the default. Each coin has its own scale, its own target lines and its own all-time high.</li>
+    <li><b>The faucet runs when buyers are winning:</b> over the last minute, more dollars of <span class="v-sym">XRP</span> were bought from sellers than sold to buyers, counting every trade on one exchange as it happens. The harder the buying, the harder it pours.</li>
+    <li><b>The drain opens when sellers are winning</b> the minute. The harder the selling, the faster it swirls.</li>
+    <li>The flow also nudges the water a little above or below the price, so you can watch buying pour in and selling drain out (⚙ → Flow nudge).</li>
+    <li><b>Lines in the tub:</b> gold is the all-time high (from CoinGecko). Add your own with ＋ Target; tap a line's label to remove it.</li>
+    <li><b>The lettering on the wall</b> above the tub has it all: the price, the day's change, the 24-hour high, low and volume, market cap, the exchange's volume, the all-time high (in gold) and the last minute's flow with the last ten minutes beside it. Tap it to look at it straight on; tap again to come back.</li>
+  </ul>
+  <h3>"Liquidity", "volume", "flow"</h3>
+  <p><b>Volume</b> is how much traded in 24 hours. <b>Flow</b> here is buying minus selling: on every trade one side crossed over to take the other's price, and that's who we count. <b>Liquidity</b>, strictly, is how much can be bought or sold without moving the price much (how deep the order book is). This first pass shows flow and volume, the closest live numbers that are free; order-book depth could come next.</p>
+  <h3>Where the numbers come from</h3>
+  <p><b>The flow for <span class="v-sym">XRP</span> comes from</b> <span id="i-venue">Coinbase</span>. CoinGecko: the coin list and logos, all-time high, market cap, 24 h volume across all exchanges (one call a minute for all ten). All free, public, no account. If a feed is down you'll see — and an "offline" badge, never made-up numbers. <span class="small">Add ?demo to the address for a pretend market that fills and drains on its own.</span></p>
+  <p class="small">Bathtub model: "Photorealistic Bathtub" by Igrium (sketchfab.com/Sam54123), CC BY 4.0. Everything else is drawn in code.</p>
+</div>
+
+<div id="p-set" class="panel glass"><button class="close" aria-label="Close">✕</button>
+  <h2>Settings</h2>
+  <h3>The tub's scale for <span class="v-sym">XRP</span></h3>
+  <label>Price at the tub's bottom <input id="s-min" type="number" step="any" min="0.0001" inputmode="decimal"></label>
+  <label>Price at the rim <input id="s-max" type="number" step="any" min="0.001" inputmode="decimal"></label>
+  <label>Scale <select id="s-log"><option value="1">Log (multiples)</option><option value="0">Straight</option></select></label>
+  <label>Flow nudge <select id="s-effect"><option value="off">Off</option><option value="subtle">Subtle</option><option value="strong">Strong</option></select></label>
+  <label>Picture quality <select id="s-quality"><option value="auto">Auto</option><option value="high">High</option><option value="low">Low (cooler phone)</option></select></label>
+  <h3><span class="v-sym">XRP</span> target lines</h3>
+  <ul class="tlist" id="s-targets"></ul>
+  <p><button class="act" id="s-add">＋ Add a target</button><button class="act" id="s-reset">Reset scale</button></p>
+</div>
+
+<div id="p-add" class="panel glass"><button class="close" aria-label="Close">✕</button>
+  <h2 id="a-title">Mark a target on the tub</h2>
+  <label>Price ($) <input id="a-price" type="text" inputmode="decimal" placeholder="5.00" autocomplete="off"></label>
+  <label>Name (optional) <input id="a-label" type="text" maxlength="24" placeholder="Moon" autocomplete="off"></label>
+  <p class="small" id="a-hint"></p>
+  <p><button class="act" id="a-go">Draw the line</button></p>
+</div>
+
+<div id="p-line" class="panel glass"><button class="close" aria-label="Close">✕</button>
+  <h2 id="l-title"></h2><p id="l-body"></p>
+  <p><button class="act danger" id="l-del">Remove this line</button></p>
+</div>
+
+<div id="p-coin" class="panel glass"><button class="close" aria-label="Close">✕</button>
+  <h2>Pick a coin</h2>
+  <ul id="c-list"></ul>
+  <p class="small" id="c-note"></p>
+</div>
+
+<script src="bathtub.js?v=4602ee0"></script>
+</body></html>
