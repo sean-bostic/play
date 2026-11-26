@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Garbage Truck</title>
+<!-- The three trucks are models from Sketchfab, each CC BY 4.0: "Garbage Truck" by iedalton (the green one),
+     "GARBAGE TRUCK" by gelber / liebherr996litronic (the blue one), "Garbage Truck" by Lung_ong (the yellow one).
+     Resized, slimmed and repainted for the game. -->
+<style>
+  html, body { margin: 0; height: 100%; overflow: hidden; background: #58b6ff; font-family: system-ui, -apple-system, sans-serif; cursor: default; }
+  canvas { display: block; }
+  #loading { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; font: 900 9vmin system-ui; color: #fff; text-shadow: 0 0.06em 0 #1f4f8a; z-index: 20; }
+
+  /* "🗑️ 2 / 4", top right; the day, top left */
+  #count { position: fixed; right: calc(env(safe-area-inset-right) + 3vmin); top: calc(env(safe-area-inset-top) + 2.5vmin); font: 900 6vmin system-ui; color: #fff; z-index: 3; pointer-events: none;
+           text-shadow: 0 0.07em 0 #1f4f8a, 0 0 0.4em rgba(0,0,0,0.35); letter-spacing: 0.02em; }
+  #day { position: fixed; left: calc(env(safe-area-inset-left) + 3vmin); top: calc(env(safe-area-inset-top) + 2.5vmin); font: 800 3.8vmin system-ui; color: #fff3b0; z-index: 3; pointer-events: none;
+         text-shadow: 0 0.08em 0 #1f4f8a; }
+  #credits { position: fixed; left: calc(env(safe-area-inset-left) + 3vmin); top: calc(env(safe-area-inset-top) + 8vmin); font: 600 1.7vmin system-ui; color: #fff; z-index: 3; pointer-events: none;
+             text-shadow: 0 0.1em 0.2em rgba(0,0,0,0.5); opacity: 0.85; animation: credits 1.5s ease-in 14s forwards; }
+  @keyframes credits { to { opacity: 0; } }
+
+  /* GREAT JOB!, in gold */
+  #victory { position: fixed; left: 0; right: 0; top: 22%; text-align: center; font: 900 17vmin system-ui; color: #ffd700; z-index: 8; pointer-events: none;
+             text-shadow: 0 0.05em 0 #a85b00, 0 0.09em 0 #5a2d00, 0 0 0.35em rgba(255,240,150,0.9); opacity: 0; transform: scale(0.2); letter-spacing: 0.02em; }
+  #victory.show { animation: victory 1s cubic-bezier(.2,1.6,.4,1) forwards, wobble 1.2s ease-in-out 1s infinite alternate; }
+  #victory small { display: block; font: 800 4vmin system-ui; color: #fff; text-shadow: 0 0.08em 0 #1f4f8a; letter-spacing: 0; margin-top: 1vmin; }
+  @keyframes victory { to { opacity: 1; transform: scale(1); } }
+  @keyframes wobble { from { transform: scale(1) rotate(-2deg); } to { transform: scale(1.06) rotate(2deg); } }
+
+  #banner { position: fixed; left: 0; right: 0; top: 54%; text-align: center; font: 900 8vmin system-ui; color: #fff; z-index: 7; pointer-events: none;
+            text-shadow: 0 0.06em 0 #1f4f8a, 0 0 0.3em rgba(0,0,0,0.3); opacity: 0; }
+  #banner.show { animation: banner 1.7s ease-out forwards; }
+  @keyframes banner { 0% { opacity: 0; transform: scale(0.3); } 15% { opacity: 1; transform: scale(1.15); } 25% { transform: scale(1); } 70% { opacity: 1; } 100% { opacity: 0; transform: translateY(-8vmin); } }
+
+  /* beside a full can, or on the dump's pad with garbage aboard */
+  #press { position: fixed; left: 50%; bottom: calc(env(safe-area-inset-bottom) + 15vmin); transform: translateX(-50%); z-index: 4; pointer-events: none; display: none; white-space: nowrap;
+           padding: 1.2vmin 3.4vmin; border-radius: 7vmin; background: #2fbf4f; border: 0.6vmin solid #fff; color: #fff; font: 900 6vmin system-ui; text-shadow: 0 0.06em 0 #14602a;
+           box-shadow: 0 1vmin 2.5vmin rgba(0,0,0,0.35); }
+  #press.show { display: block; animation: press 0.45s ease-in-out infinite alternate; }
+  @keyframes press { to { transform: translateX(-50%) scale(1.12); } }
+
+  /* what the keys do, until he starts driving (and again if he stops for a while) */
+  #keys { position: fixed; left: 0; right: 0; bottom: 3.5vmin; text-align: center; font: 800 3.2vmin system-ui; color: #fff; z-index: 3; pointer-events: none;
+          text-shadow: 0 0.3vmin 0 #1f4f8a; transition: opacity 0.6s; }
+  #keys b { display: inline-block; min-width: 1.4em; padding: 0.1em 0.35em; margin: 0 0.1em; border-radius: 0.3em; background: rgba(0,0,0,0.28); border: 0.3vmin solid rgba(255,255,255,0.7); }
+  #keys.away { opacity: 0; }
+  /* the arrow to the nearest full can (or to the dump) */
+  #finder { position: fixed; left: 50%; top: calc(env(safe-area-inset-top) + 2vmin); transform: translateX(-50%); z-index: 3; pointer-events: none; display: none;
+            align-items: center; gap: 1.2vmin; padding: 0.8vmin 2.4vmin; border-radius: 6vmin; background: rgba(0,0,0,0.3); border: 0.4vmin solid rgba(255,255,255,0.75); font: 900 5vmin system-ui; color: #fff; }
+  #finder.show { display: flex; }
+  #finder-arrow { display: inline-block; color: #ffe14d; font-size: 6.4vmin; line-height: 1; text-shadow: 0 0.06em 0 #1f4f8a; }
+  #finder.close { border-color: #ffe14d; animation: near 0.5s ease-in-out infinite alternate; }
+  #finder.dump { background: rgba(31,138,58,0.85); }
+  @keyframes near { to { transform: translateX(-50%) scale(1.15); } }
+  #fps { position: fixed; left: 10px; bottom: 8px; color: #fff; font: 12px ui-monospace, monospace; z-index: 3; pointer-events: none; }
+</style>
+<!-- 👆 No zoom, no text highlight, no long-press bubble: downloads/touch-feel.html -->
+<style id="touch-feel">
+  html, body { -webkit-text-size-adjust: 100%; -webkit-tap-highlight-color: transparent; overscroll-behavior: none; touch-action: manipulation; }
+  *, *::before, *::after { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+  input, textarea, [contenteditable] { -webkit-user-select: text; user-select: text; }
+  canvas { touch-action: none; }
+</style>
+<script id="touch-feel-js">
+  (() => {
+    const typing = (e) => e.target.closest?.('input, textarea, [contenteditable]');
+    for (const ev of ['contextmenu', 'selectstart', 'dragstart']) addEventListener(ev, (e) => { if (!typing(e)) e.preventDefault(); });
+    for (const ev of ['gesturestart', 'gesturechange', 'gestureend']) addEventListener(ev, (e) => e.preventDefault(), { passive: false });
+    addEventListener('touchmove', (e) => { if (e.touches.length > 1) e.preventDefault(); }, { passive: false });
+  })();
+</script>
+</head>
+<body>
+<div id="loading">🚛 …</div>
+<div id="day"></div>
+<div id="credits">Trucks: iedalton · gelber · Lung_ong (Sketchfab, CC BY 4.0)</div>
+<div id="count"></div>
+<div id="finder"><span id="finder-arrow">▲</span><span id="finder-icon">🗑️</span></div>
+<div id="victory">GREAT JOB!<small>🕹️ press the button for more garbage</small></div>
+<div id="banner"></div>
+<div id="press"></div>
+<div id="fps"></div>
+<div id="keys" class="keys">🕹️ or <b>←</b><b>↑</b><b>→</b><b>↓</b> drive &nbsp;·&nbsp; <b>Space</b> the arm &nbsp;·&nbsp; <b>H</b> horn &nbsp;·&nbsp; <b>T</b> next truck</div>
+<script src="garbage.js?v=697f818"></script>
+</body>
+</html>
