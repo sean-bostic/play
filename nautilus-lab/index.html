@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#04121a">
+<title>Nautilus</title>
+<!-- A game of Jules Verne's "Twenty Thousand Leagues Under the Sea" (1870; in the public domain). Everything in it is
+     made in code: no pictures, models or recordings from anywhere else. -->
+<style>
+  :root { --ink: #04121a; --paper: #e9dcc0; --brass: #c9a25a; --brass-dk: #7c5d28; --lamp: #ffb347; --sea: #9fd8e8; --blood: #b3261e;
+          --serif: "Baskerville", "Hoefler Text", "Iowan Old Style", "Palatino Linotype", Georgia, serif; }
+  html, body { margin: 0; height: 100%; overflow: hidden; background: var(--ink); color: var(--paper); font-family: var(--serif); cursor: default; }
+  canvas#view { display: block; width: 100vw; height: 100vh; height: 100dvh; }
+  #fade { position: fixed; inset: 0; background: #020a0f; opacity: 1; pointer-events: none; z-index: 30; }
+  #loading { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1.6vmin; z-index: 31; pointer-events: none; opacity: 0; transition: opacity 0.5s; text-align: center; }
+  #loading span { font: italic 400 4.4vmin var(--serif); letter-spacing: 0.04em; color: var(--paper); }
+  #loading em { font: 400 1.9vmin var(--serif); letter-spacing: 0.5em; text-transform: uppercase; color: var(--brass); font-style: normal; }
+  #loading i { width: 14vmin; height: 1px; background: linear-gradient(90deg, transparent, var(--brass), transparent); animation: breathe 1.8s ease-in-out infinite alternate; }
+  @keyframes breathe { from { transform: scaleX(0.3); opacity: 0.4; } to { transform: scaleX(1); opacity: 1; } }
+
+  /* the chapter's title plate */
+  #title { position: fixed; left: 0; right: 0; top: 30%; text-align: center; z-index: 12; pointer-events: none; opacity: 0; transition: opacity 1.6s ease; padding: 0 6vw; }
+  #title.show { opacity: 1; }
+  #title h1 { margin: 0; font: 400 7.4vmin var(--serif); letter-spacing: 0.06em; color: var(--paper); text-shadow: 0 0.04em 0.5em rgba(0,0,0,0.8), 0 0 1.4em rgba(4,18,26,0.9); }
+  #title p { margin: 1.2vmin 0 0; font: italic 400 3vmin var(--serif); color: var(--brass); letter-spacing: 0.08em; text-shadow: 0 0.05em 0.5em rgba(0,0,0,0.9); }
+  #title h1::after { content: ""; display: block; width: 22vmin; height: 1px; margin: 1.6vmin auto 0; background: linear-gradient(90deg, transparent, var(--brass), transparent); }
+
+  /* captions: the book speaking */
+  #say { position: fixed; left: 50%; bottom: calc(env(safe-area-inset-bottom) + 7vmin); transform: translateX(-50%); max-width: min(86vw, 108vmin); z-index: 12; pointer-events: none; opacity: 0; transition: opacity 0.5s;
+         text-align: center; font: italic 400 3.1vmin/1.35 var(--serif); color: var(--paper); text-shadow: 0 0.06em 0.35em #000, 0 0 0.9em rgba(2,10,15,0.95), 0 0 0.2em #000; }
+  #say.show { opacity: 1; }
+  #say b { display: block; font: 400 1.7vmin var(--serif); letter-spacing: 0.42em; text-transform: uppercase; color: var(--brass); margin-bottom: 0.5vmin; font-style: normal; }
+
+  #objective { position: fixed; left: calc(env(safe-area-inset-left) + 3vmin); top: calc(env(safe-area-inset-top) + 2.6vmin); z-index: 11; pointer-events: none; opacity: 0; transition: opacity 0.6s;
+               font: 400 2.3vmin var(--serif); letter-spacing: 0.05em; color: var(--paper); text-shadow: 0 0.06em 0.4em #000; padding-left: 1.6vmin; border-left: 2px solid var(--brass); max-width: 60vw; }
+  #objective.show { opacity: 0.95; }
+  #prompt { position: fixed; left: 50%; top: 62%; transform: translateX(-50%); z-index: 11; pointer-events: none; opacity: 0; transition: opacity 0.25s; white-space: nowrap;
+            font: 400 2.6vmin var(--serif); letter-spacing: 0.05em; color: var(--paper); padding: 0.8vmin 2.2vmin; border: 1px solid rgba(201,162,90,0.75); border-radius: 0.4vmin; background: rgba(4,18,26,0.62); text-shadow: 0 1px 2px #000; }
+  #prompt.show { opacity: 1; }
+  kbd { display: inline-block; min-width: 1.2em; padding: 0 0.35em; margin-right: 0.3em; border: 1px solid var(--brass); border-radius: 0.25em; font: 600 0.82em ui-monospace, Menlo, monospace; color: var(--lamp); background: rgba(0,0,0,0.35); text-align: center; }
+  #banner { position: fixed; left: 0; right: 0; top: 40%; text-align: center; z-index: 13; pointer-events: none; opacity: 0; font: 400 6vmin var(--serif); letter-spacing: 0.08em; color: var(--lamp); text-shadow: 0 0.05em 0.5em #000, 0 0 1em rgba(255,140,40,0.5); }
+  #banner.show { animation: banner 2.2s ease-out forwards; }
+  @keyframes banner { 0% { opacity: 0; transform: scale(0.92); } 12% { opacity: 1; transform: scale(1); } 75% { opacity: 1; } 100% { opacity: 0; transform: translateY(-2vmin); } }
+  #hint { position: fixed; left: calc(env(safe-area-inset-left) + 3vmin); bottom: calc(env(safe-area-inset-bottom) + 2.4vmin); z-index: 11; pointer-events: none; opacity: 0; transition: opacity 1s;
+          font: 400 1.9vmin/1.7 var(--serif); letter-spacing: 0.04em; color: rgba(233,220,192,0.86); text-shadow: 0 1px 3px #000; }
+  #hint.show { opacity: 1; }
+  #hint b { font: 600 0.86em ui-monospace, Menlo, monospace; color: var(--lamp); border: 1px solid rgba(201,162,90,0.7); border-radius: 0.25em; padding: 0 0.4em; margin: 0 0.15em; background: rgba(0,0,0,0.3); }
+  @media (pointer: coarse) { #hint { display: none; } }
+
+  /* brass gauges, top right */
+  #meters { position: fixed; right: calc(env(safe-area-inset-right) + 3vmin); top: calc(env(safe-area-inset-top) + 2.6vmin); z-index: 11; pointer-events: none; display: flex; flex-direction: column; gap: 1.1vmin; align-items: flex-end; }
+  .meter { display: flex; align-items: center; gap: 1.2vmin; }
+  .meter label { font: 400 1.7vmin var(--serif); letter-spacing: 0.36em; text-transform: uppercase; color: var(--brass); text-shadow: 0 1px 3px #000; }
+  .meter > div { width: 24vmin; height: 1.1vmin; border: 1px solid var(--brass); border-radius: 1vmin; background: rgba(2,10,15,0.6); overflow: hidden; box-shadow: 0 0 0.6vmin rgba(0,0,0,0.6); }
+  .meter i { display: block; height: 100%; width: 100%; background: var(--sea); transition: width 0.25s ease; }
+  .meter.low i { animation: low 0.6s ease-in-out infinite alternate; }
+  @keyframes low { to { filter: brightness(1.8); } }
+  .meter.boss { position: fixed; left: 50%; transform: translateX(-50%); top: calc(env(safe-area-inset-top) + 3vmin); flex-direction: column; gap: 0.6vmin; }
+  .meter.boss > div { width: min(60vw, 70vmin); height: 1.3vmin; } .meter.boss i { background: var(--blood); }
+
+  /* the pause plate */
+  #pause { position: fixed; inset: 0; z-index: 25; display: none; align-items: center; justify-content: center; flex-direction: column; gap: 2.4vmin; background: rgba(2,10,15,0.78); backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px); }
+  #pause.show { display: flex; }
+  #pause h2 { margin: 0 0 1vmin; font: 400 6vmin var(--serif); letter-spacing: 0.3em; text-transform: uppercase; color: var(--paper); }
+  .plate-btn { font: 400 2.8vmin var(--serif); letter-spacing: 0.14em; color: var(--paper); background: rgba(201,162,90,0.08); border: 1px solid var(--brass); border-radius: 0.4vmin; padding: 1.2vmin 4vmin; min-width: 34vmin; cursor: pointer; }
+  .plate-btn:hover, .plate-btn:focus-visible { background: rgba(201,162,90,0.25); color: #fff; outline: none; }
+  #layer { position: fixed; inset: 0; z-index: 10; pointer-events: none; }
+  #layer > * { pointer-events: auto; }
+
+  /* touch controls (phones) */
+  #touch { display: none; position: fixed; inset: 0; z-index: 9; pointer-events: none; }
+  #stick { display: none; position: absolute; width: 112px; height: 112px; margin: -56px 0 0 -56px; border-radius: 50%; border: 1px solid rgba(201,162,90,0.7); background: rgba(2,10,15,0.25); }
+  #stick i { position: absolute; left: 50%; top: 50%; width: 46px; height: 46px; margin: -23px 0 0 -23px; border-radius: 50%; background: rgba(201,162,90,0.55); }
+  #tbtns { position: absolute; right: calc(env(safe-area-inset-right) + 18px); bottom: calc(env(safe-area-inset-bottom) + 18px); display: flex; flex-wrap: wrap-reverse; justify-content: flex-end; gap: 12px; max-width: 46vw; pointer-events: none; }
+  #tbtns button { pointer-events: auto; min-width: 68px; height: 68px; padding: 0 14px; border-radius: 34px; border: 1px solid var(--brass); background: rgba(2,10,15,0.45); color: var(--paper); font: 400 15px var(--serif); letter-spacing: 0.06em; }
+  #tbtns button.on { background: rgba(201,162,90,0.5); }
+  #fps { position: fixed; right: 8px; bottom: 6px; z-index: 40; font: 11px ui-monospace, monospace; color: rgba(255,255,255,0.5); pointer-events: none; display: none; }
+</style>
+<!-- 👆 No zoom, no text highlight, no long-press bubble: downloads/touch-feel.html -->
+<style id="touch-feel">
+  html, body { -webkit-text-size-adjust: 100%; -webkit-tap-highlight-color: transparent; overscroll-behavior: none; touch-action: manipulation; }
+  *, *::before, *::after { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+  input, textarea, [contenteditable] { -webkit-user-select: text; user-select: text; }
+  canvas { touch-action: none; }
+</style>
+<script id="touch-feel-js">
+  (() => {
+    const typing = (e) => e.target.closest?.('input, textarea, [contenteditable]');
+    for (const ev of ['contextmenu', 'selectstart', 'dragstart']) addEventListener(ev, (e) => { if (!typing(e)) e.preventDefault(); });
+    for (const ev of ['gesturestart', 'gesturechange', 'gestureend']) addEventListener(ev, (e) => e.preventDefault(), { passive: false });
+    addEventListener('touchmove', (e) => { if (e.touches.length > 1) e.preventDefault(); }, { passive: false });
+  })();
+</script>
+</head>
+<body>
+<canvas id="view"></canvas>
+<div id="layer"></div>
+<div id="objective"></div>
+<div id="meters"></div>
+<div id="title"></div>
+<div id="banner"></div>
+<div id="prompt"></div>
+<div id="say"></div>
+<div id="hint"></div>
+<div id="pause">
+  <h2>Paused</h2>
+  <button class="plate-btn" id="p-resume">Resume</button>
+  <button class="plate-btn" id="p-chart">Back to the chart</button>
+</div>
+<div id="fade"></div>
+<div id="loading"><em>Nautilus</em><span></span><i></i></div>
+<div id="fps"></div>
+<script src="nautilus.js?v=2f1284d"></script>
+</body>
+</html>
