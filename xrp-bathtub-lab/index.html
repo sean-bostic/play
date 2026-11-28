@@ -3,7 +3,18 @@
 <meta name="robots" content="noindex">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#0b1014">
-<title>XRP Bathtub</title>
+<!--brand-->
+<title>Ticker Tub</title>
+<meta name="description" content="Pick a coin or a stock: the water is its price, the faucet runs with buying and the drain opens with selling, and the numbers are lettered on the tile above the tub. XRP is the default.">
+<meta name="apple-mobile-web-app-title" content="Ticker Tub">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Ticker Tub">
+<meta property="og:title" content="Ticker Tub: a live bathroom where a market fills or drains a clawfoot tub">
+<meta property="og:description" content="Pick a coin or a stock: the water is its price, the faucet runs with buying and the drain opens with selling, and the numbers are lettered on the tile above the tub. XRP is the default.">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Ticker Tub">
+<meta name="twitter:description" content="Pick a coin or a stock: the water is its price, the faucet runs with buying and the drain opens with selling, and the numbers are lettered on the tile above the tub. XRP is the default.">
+<!--/brand-->
 <style>
   :root { --ink: #e9f6ff; --dim: rgba(220,240,255,0.66); --glass: rgba(10,16,22,0.62); --line: rgba(160,220,255,0.16); --up: #5dffa4; --down: #ff6150; --gold: #ffc861; --cyan: #7fe7ff; }
   html, body { margin: 0; height: 100%; overflow: hidden; background: #0b1014; color: var(--ink); font: 15px/1.35 system-ui, -apple-system, "Segoe UI", sans-serif; }
@@ -18,6 +29,9 @@
   #h-coin .caret { font-size: 10px; color: var(--dim); }
   .coinlogo { display: inline-grid; place-items: center; flex: none; border-radius: 99px; background: #fbfaf6; overflow: hidden; box-shadow: 0 0 0 1px rgba(255,200,97,.55); color: #18233d; font-weight: 800; letter-spacing: .02em; }
   .coinlogo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  #c-preset a { color: var(--cyan); word-break: break-all; } #c-preset .act { padding: 4px 10px; font-size: 13px; }
+  #c-tabs { display: flex; gap: 6px; margin: 2px 0 4px; } #c-tabs button { flex: 1; border: 1px solid var(--line); background: rgba(255,255,255,0.05); border-radius: 99px; padding: 7px 0; font-weight: 700; letter-spacing: .04em; color: var(--dim); }
+  #c-tabs button.on { background: rgba(127,231,255,0.16); color: var(--ink); border-color: rgba(127,231,255,0.4); }
   #c-list { list-style: none; padding: 0; margin: 6px 0; }
   #c-list li { margin: 0; }
   #c-list .coin { display: flex; align-items: center; gap: 12px; width: 100%; text-align: left; border: 0; border-bottom: 1px solid var(--line); background: none; padding: 9px 4px; min-height: 54px; }
@@ -29,7 +43,7 @@
   #h-status { font-size: 13px; color: var(--dim); margin-top: 2px; }
   #h-stats { font-size: 12px; color: var(--dim); margin-top: 2px; font-variant-numeric: tabular-nums; }
   .badge { font-size: 11px; font-weight: 700; padding: 1px 7px; border-radius: 99px; letter-spacing: .05em; }
-  .badge.off { background: rgba(255,97,80,.2); color: var(--down); } .badge.demo { background: rgba(255,200,97,.2); color: var(--gold); } .badge.live { background: rgba(93,255,164,.14); color: var(--up); }
+  .badge.off { background: rgba(255,97,80,.2); color: var(--down); } .badge.demo { background: rgba(255,200,97,.2); color: var(--gold); } .badge.live { background: rgba(93,255,164,.14); color: var(--up); } .badge.closed { background: rgba(220,240,255,.12); color: var(--dim); }
   #btns { position: fixed; right: max(10px, env(safe-area-inset-right)); top: max(10px, env(safe-area-inset-top)); display: flex; gap: 6px; z-index: 5; }
   button { font: inherit; color: var(--ink); cursor: pointer; }
   #btns button { min-width: 40px; height: 40px; padding: 0 10px; font-size: 16px; font-weight: 600; }
@@ -70,10 +84,10 @@
 </script>
 </head><body>
 <canvas id="view"></canvas>
-<div id="loading">Running the bath…</div>
+<div id="loading"><span><span class="v-app">Ticker Tub</span> · running the bath…</span></div>
 
 <div id="card" class="glass">
-  <div class="row"><button id="h-coin" aria-label="Pick a coin"><span id="h-logo"></span><span id="h-sym">XRP</span><span class="caret">▾</span></button><span id="h-price">—</span><span id="h-chg"></span><span id="h-badge" class="badge"></span></div>
+  <div class="row"><button id="h-coin" aria-label="Pick a coin or a stock"><span id="h-logo"></span><span id="h-sym">XRP</span><span class="caret">▾</span></button><span id="h-price">—</span><span id="h-chg"></span><span id="h-badge" class="badge"></span></div>
   <div id="h-status">Connecting to the market…</div>
   <div id="h-stats"></div>
 </div>
@@ -82,10 +96,10 @@
 <div id="toast" class="glass"></div>
 
 <div id="p-info" class="panel glass"><button class="close" aria-label="Close">✕</button>
-  <h2>The XRP Bathtub <span class="small">· now showing <span class="v-sym">XRP</span></span></h2>
+  <h2><span class="v-app">Ticker Tub</span> <span class="small">· now showing <span class="v-sym">XRP</span></span></h2>
   <ul>
     <li><b>The water level is the price</b> on the tub's own scale: the bottom of the tub is <span class="v-min">$0.10</span>, the rim is <span class="v-max">$10</span>. It's a log scale, so each step up the tub is a multiple ($0.10 → $1 → $10 is the same climb twice). Change the scale in ⚙ (each coin keeps its own).</li>
-    <li><b>Pick the coin:</b> tap its logo (top left, or the logo on the wall) for the top ten by market cap. XRP is the default. Each coin has its own scale, its own target lines and its own all-time high.</li>
+    <li><b>Pick what's in the tub:</b> tap its logo (top left, or the logo on the wall) for the top ten coins by market cap, or (Stocks) the ten biggest US companies by market value. XRP is the default. Stocks: the faucet and drain come from price moves (there's no free feed of real buy and sell orders), and when the market is closed the tub is still at the last close. Each coin has its own scale, its own target lines and its own all-time high.</li>
     <li><b>The faucet runs when buyers are winning:</b> over the last minute, more dollars of <span class="v-sym">XRP</span> were bought from sellers than sold to buyers, counting every trade on one exchange as it happens. The harder the buying, the harder it pours.</li>
     <li><b>The drain opens when sellers are winning</b> the minute. The harder the selling, the faster it swirls.</li>
     <li>The flow also nudges the water a little above or below the price, so you can watch buying pour in and selling drain out (⚙ → Flow nudge).</li>
@@ -126,10 +140,12 @@
 </div>
 
 <div id="p-coin" class="panel glass"><button class="close" aria-label="Close">✕</button>
-  <h2>Pick a coin</h2>
+  <h2>Pick one</h2>
+  <div id="c-tabs" role="tablist"><button type="button" data-kind="crypto">Crypto</button><button type="button" data-kind="stock">Stocks</button></div>
   <ul id="c-list"></ul>
   <p class="small" id="c-note"></p>
+  <p class="small" id="c-preset">A link that opens straight on <b class="v-sym">XRP</b> (with its own target lines): <a id="c-plink" href="?xrp">?xrp</a> <button class="act" id="c-copy" type="button">Copy link</button></p>
 </div>
 
-<script src="bathtub.js?v=f854670"></script>
+<script src="bathtub.js?v=2f5ac70"></script>
 </body></html>
