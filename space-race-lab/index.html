@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#05080d">
+<title>Space Race</title>
+<!-- Space Race: the Soviet Union against the United States, flown with real physics. The simulator is in src/core (no
+     page needed: npm test flies every rocket against history). The land outline is Natural Earth (public domain). -->
+<style>
+  :root { --bg: #05080d; --panel: rgba(7, 13, 22, 0.72); --line: rgba(150, 180, 210, 0.22); --ink: #e8eef5; --dim: #8fa3b8; --amber: #ffc857; --green: #6ee7a0; --red: #ff6b5e; --cyan: #6fd3ff; --ussr: #e0483c; --usa: #4d8dff;
+          --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace; --sans: -apple-system, BlinkMacSystemFont, "Helvetica Neue", "Segoe UI", Arial, sans-serif;
+          --sl: env(safe-area-inset-left); --sr: env(safe-area-inset-right); --st: env(safe-area-inset-top); --sb: env(safe-area-inset-bottom); }
+  html, body { margin: 0; height: 100%; overflow: hidden; background: var(--bg); color: var(--ink); font-family: var(--sans); }
+  canvas#view { position: fixed; inset: 0; width: 100vw; height: 100vh; height: 100dvh; display: block; }
+  button { font: inherit; color: inherit; background: none; border: 0; padding: 0; margin: 0; cursor: pointer; }
+  #hud { position: fixed; inset: 0; pointer-events: none; display: grid; grid-template: "top" auto "tele" auto "mid" 1fr "dv" auto "man" auto "ctl" auto / minmax(0, 1fr); padding: calc(var(--st) + 6px) calc(var(--sr) + 8px) calc(var(--sb) + 8px) calc(var(--sl) + 8px); gap: 6px; box-sizing: border-box; }
+  #hud > * { pointer-events: auto; }
+  #top { grid-area: top; min-width: 0; display: flex; align-items: baseline; gap: 10px; pointer-events: none; text-shadow: 0 1px 3px #000; }
+  #m-title { font-weight: 700; font-size: 15px; letter-spacing: 0.02em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  #m-sub { color: var(--dim); font-size: 12px; white-space: nowrap; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+  #clock { font: 700 20px var(--mono); color: var(--amber); white-space: nowrap; }
+  #tele { grid-area: tele; display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 8px; overflow: hidden; pointer-events: none; }
+  #tele .c { background: var(--panel); padding: 4px 7px 5px; min-width: 0; }
+  #tele label { display: block; font-size: 9.5px; letter-spacing: 0.08em; color: var(--dim); text-transform: uppercase; white-space: nowrap; }
+  #tele b { display: block; font: 600 15px var(--mono); white-space: nowrap; overflow: hidden; }
+  #tele b small { font-size: 10px; color: var(--dim); font-weight: 400; margin-left: 2px; }
+  #tele .big b { font-size: 18px; color: #fff; }
+  #mid { grid-area: mid; position: relative; pointer-events: none !important; min-height: 0; }
+  #ticker { position: absolute; left: 0; top: 4px; display: flex; flex-direction: column; gap: 3px; align-items: flex-start; }
+  #ticker div { font: 600 12px var(--mono); padding: 3px 8px; border-left: 3px solid var(--amber); background: var(--panel); border-radius: 0 5px 5px 0; animation: tick 9s forwards; white-space: nowrap; }
+  @keyframes tick { 0% { opacity: 0; transform: translateX(-8px); } 4% { opacity: 1; transform: none; } 85% { opacity: 1; } 100% { opacity: 0; } }
+  #state { position: absolute; right: 0; top: 4px; font: 700 11px var(--mono); letter-spacing: 0.1em; padding: 3px 8px; border-radius: 5px; background: var(--panel); color: var(--green); }
+  #state.warn { color: var(--amber); } #state.bad { color: var(--red); }
+  #dv { grid-area: dv; background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 5px 8px 6px; pointer-events: none; }
+  #dv .head { display: flex; justify-content: space-between; gap: 6px; white-space: nowrap; overflow: hidden; font-size: 10px; letter-spacing: 0.06em; color: var(--dim); text-transform: uppercase; }
+  #dv .head b { color: var(--ink); font: 600 11px var(--mono); text-transform: none; letter-spacing: 0; }
+  #dv-bar { position: relative; height: 14px; margin: 4px 0 3px; background: rgba(255, 255, 255, 0.06); border-radius: 3px; overflow: hidden; }
+  #dv-bar i { position: absolute; top: 0; bottom: 0; }
+  #dv-bar .have { background: repeating-linear-gradient(135deg, rgba(255, 200, 87, 0.28) 0 4px, rgba(255, 200, 87, 0.14) 4px 8px); border-right: 1px solid rgba(255, 200, 87, 0.7); }
+  #dv-bar .spent { background: var(--amber); } #dv-bar .kept { background: var(--green); }
+  #dv-bar .orbit { width: 2px; background: #fff; box-shadow: 0 0 6px #fff; }
+  #dv .foot { font: 500 10.5px/1.35 var(--mono); color: var(--dim); }
+  #dv .foot b { color: var(--ink); font-weight: 600; }
+  #ctl { grid-area: ctl; display: flex; gap: 6px; align-items: stretch; min-width: 0; }
+  #ctl > button { flex: 0 1 auto; white-space: nowrap; } #b-pause, #b-menu { min-width: 40px !important; padding: 0 !important; flex: 0 0 40px !important; }
+  #ctl button, #man button, .sheet button.btn { background: var(--panel); border: 1px solid var(--line); border-radius: 9px; min-height: 44px; min-width: 44px; padding: 0 10px; font: 600 13px var(--sans); display: flex; align-items: center; justify-content: center; gap: 5px; backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
+  #ctl button:active, #man button:active, #man button.on { background: rgba(255, 200, 87, 0.25); border-color: var(--amber); }
+  #ctl .warp { display: flex; flex: 1; gap: 0; min-width: 0; } #ctl .warp button { border-radius: 0; flex: 0 0 40px; min-width: 40px; padding: 0; font-size: 18px; } #ctl .warp button:first-child { border-radius: 9px 0 0 9px; } #ctl .warp button:last-child { border-radius: 0 9px 9px 0; }
+  #warp { flex: 1; display: flex; align-items: center; justify-content: center; background: var(--panel); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); font: 700 14px var(--mono); color: var(--amber); min-width: 52px; }
+  #b-go { background: #c8372b !important; border-color: #ff8a7d !important; color: #fff; font-size: 15px !important; letter-spacing: 0.08em; flex: 1; }
+  #man { grid-area: man; display: none; gap: 6px; align-items: stretch; }
+  body.manual.flying #man { display: flex; }
+  #man .pad { display: grid; grid-template: "a u b" 44px "l d r" 44px / 44px 44px 44px; gap: 4px; }
+  #man .side { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; flex: 1; }
+  #man .read { grid-column: 1 / 3; font: 600 12px var(--mono); color: var(--amber); background: var(--panel); border: 1px solid var(--line); border-radius: 9px; display: flex; align-items: center; justify-content: center; padding: 0 6px; white-space: nowrap; }
+  #b-cut { color: var(--red); } #b-stage { color: var(--cyan); }
+  body:not(.flying) #b-take, body.manual #b-take, body:not(.reported) #b-report { display: none; }
+  body.picking #hud > :not(#top) { display: none; } body.picking #clock { display: none; }
+  #labels { position: fixed; inset: 0; pointer-events: none; overflow: hidden; }
+  #labels div { position: absolute; left: 0; top: 0; font: 600 11px var(--mono); white-space: nowrap; text-shadow: 0 1px 3px #000, 0 0 2px #000; will-change: transform; }
+  #labels div::before { content: ""; position: absolute; left: -4px; top: -4px; width: 8px; height: 8px; border-radius: 50%; background: currentColor; box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.5); }
+  #labels div span { position: absolute; left: 9px; top: -7px; }
+  #labels .ap { color: var(--cyan); } #labels .pe { color: var(--green); } #labels .hit { color: var(--red); } #labels .me { color: var(--amber); } #labels .site { color: #cfd8e3; font-weight: 400; opacity: 0.8; }
+
+  .sheet { position: fixed; left: 0; right: 0; bottom: 0; max-height: 62dvh; background: rgba(6, 11, 19, 0.93); border-top: 1px solid var(--line); border-radius: 16px 16px 0 0; display: none; flex-direction: column; padding: 12px calc(var(--sr) + 14px) calc(var(--sb) + 12px) calc(var(--sl) + 14px); box-sizing: border-box; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); z-index: 5; }
+  body.picking #picker, body.reporting #report { display: flex; }
+  .sheet .scroll { overflow-y: auto; touch-action: pan-y; -webkit-overflow-scrolling: touch; min-height: 0; flex: 1; }
+  .sheet h1 { margin: 0 0 2px; font-size: 22px; letter-spacing: 0.14em; font-weight: 800; } .sheet h1 em { font-style: normal; color: var(--ussr); } .sheet h1 i { font-style: normal; color: var(--usa); }
+  .sheet .lede { margin: 0 0 8px; color: var(--dim); font-size: 12.5px; line-height: 1.35; }
+  #flights { display: grid; gap: 5px; }
+  #flights button { text-align: left; display: grid; grid-template-columns: 4px 1fr auto; gap: 9px; align-items: center; padding: 7px 10px 7px 0; border: 1px solid var(--line); border-radius: 9px; background: rgba(255, 255, 255, 0.03); min-height: 44px; }
+  #flights button.on { border-color: var(--amber); background: rgba(255, 200, 87, 0.1); }
+  #flights .tag { align-self: stretch; border-radius: 9px 0 0 9px; } #flights .ussr { background: var(--ussr); } #flights .usa { background: var(--usa); } #flights .both { background: linear-gradient(var(--usa) 50%, var(--ussr) 50%); }
+  #flights b { display: block; font-size: 14px; } #flights span { display: block; font-size: 11.5px; color: var(--dim); }
+  #flights .dvm { font: 600 11px var(--mono); color: var(--amber); text-align: right; } #flights .dvm small { display: block; color: var(--dim); font-weight: 400; }
+  #story { font-size: 12.5px; line-height: 1.4; color: #c9d5e2; margin: 9px 0 8px; }
+  .row { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; margin: 0 0 8px; } .row > label { font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--dim); width: 100%; }
+  .chip { border: 1px solid var(--line); border-radius: 999px; padding: 0 12px; min-height: 36px; font-size: 12.5px; background: rgba(255, 255, 255, 0.03); } .chip.on { border-color: var(--amber); color: var(--amber); background: rgba(255, 200, 87, 0.1); }
+  .sheet .foot { display: flex; gap: 8px; padding-top: 10px; } .sheet .foot .btn { flex: 1; min-height: 48px; font-size: 14px; }
+  .btn.go { background: #c8372b !important; border-color: #ff8a7d !important; color: #fff; letter-spacing: 0.1em; font-size: 16px !important; font-weight: 800 !important; }
+  #report h2 { margin: 0 0 2px; font-size: 17px; } #report .verdict { font: 700 13px var(--mono); margin: 0 0 8px; color: var(--amber); } #report .verdict.ok { color: var(--green); }
+  #report table { width: 100%; border-collapse: collapse; font: 500 12.5px var(--mono); } #report th { text-align: left; font: 500 9.5px var(--sans); letter-spacing: 0.08em; color: var(--dim); text-transform: uppercase; padding: 2px 4px; }
+  #report td { padding: 4px; border-top: 1px solid var(--line); white-space: nowrap; } #report td:first-child { font-family: var(--sans); color: #c9d5e2; white-space: normal; } #report td.real { color: var(--cyan); }
+  #report .why { font-size: 12.5px; line-height: 1.45; color: #dbe5ef; margin: 10px 0 4px; padding: 9px 10px; border-left: 3px solid var(--amber); background: rgba(255, 200, 87, 0.07); border-radius: 0 8px 8px 0; }
+  #report .why b { color: var(--amber); } #report .note { font-size: 11.5px; color: var(--dim); line-height: 1.4; margin: 6px 0 0; }
+  #keys { display: none; }
+  @media (pointer: fine) and (min-width: 900px) { #keys { display: block; position: fixed; right: 18px; bottom: 74px; font: 400 11px var(--mono); color: var(--dim); text-align: right; line-height: 1.6; pointer-events: none; text-shadow: 0 1px 2px #000; } body.picking #keys, body.reporting #keys { display: none; } #keys b { color: var(--ink); border: 1px solid var(--line); border-radius: 3px; padding: 0 4px; } }
+
+  /* a phone on its side, and anything wide: telemetry down the left, controls along the bottom right */
+  @media (orientation: landscape) {
+    #hud { grid-template: "top top" auto "tele mid" 1fr "dv ctl" auto / minmax(250px, 300px) minmax(0, 1fr); column-gap: 10px; }
+    #tele { grid-template-columns: repeat(2, 1fr); align-self: start; }
+    #man { grid-area: mid; align-self: end; justify-self: end; width: min(360px, 100%); }
+    #ctl { align-self: end; justify-self: end; width: min(430px, 100%); }
+    .sheet { left: auto; top: 0; width: min(46vw, 460px); max-height: none; border-radius: 0; border-top: 0; border-left: 1px solid var(--line); padding-top: calc(var(--st) + 12px); }
+    #flights span.date { display: none; }
+  }
+  @media (orientation: landscape) and (max-height: 500px) { #tele .c { padding: 2px 7px 3px; } #tele b { font-size: 13.5px; } #tele .big b { font-size: 15px; } #tele label { font-size: 8.5px; } .sheet h1 { font-size: 17px; } .sheet .lede { display: none; } #story { margin: 6px 0; font-size: 12px; } }
+  @media (min-width: 1100px) and (min-height: 700px) { #hud { grid-template-columns: 340px 1fr; padding: 14px 18px 16px; } #tele b { font-size: 17px; } #tele .big b { font-size: 21px; } #tele label { font-size: 10.5px; } #m-title { font-size: 18px; } #clock { font-size: 26px; } #dv .foot { font-size: 12px; } .sheet { width: 480px; } }
+</style>
+<style id="touch-feel">
+  html, body { -webkit-text-size-adjust: 100%; -webkit-tap-highlight-color: transparent; overscroll-behavior: none; touch-action: manipulation; }
+  *, *::before, *::after { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+  input, textarea, [contenteditable] { -webkit-user-select: text; user-select: text; }
+  canvas { touch-action: none; }
+</style>
+<script id="touch-feel-js">
+  (() => {
+    const typing = (e) => e.target.closest?.('input, textarea, [contenteditable]');
+    for (const ev of ['contextmenu', 'selectstart', 'dragstart']) addEventListener(ev, (e) => { if (!typing(e)) e.preventDefault(); });
+    for (const ev of ['gesturestart', 'gesturechange', 'gestureend']) addEventListener(ev, (e) => e.preventDefault(), { passive: false });
+    addEventListener('touchmove', (e) => { if (e.touches.length > 1) e.preventDefault(); }, { passive: false });
+  })();
+</script>
+</head>
+<body class="picking">
+<canvas id="view"></canvas>
+<div id="labels"></div>
+<div id="hud">
+  <header id="top"><b id="m-title">Space Race</b><span id="m-sub"></span><span id="clock">T-00:00</span></header>
+  <section id="tele">
+    <div class="c big"><label>Altitude</label><b id="t-alt"></b></div><div class="c big"><label>Speed</label><b id="t-spd"></b></div>
+    <div class="c"><label>Vertical</label><b id="t-vs"></b></div><div class="c"><label>Downrange</label><b id="t-dr"></b></div>
+    <div class="c"><label>Apoapsis</label><b id="t-ap"></b></div><div class="c"><label>Periapsis</label><b id="t-pe"></b></div>
+    <div class="c"><label>Orbital spd</label><b id="t-in"></b></div><div class="c"><label>Mach</label><b id="t-mach"></b></div>
+    <div class="c"><label>Dyn. press. Q</label><b id="t-q"></b></div><div class="c"><label>G-load</label><b id="t-g"></b></div>
+    <div class="c"><label>Mass</label><b id="t-mass"></b></div><div class="c"><label>Propellant</label><b id="t-prop"></b></div>
+    <div class="c"><label>Pitch</label><b id="t-pitch"></b></div><div class="c"><label>Heading</label><b id="t-hdg"></b></div>
+    <div class="c"><label>Thrust</label><b id="t-thr"></b></div><div class="c"><label>Stage</label><b id="t-stage"></b></div>
+  </section>
+  <div id="mid"><div id="ticker"></div><div id="state">ON THE PAD</div></div>
+  <section id="dv">
+    <div class="head"><span>Delta-v <b id="dv-head"></b></span><span id="dv-need"></span></div>
+    <div id="dv-bar"><i class="have" id="dv-have"></i><i class="spent" id="dv-spent"></i><i class="kept" id="dv-kept"></i><i class="orbit" id="dv-orbit"></i></div>
+    <div class="foot"><span id="dv-loss"></span></div>
+  </section>
+  <div id="man">
+    <div class="pad"><button id="b-up" style="grid-area:u" aria-label="Pitch up">▲</button><button id="b-left" style="grid-area:l" aria-label="Turn left">◀</button><button id="b-down" style="grid-area:d" aria-label="Pitch down">▼</button><button id="b-right" style="grid-area:r" aria-label="Turn right">▶</button></div>
+    <div class="side"><div class="read" id="man-read"></div><button id="b-pro">Prograde</button><button id="b-hold" class="on">Hold</button><button id="b-cut">Cutoff</button><button id="b-stage">Stage</button></div>
+  </div>
+  <nav id="ctl">
+    <button id="b-go">LAUNCH</button>
+    <button id="b-pause" aria-label="Pause">❚❚</button>
+    <div class="warp"><button id="b-slow" aria-label="Slower">−</button><div id="warp">×1</div><button id="b-fast" aria-label="Faster">+</button></div>
+    <button id="b-view">Map</button>
+    <button id="b-take">Fly it</button>
+    <button id="b-report">Report</button>
+    <button id="b-menu" aria-label="Missions">☰</button>
+  </nav>
+</div>
+<div id="keys"><b>Space</b> launch / stage &nbsp; <b>P</b> pause &nbsp; <b>,</b> <b>.</b> time warp &nbsp; <b>M</b> map &nbsp; <b>R</b> restart<br><b>W</b> <b>S</b> pitch &nbsp; <b>A</b> <b>D</b> heading &nbsp; <b>G</b> prograde &nbsp; <b>X</b> cutoff &nbsp; drag: look &nbsp; wheel: zoom</div>
+<section id="picker" class="sheet">
+  <h1><em>SPACE</em> <i>RACE</i></h1>
+  <p class="lede">Real rockets, real physics. Start where both sides did: with a captured V-2.</p>
+  <div class="scroll">
+    <div id="flights"></div>
+    <p id="story"></p>
+    <div class="row" id="sites"><label>Launch site</label></div>
+    <div class="row"><label>Who flies</label><button class="chip on" id="c-auto">Automatic (as it flew)</button><button class="chip" id="c-manual">Fly it yourself</button></div>
+    <div class="row"><label>Units</label><button class="chip on" id="c-metric">Metric</button><button class="chip" id="c-imperial">Miles, feet</button></div>
+  </div>
+  <div class="foot"><button class="btn" id="p-pad">See the pad</button><button class="btn go" id="p-launch">LAUNCH</button></div>
+</section>
+<section id="report" class="sheet">
+  <h2 id="r-title"></h2><p class="verdict" id="r-verdict"></p>
+  <div class="scroll"><table><thead><tr><th></th><th>This flight</th><th>The real one</th></tr></thead><tbody id="r-rows"></tbody></table><div id="r-why"></div><p class="note" id="r-note"></p></div>
+  <div class="foot"><button class="btn" id="r-close">Keep watching</button><button class="btn" id="r-again">Fly again</button><button class="btn go" id="r-next">Missions</button></div>
+</section>
+<script src="space-race.js?v=c85196e"></script>
+</body>
+</html>
